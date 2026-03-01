@@ -3,15 +3,22 @@ from app.models.user import User
 from app.models.role import Role
 from app.models.identity import Identity
 from app.models.user_role import UserRole
+from app.core.security import hash_password
 
 db = SessionLocal()
 
 try:
-    # 1️⃣ Crear roles
-    admin_role = Role(nombre="administrador", descripcion="Acceso total")
-    participant_role = Role(nombre="participante", descripcion="Acceso limitado")
+    # 1️⃣ Crear roles solo si no existen
+    admin_role = db.query(Role).filter_by(nombre="administrador").first()
+    if not admin_role:
+        admin_role = Role(nombre="administrador", descripcion="Acceso total")
+        db.add(admin_role)
 
-    db.add_all([admin_role, participant_role])
+    participant_role = db.query(Role).filter_by(nombre="participante").first()
+    if not participant_role:
+        participant_role = Role(nombre="participante", descripcion="Acceso limitado")
+        db.add(participant_role)
+
     db.commit()
 
     # 2️⃣ Crear usuario
@@ -25,10 +32,20 @@ try:
     db.commit()
 
     # 4️⃣ Crear identidad con rol contextual
+    # identity = Identity(
+    #     email="laura_admin",
+    #     provider="local",
+    #     password_hash="fakehash",
+    #     user_id=user.id_usuario,
+    #     rol_id=admin_role.id_rol
+    # )
+
+    hashed = hash_password("123456")
+
     identity = Identity(
-        email="laura_admin",
+        email="laura_admin@eurobot.es",
         provider="local",
-        password_hash="fakehash",
+        password_hash=hashed,
         user_id=user.id_usuario,
         rol_id=admin_role.id_rol
     )
