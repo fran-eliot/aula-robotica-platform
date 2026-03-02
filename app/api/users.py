@@ -10,14 +10,29 @@ from app.api.deps import get_current_user, require_roles
 
 router = APIRouter()
 
-@router.get("/", response_model=List[UserResponse])
+@router.get("/", 
+            response_model=List[UserResponse],
+            summary="Listar usuarios",
+    description="Devuelve el listado completo de usuarios. Requiere rol administrador.",
+    responses={
+        403: {"description": "No tienes permisos suficientes"},
+        401: {"description": "Token inválido o expirado"}
+    })
 def get_users(
     db: Session = Depends(get_db),
     user = Depends(require_roles("administrador"))
 ):
     return db.query(User).all()
 
-@router.get("/{user_id}", response_model=UserResponse)
+@router.get("/{user_id}", 
+            response_model=UserResponse,
+            summary="Obtener usuario por ID",
+    description="Devuelve la información de un usuario específico por su ID. Requiere rol administrador.",
+    responses={
+        403: {"description": "No tienes permisos suficientes"},
+        401: {"description": "Token inválido o expirado"},
+        404: {"description": "Usuario no encontrado"}
+    })
 def get_user(
     user_id: int,
     db: Session = Depends(get_db),
@@ -33,11 +48,26 @@ def get_user(
 
     return usuario
 
-@router.get("/me", response_model=UserResponse)
+@router.get(
+    "/me",
+    response_model=UserResponse,
+    summary="Obtener perfil del usuario autenticado",
+    description="Devuelve la información del usuario actualmente autenticado mediante JWT.",
+    responses={
+        401: {"description": "Token inválido o expirado"}
+    }
+)
 def get_my_profile(current_user = Depends(get_current_user)):
     return current_user
 
-@router.post("/", response_model=UserResponse)
+@router.post("/", 
+             response_model=UserResponse,
+             summary="Crear nuevo usuario",
+             description="Crea un nuevo usuario en el sistema. Requiere rol administrador.",
+             responses={
+                 403: {"description": "No tienes permisos suficientes"},
+                 401: {"description": "Token inválido o expirado"}
+             })
 def create_user(
     data: UserCreate,
     db: Session = Depends(get_db),
@@ -54,7 +84,14 @@ def create_user(
 
     return nuevo
 
-@router.delete("/{user_id}")
+@router.delete("/{user_id}",
+               summary="Eliminar usuario",
+               description="Elimina un usuario específico por su ID. Requiere rol administrador.",
+               responses={
+                   403: {"description": "No tienes permisos suficientes"},
+                   401: {"description": "Token inválido o expirado"},
+                   404: {"description": "Usuario no encontrado"}
+               })
 def delete_user(
     user_id: int,
     db: Session = Depends(get_db),

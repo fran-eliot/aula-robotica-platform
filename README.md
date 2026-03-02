@@ -28,3 +28,10 @@ Arquitectura modular con separación de:
 
 ```bash
 uv run python -m app.db.init_db
+```
+
+### Flujo de autenticación
+1. Realizar POST /auth/login
+2. Copiar el token JWT
+3. Autorizar mediante botón "Authorize" en Swagger
+4. Consumir endpoints protegidos
