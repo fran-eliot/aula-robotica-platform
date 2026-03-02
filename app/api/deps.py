@@ -1,10 +1,17 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
+from typing import Union, List
 
 from app.db.session import get_db
 from app.models.user import User
 from app.core.security import decode_access_token
+
+ROLE_HIERARCHY = {
+    "administrador": 3,
+    "organizador": 2,
+    "participante": 1
+}
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
@@ -38,17 +45,68 @@ def get_current_user(
     return user
 
 
-def require_role(required_role: str):
+def require_roles(required_roles: Union[str, List[str]]):
+    """
+    Dependency para validar autorización basada en roles.
+    Soporta:
+        - Un solo rol: "administrador"
+        - Varios roles: ["administrador", "organizador"]
+    Aplica jerarquía de roles.
+    """
+
+    if isinstance(required_roles, str):
+        required_roles = [required_roles]
+
     def role_checker(
-        token: str = Depends(oauth2_scheme)
+        token: str = Depends(oauth2_scheme),
+        db: Session = Depends(get_db)
     ):
+        # Decodificar token
         payload = decode_access_token(token)
+
+        user_id = payload.get("sub")
         roles = payload.get("roles", [])
 
-        if required_role not in roles:
+        if user_id is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Token inválido"
+            )
+
+        if not roles:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Usuario sin roles asignados"
+            )
+
+        # Nivel máximo del usuario
+        user_max_level = max(
+            ROLE_HIERARCHY.get(role, 0) for role in roles
+        )
+
+        # Nivel mínimo requerido
+        required_min_level = max(
+            ROLE_HIERARCHY.get(role, 0) for role in required_roles
+        )
+
+        # Comparación jerárquica
+        if user_max_level < required_min_level:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="No tienes permisos suficientes"
             )
+
+        # Recuperar usuario desde BD
+        user = db.query(User).filter(
+            User.id_usuario == int(user_id)
+        ).first()
+
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Usuario no encontrado"
+            )
+
+        return user
 
     return role_checker
