@@ -1,6 +1,12 @@
 from fastapi import FastAPI
 from fastapi.openapi.utils import get_openapi
 from app.api import auth, users
+from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
+from fastapi import Request
+from app.web import auth_web, users_web, dashboard_web, identities_web
+from app.core.templates import templates
+
 
 def custom_openapi():
     if app.openapi_schema:
@@ -24,21 +30,23 @@ def custom_openapi():
     return app.openapi_schema
 
 app = FastAPI(
-    title="Eurobot Spain Backend API",
+    title="Aula de Robótica EPS-UAH Backend API",
     description="""
 API REST para la gestión de autenticación, autorización y usuarios
-del Aula de Robótica de la Escuela Politécnica (Universidad de Alcalá).
+del Aula de Robótica de la Escuela Politécnica Superior (Universidad de Alcalá).
 
-###Funcionalidades principales:
+### Funcionalidades principales:
 
-- Autenticación basada en JWT
+- Autenticación basada en JWT (HS256)
 - Autorización jerárquica basada en roles (RBAC)
+- Gestión administrativa de usuarios (CRUD)
 - Persistencia con MariaDB
 - Arquitectura modular con FastAPI y SQLAlchemy
 - Documentación automática OpenAPI
 
-Proyecto académico vinculado a la Escuela Politécnica Superior
-de la Universidad de Alcalá.
+### Seguridad:
+Todos los endpoints (excepto login) requieren autenticación mediante Bearer Token.
+
 """,
     version="1.0.0",
     contact={
@@ -47,8 +55,14 @@ de la Universidad de Alcalá.
     }
 )
 
-app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
-app.include_router(users.router, prefix="/users", tags=["Users"])
+app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
+app.include_router(users.router, prefix="/api/users", tags=["Users"])
+app.include_router(auth_web.router, tags=["Authentication Web"])
+app.include_router(dashboard_web.router, tags=["Dashboard Web"])
+app.include_router(users_web.router, tags=["Users Web"])
+app.include_router(identities_web.router, tags=["Identities Web"])
 
 app.openapi = custom_openapi
+
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
 

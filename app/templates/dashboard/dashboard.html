@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}
+Dashboard
+{% endblock %}
+
+{% block page_title %}
+Dashboard
+{% endblock %}
+
+{% block content %}
+
+<div class="row">
+
+    <!-- Usuario -->
+    <div class="col-lg-4 col-6">
+        <div class="small-box bg-info">
+            <div class="inner">
+                <h4>{{ current_user.nombre }}</h4>
+                <p>Usuario autenticado</p>
+            </div>
+
+            <div class="icon">
+                <i class="fas fa-user"></i>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Rol -->
+    <div class="col-lg-4 col-6">
+        <div class="small-box bg-success">
+            <div class="inner">
+
+                {% if current_user_roles %}
+                    <h4>{{ current_user_roles[0] }}</h4>
+                {% else %}
+                    <h4>Sin rol</h4>
+                {% endif %}
+
+                <p>Rol principal</p>
+            </div>
+
+            <div class="icon">
+                <i class="fas fa-id-badge"></i>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Sistema -->
+    <div class="col-lg-4 col-6">
+        <div class="small-box bg-warning">
+            <div class="inner">
+                <h4>Aula Robótica</h4>
+                <p>Sistema activo</p>
+            </div>
+
+            <div class="icon">
+                <i class="fas fa-robot"></i>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+<!-- Métricas del sistema -->
+
+<div class="row">
+
+    <!-- Total usuarios -->
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-primary">
+            <div class="inner">
+                <h3>{{ total_users }}</h3>
+                <p>Usuarios registrados</p>
+            </div>
+
+            <div class="icon">
+                <i class="fas fa-users"></i>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Usuarios activos -->
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-success">
+            <div class="inner">
+                <h3>{{ active_users }}</h3>
+                <p>Usuarios activos</p>
+            </div>
+
+            <div class="icon">
+                <i class="fas fa-user-check"></i>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Identidades -->
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-warning">
+            <div class="inner">
+                <h3>{{ identities }}</h3>
+                <p>Identidades registradas</p>
+            </div>
+
+            <div class="icon">
+                <i class="fas fa-id-card"></i>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Roles -->
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-danger">
+            <div class="inner">
+                <h3>{{ total_roles }}</h3>
+                <p>Roles definidos</p>
+            </div>
+
+            <div class="icon">
+                <i class="fas fa-user-shield"></i>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

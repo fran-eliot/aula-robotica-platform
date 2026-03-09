@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}
+Detalle usuario
+{% endblock %}
+
+{% block page_title %}
+Detalle del usuario
+{% endblock %}
+
+{% block content %}
+
+<div class="card">
+
+    <div class="card-header">
+        <h3 class="card-title">Información del usuario</h3>
+    </div>
+
+    <div class="card-body">
+
+        <table class="table table-bordered">
+
+            <tr>
+                <th>ID</th>
+                <td>{{ user.id_usuario }}</td>
+            </tr>
+
+            <tr>
+                <th>Nombre</th>
+                <td>{{ user.nombre }}</td>
+            </tr>
+
+            <tr>
+                <th>Activo</th>
+                <td>
+                    {% if user.activo %}
+                        <span class="badge badge-success">Activo</span>
+                    {% else %}
+                        <span class="badge badge-danger">Inactivo</span>
+                    {% endif %}
+                </td>
+            </tr>
+
+            <tr>
+                <th>Fecha creación</th>
+                <td>{{ user.fecha_creacion }}</td>
+            </tr>
+
+        </table>
+
+    </div>
+
+    <div class="card-footer">
+
+        <a href="/users" class="btn btn-secondary">
+            Volver
+        </a>
+
+        <a href="/users/delete/{{ user.id_usuario }}" class="btn btn-danger">
+            Eliminar
+        </a>
+
+    </div>
+
+</div>
+
+{% endblock %}

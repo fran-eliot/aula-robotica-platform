@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <title>{% block title %}Aula de Robótica EPS-UAH{% endblock %}</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- AdminLTE CSS -->
+    <link rel="stylesheet" href="/static/adminlte/css/adminlte.min.css">
+
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="/static/adminlte/plugins/fontawesome-free/css/all.min.css">
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body class="hold-transition sidebar-mini">
+
+{% set ctx = get_template_context(request) %}
+{% set current_user = ctx.current_user %}
+{% set current_user_roles = ctx.current_user_roles %}
+
+<div class="wrapper">
+
+    <!-- NAVBAR -->
+    <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+
+        <!-- botón sidebar -->
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" data-widget="pushmenu" href="#">
+                    <i class="fas fa-bars"></i>
+                </a>
+            </li>
+        </ul>
+
+        <!-- usuario -->
+        <ul class="navbar-nav ml-auto">
+
+            {% if current_user %}
+            <li class="nav-item">
+                <span class="nav-link">
+                    <i class="fas fa-user"></i>
+                    {{ current_user.nombre }}
+                </span>
+            </li>
+            {% endif %}
+
+            <li class="nav-item">
+                <a href="/logout" class="nav-link">
+                    <i class="fas fa-sign-out-alt"></i>
+                </a>
+            </li>
+
+        </ul>
+    </nav>
+
+
+    <!-- Sidebar -->
+    <aside class="main-sidebar sidebar-dark-primary elevation-4">
+
+        <!-- logo -->
+        <a href="/dashboard" class="brand-link">
+            <span class="brand-text font-weight-light">
+                Aula Robótica
+            </span>
+        </a>
+
+        <div class="sidebar">
+
+            <!-- usuario -->
+            {% if current_user %}
+            <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+                <div class="info">
+                    <a href="#" class="d-block">
+                        {{ current_user.nombre }}
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- menú -->
+            <nav class="mt-2">
+
+                <ul class="nav nav-pills nav-sidebar flex-column"
+                    data-widget="treeview"
+                    role="menu">
+
+                    <!-- Dashboard -->
+                    <li class="nav-item">
+                        <a href="/dashboard" class="nav-link">
+                            <i class="nav-icon fas fa-tachometer-alt"></i>
+                            <p>Dashboard</p>
+                        </a>
+                    </li>
+
+
+                    <!-- Usuarios -->
+                    {% if "administrador" in current_user_roles %}
+
+                    <li class="nav-item">
+                        <a href="/users/" class="nav-link">
+                            <i class="nav-icon fas fa-users"></i>
+                            <p>Usuarios</p>
+                        </a>
+                    </li>
+
+                    {% endif %}
+
+
+                    <!-- Identidades -->
+                    {% if "administrador" in current_user_roles %}
+
+                    <li class="nav-item">
+                        <a href="/identities/" class="nav-link">
+                            <i class="nav-icon fas fa-id-card"></i>
+                            <p>Identidades</p>
+                        </a>
+                    </li>
+
+                    {% endif %}
+
+                </ul>
+
+            </nav>
+
+        </div>
+
+    </aside>
+
+
+    <!-- CONTENT -->
+    <div class="content-wrapper">
+
+        <section class="content-header">
+            <div class="container-fluid">
+                <h1>{% block page_title %}{% endblock %}</h1>
+            </div>
+        </section>
+
+        <section class="content">
+
+            <div class="container-fluid">
+
+                {% block content %}
+                {% endblock %}
+
+            </div>
+
+        </section>
+
+    </div>
+
+
+    <!-- FOOTER -->
+    <footer class="main-footer">
+        <strong>
+            Aula de Robótica EPS-UAH
+        </strong>
+    </footer>
+
+</div>
+
+
+<!-- JS -->
+<script src="/static/adminlte/plugins/jquery/jquery.min.js"></script>
+<script src="/static/adminlte/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="/static/adminlte/js/adminlte.min.js"></script>
+
+{% block extra_js %}{% endblock %}
+
+</body>
+</html>

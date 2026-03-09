@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}
+Identidades
+{% endblock %}
+
+{% block content %}
+
+<div class="card">
+
+    <div class="card-header">
+        <h3 class="card-title">Identidades</h3>
+
+        <div class="card-tools">
+            <a href="/identities/create" class="btn btn-primary btn-sm">
+                Crear identidad
+            </a>
+        </div>
+    </div>
+
+
+    <div class="card-body">
+
+        <table class="table table-bordered">
+
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Email</th>
+                    <th>Usuario</th>
+                    <th>Rol</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+            {% for identity in identities %}
+
+                <tr>
+
+                    <td>{{ identity.id_identidad }}</td>
+
+                    <td>{{ identity.email }}</td>
+
+                    <td>
+                    {% if identity.rol %}
+                        {{ identity.rol.nombre }}
+                    {% else %}
+                        Sin rol
+                    {% endif %}
+                    </td>
+
+                    <td>{{ identity.rol.nombre }}</td>
+
+                    <td>
+
+                        <a href="/identities/edit/{{ identity.id_identidad }}"
+                        class="btn btn-warning btn-sm">
+                        Editar
+                        </a>
+
+                        <a href="/identities/delete/{{ identity.id_identidad }}"
+                        class="btn btn-danger btn-sm">
+                        Eliminar
+                        </a>
+
+                    </td>
+
+                </tr>
+
+            {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+{% endblock %}
