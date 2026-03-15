@@ -9,6 +9,7 @@ from app.models.user import User
 from app.models.role import Role
 from app.core.security import hash_password
 from app.core.templates import templates
+import app.core.roles
 
 
 router = APIRouter(prefix="/identities", tags=["Identities Web"])
@@ -57,7 +58,7 @@ def identities_create(
     email: str = Form(...),
     password: str = Form(...),
     user_id: int = Form(...),
-    rol_id: int = Form(...),
+    rol_id: int | None = Form(None),
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user_from_cookie)
 ):
@@ -68,6 +69,26 @@ def identities_create(
 
     if existing:
         raise HTTPException(status_code=400, detail="Email ya registrado")
+    
+    # -------------------------
+    # Rol por defecto: estudiante
+    # -------------------------
+
+    if not rol_id:
+
+        default_role = db.query(Role).filter(
+            Role.nombre == "estudiante"
+        ).first()
+
+        if not default_role:
+            raise HTTPException(
+                status_code=500,
+                detail="Rol 'estudiante' no existe en la base de datos"
+            )
+
+        rol_id = default_role.id_rol
+
+    # -------------------------
 
     identity = Identity(
         email=email,

@@ -3,9 +3,11 @@ from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
+from app.api.deps import get_current_user_from_cookie
 from app.services.auth_service import authenticate_user
 from app.core.security import create_access_token
 from app.core.templates import templates
+from app.services.audit_service import log_action
 
 router = APIRouter()
 
@@ -34,8 +36,19 @@ def login(
                 "error": "Credenciales incorrectas"
             }
         )
-
+    
     token = result["access_token"]
+
+    user = result["user"]
+
+    log_action(
+        db,
+        action="login",
+        user_id=user.id_usuario,
+        description="Inicio de sesión",
+        ip_address=request.client.host,
+        user_agent=request.headers.get("user-agent")
+    )
 
     response = RedirectResponse(
         url="/dashboard",
@@ -51,7 +64,18 @@ def login(
     return response
 
 @router.get("/logout")
-def logout():
+def logout(request: Request,
+           db:Session = Depends(get_db),
+           current_user = Depends(get_current_user_from_cookie)):
+
+    log_action(
+        db,
+        action="logout",
+        user_id=current_user.id_usuario,
+        description="Cierre de sesión",
+        ip_address=request.client.host,
+        user_agent=request.headers.get("user-agent")
+    )
 
     response = RedirectResponse(
         url="/login",
@@ -59,5 +83,5 @@ def logout():
     )
 
     response.delete_cookie("access_token")
-
+    
     return response

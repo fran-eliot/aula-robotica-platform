@@ -75,6 +75,10 @@
                 <div class="info">
                     <a href="#" class="d-block">
                         {{ current_user.nombre }}
+                        
+                        {% if current_user_roles %}
+                        ({{ current_user_roles[0]|capitalize }})
+                        {% endif %}
                     </a>
                 </div>
             </div>
@@ -96,30 +100,57 @@
                     </li>
 
 
-                    <!-- Usuarios -->
+
+                    <!-- ADMIN -->
                     {% if "administrador" in current_user_roles %}
 
                     <li class="nav-item">
-                        <a href="/users/" class="nav-link">
-                            <i class="nav-icon fas fa-users"></i>
-                            <p>Usuarios</p>
-                        </a>
+                    <a href="/users/" class="nav-link">
+                    <i class="nav-icon fas fa-users"></i>
+                    <p>Usuarios</p>
+                    </a>
+                    </li>
+
+                    <li class="nav-item">
+                    <a href="/identities/" class="nav-link">
+                    <i class="nav-icon fas fa-id-badge"></i>
+                    <p>Identidades</p>
+                    </a>
+                    </li>
+
+                    <li class="nav-item">
+                    <a href="/roles/" class="nav-link">
+                    <i class="nav-icon fas fa-user-shield"></i>
+                    <p>Roles</p>
+                    </a>
                     </li>
 
                     {% endif %}
 
-
-                    <!-- Identidades -->
-                    {% if "administrador" in current_user_roles %}
+                    <!-- PROFESOR -->
+                    {% if "profesor" in current_user_roles %}
 
                     <li class="nav-item">
-                        <a href="/identities/" class="nav-link">
-                            <i class="nav-icon fas fa-id-card"></i>
-                            <p>Identidades</p>
-                        </a>
+                    <a href="/students/" class="nav-link">
+                    <i class="nav-icon fas fa-user-graduate"></i>
+                    <p>Estudiantes</p>
+                    </a>
                     </li>
 
                     {% endif %}
+
+                    <!-- ESTUDIANTE -->
+                    {% if "estudiante" in current_user_roles %}
+
+                    <li class="nav-item">
+                    <a href="/profile/" class="nav-link">
+                    <i class="nav-icon fas fa-user"></i>
+                    <p>Mi perfil</p>
+                    </a>
+                    </li>
+
+                    {% endif %}
+             
 
                 </ul>
 

@@ -8,6 +8,7 @@ from app.api.deps import get_current_user_from_cookie
 from app.models.user import User
 from app.models.identity import Identity
 from app.core.templates import templates
+from app.services.audit_service import log_action
 
 router = APIRouter(prefix="/users", tags=["Users Web"])
 
@@ -60,6 +61,13 @@ def users_create(
     db.add(new_user)
     db.commit()
 
+    log_action(
+        db,
+        action="create_user",
+        user_id=current_user.id_usuario,
+        description=f"Creó usuario {new_user.nombre}"
+    )
+
     return RedirectResponse("/users/", status_code=303)
 
 @router.get("/{user_id}")
@@ -100,6 +108,58 @@ def delete_user(
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
     db.delete(user)
+    db.commit()
+
+    log_action(
+        db,
+        action="delete_user",
+        user_id=current_user.id_usuario,
+        description=f"Eliminó usuario {user.nombre}"
+    )
+
+    return RedirectResponse("/users/", status_code=303)
+
+@router.get("/deactivate/{user_id}")
+def deactivate_user(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user_from_cookie)
+):
+
+    user = db.query(User).filter(
+        User.id_usuario == user_id
+    ).first()
+
+    if not user:
+        raise HTTPException(status_code=404)
+
+    user.activo = False
+    db.commit()
+
+    log_action(
+        db,
+        action="deactivate_user",
+        user_id=current_user.id_usuario,
+        description=f"Desactivó usuario {user.nombre}"
+    )
+
+    return RedirectResponse("/users/", status_code=303)
+
+@router.get("/activate/{user_id}")
+def activate_user(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user_from_cookie)
+):
+
+    user = db.query(User).filter(
+        User.id_usuario == user_id
+    ).first()
+
+    if not user:
+        raise HTTPException(status_code=404)
+
+    user.activo = True
     db.commit()
 
     return RedirectResponse("/users/", status_code=303)

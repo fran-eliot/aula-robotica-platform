@@ -41,7 +41,7 @@ Gestión de Usuarios
 
                 {% for user in users %}
 
-                <tr>
+                <tr class="{% if not user.activo %}table-secondary{% endif %}">
 
                     <td>{{ user.id_usuario }}</td>
 
@@ -49,10 +49,25 @@ Gestión de Usuarios
 
                     <td>
                         {% if user.activo %}
-                            <span class="badge badge-success">Activo</span>
+
+                        <a href="/users/deactivate/{{ user.id_usuario }}"
+                        class="btn btn-warning btn-sm">
+                        Desactivar
+                        </a>
+
                         {% else %}
-                            <span class="badge badge-danger">Inactivo</span>
+
+                        <a href="/users/activate/{{ user.id_usuario }}"
+                        class="btn btn-success btn-sm">
+                        Reactivar
+                        </a>
+
                         {% endif %}
+
+                        <a href="/users/delete/{{ user.id_usuario }}"
+                        class="btn btn-danger btn-sm" onclick="return confirm('¿Eliminar definitivamente este usuario?')">
+                        Eliminar
+                        </a>
                     </td>
 
                     <td>{{ user.fecha_creacion }}</td>

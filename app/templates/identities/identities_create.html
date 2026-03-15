@@ -1,7 +1,11 @@
 {% extends "base.html" %}
 
 {% block title %}
-Identidades
+Crear identidad
+{% endblock %}
+
+{% block page_title %}
+Crear identidad
 {% endblock %}
 
 {% block content %}
@@ -9,60 +13,101 @@ Identidades
 <div class="card">
 
     <div class="card-header">
-        <h3 class="card-title">Identidades</h3>
+        <h3 class="card-title">Nueva identidad</h3>
+    </div>
 
-        <div class="card-tools">
-            <a href="/identities/create" class="btn btn-primary btn-sm">
-                Crear identidad
-            </a>
+    <form method="post">
+
+        <div class="card-body">
+
+            <!-- Email -->
+
+            <div class="form-group">
+                <label>Email</label>
+
+                <input
+                    type="email"
+                    name="email"
+                    class="form-control"
+                    required
+                >
+            </div>
+
+
+            <!-- Password -->
+
+            <div class="form-group">
+                <label>Password</label>
+
+                <input
+                    type="password"
+                    name="password"
+                    class="form-control"
+                    required
+                >
+            </div>
+
+
+            <!-- Usuario -->
+
+            <div class="form-group">
+                <label>Usuario</label>
+
+                <select name="user_id" class="form-control" required>
+
+                    <option disabled selected>Selecciona usuario</option>
+
+                    {% for user in users %}
+
+                    <option value="{{ user.id_usuario }}">
+                        {{ user.nombre }}
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+            </div>
+
+
+            <!-- Rol -->
+
+            <div class="form-group">
+                <label>Rol</label>
+
+                <select name="rol_id" class="form-control">
+
+                    <option value="">
+                        Rol por defecto (estudiante)
+                    </option>
+
+                    {% for role in roles %}
+
+                    <option value="{{ role.id_rol }}">
+                        {{ role.nombre }}
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
         </div>
-    </div>
 
 
-    <div class="card-body">
+        <div class="card-footer">
 
-        <table class="table table-bordered">
+            <button type="submit" class="btn btn-primary">
+                Crear identidad
+            </button>
 
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Email</th>
-                    <th>Usuario</th>
-                    <th>Rol</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
+            <a href="/identities/" class="btn btn-secondary">
+                Cancelar
+            </a>
 
-            <tbody>
+        </div>
 
-            {% for identity in identities %}
-
-                <tr>
-
-                    <td>{{ identity.id_identidad }}</td>
-
-                    <td>{{ identity.email }}</td>
-
-                    <td>{{ identity.userio.nombre }}</td>
-
-                    <td>{{ identity.rol.nombre }}</td>
-
-                    <td>
-                        <a href="/identities/delete/{{ identity.id_identidad }}"
-                           class="btn btn-danger btn-sm">
-                            Eliminar
-                        </a>
-                    </td>
-
-                </tr>
-
-            {% endfor %}
-
-            </tbody>
-
-        </table>
-
-    </div>
+    </form>
 
 </div>
 

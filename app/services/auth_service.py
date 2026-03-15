@@ -6,6 +6,7 @@ from fastapi import HTTPException, status
 from app.models.identity import Identity
 from app.models.user import User
 from app.core.security import verify_password, create_access_token
+from app.services.audit_service import log_action
 
 
 def authenticate_user(db: Session, email: str, password: str):
@@ -53,7 +54,15 @@ def authenticate_user(db: Session, email: str, password: str):
         }
     )
 
+    log_action(
+        db,
+        action="login",
+        user_id=user.id_usuario,
+        description="Inicio de sesión"
+    )
+
     return {
         "access_token": access_token,
-        "token_type": "bearer"
+        "token_type": "bearer",
+        "user":user
     }

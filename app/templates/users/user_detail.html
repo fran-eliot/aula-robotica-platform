@@ -50,6 +50,32 @@ Detalle del usuario
 
     </div>
 
+    <div class="mt-3">
+
+        {% if user.activo %}
+
+        <a href="/users/deactivate/{{ user.id_usuario }}"
+        class="btn btn-warning">
+        Desactivar usuario
+        </a>
+
+        {% else %}
+
+        <a href="/users/activate/{{ user.id_usuario }}"
+        class="btn btn-success">
+        Reactivar usuario
+        </a>
+
+        {% endif %}
+
+        <a href="/users/delete/{{ user.id_usuario }}"
+        class="btn btn-danger"
+        onclick="return confirm('¿Eliminar definitivamente este usuario?')">
+        Eliminar definitivamente
+        </a>
+
+    </div>
+
     <div class="card-footer">
 
         <a href="/users" class="btn btn-secondary">

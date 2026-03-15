@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Roles{% endblock %}
+
+{% block page_title %}Roles{% endblock %}
+
+{% block content %}
+
+<div class="card">
+
+<div class="card-header">
+
+<h3 class="card-title">Roles</h3>
+
+<div class="card-tools">
+<a href="/roles/create" class="btn btn-primary btn-sm">
+Crear rol
+</a>
+</div>
+
+</div>
+
+<div class="card-body">
+
+<table class="table table-bordered">
+
+<thead>
+<tr>
+<th>ID</th>
+<th>Nombre</th>
+<th>Descripción</th>
+<th>Acciones</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for role in roles %}
+
+<tr>
+
+<td>{{ role.id_rol }}</td>
+
+<td>{{ role.nombre }}</td>
+
+<td>{{ role.descripcion }}</td>
+
+<td>
+
+<a href="/roles/delete/{{ role.id_rol }}"
+class="btn btn-danger btn-sm">
+Eliminar
+</a>
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+{% endblock %}

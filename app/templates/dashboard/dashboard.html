@@ -80,6 +80,10 @@ Dashboard
             <div class="icon">
                 <i class="fas fa-users"></i>
             </div>
+
+            <a href="/users/" class="small-box-footer">
+            Gestionar <i class="fas fa-arrow-circle-right"></i>
+            </a>
         </div>
     </div>
 
@@ -95,6 +99,10 @@ Dashboard
             <div class="icon">
                 <i class="fas fa-user-check"></i>
             </div>
+
+            <a href="/users/" class="small-box-footer">
+            Gestionar <i class="fas fa-arrow-circle-right"></i>
+            </a>
         </div>
     </div>
 
@@ -110,6 +118,10 @@ Dashboard
             <div class="icon">
                 <i class="fas fa-id-card"></i>
             </div>
+
+            <a href="/identities/" class="small-box-footer">
+            Gestionar <i class="fas fa-arrow-circle-right"></i>
+            </a>
         </div>
     </div>
 
@@ -125,7 +137,68 @@ Dashboard
             <div class="icon">
                 <i class="fas fa-user-shield"></i>
             </div>
+
+            <a href="/roles/" class="small-box-footer">
+            Gestionar <i class="fas fa-arrow-circle-right"></i>
+            </a>
         </div>
+    </div>
+
+</div>
+
+<div class="card">
+
+    <div class="card-header">
+        <h3 class="card-title">Actividad reciente</h3>
+    </div>
+
+    <div class="card-body">
+
+        <table class="table table-sm">
+
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Usuario</th>
+                    <th>Acción</th>
+                    <th>Descripción</th>
+                    <th>IP</th>
+                    <th>Navegador</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+            {% for log in recent_logs %}
+
+                <tr>
+
+                    <td>{{ log.created_at.strftime("%d/%m/%Y %H:%M") }}</td>
+
+                    <td>
+                    {% if log.user %}
+                    {{ log.user.nombre }}
+                    {% else %}
+                    Sistema
+                    {% endif %}
+                    </td>
+
+                    <td>{{ log.action }}</td>
+
+                    <td>{{ log.description }}</td>
+
+                    <td>{{ log.ip_address }}</td>
+
+                    <td>{{ log.user_agent }}</td>
+
+                </tr>
+
+            {% endfor %}
+
+            </tbody>
+
+        </table>
+
     </div>
 
 </div>
