@@ -2,6 +2,7 @@ from fastapi import APIRouter, Request, Form, Depends
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
+from app.core.constants.audit_actions import AuditAction
 from app.db.session import get_db
 from app.api.deps import get_current_user_from_cookie
 from app.services.auth_service import authenticate_user
@@ -43,12 +44,16 @@ def login(
 
     log_action(
         db,
-        action="login",
+        action=AuditAction.LOGIN,
         user_id=user.id_usuario,
+        resource_type="user",
+        resource_id=user.id_usuario,
         description="Inicio de sesión",
         ip_address=request.client.host,
         user_agent=request.headers.get("user-agent")
     )
+
+    db.commit()
 
     response = RedirectResponse(
         url="/dashboard",
@@ -70,12 +75,16 @@ def logout(request: Request,
 
     log_action(
         db,
-        action="logout",
+        action=AuditAction.LOGOUT,
         user_id=current_user.id_usuario,
+        resource_type="user",
+        resource_id=current_user.id_usuario,
         description="Cierre de sesión",
         ip_address=request.client.host,
         user_agent=request.headers.get("user-agent")
     )
+
+    db.commit()
 
     response = RedirectResponse(
         url="/login",

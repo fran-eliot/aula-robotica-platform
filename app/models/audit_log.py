@@ -18,6 +18,10 @@ class AuditLog(Base):
         nullable=True
     )
 
+    resource_type = Column(String(50), nullable=True)
+    
+    resource_id = Column(Integer, nullable=True)
+
     description = Column(String(255))
 
     ip_address = Column(String(50))
@@ -26,4 +30,4 @@ class AuditLog(Base):
 
     created_at = Column(DateTime, default=datetime.utcnow)
 
-    user = relationship("User")
+    user = relationship("User", back_populates="audit_logs")

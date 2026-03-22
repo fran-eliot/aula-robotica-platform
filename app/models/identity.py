@@ -27,7 +27,7 @@ class Identity(Base):
     rol_id = Column(
         Integer,
         ForeignKey("roles.id_rol", ondelete="SET NULL"),
-        nullable=False
+        nullable=True
     )
 
     # Relaciones ORM

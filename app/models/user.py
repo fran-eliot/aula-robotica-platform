@@ -28,5 +28,7 @@ class User(Base):
         back_populates="usuarios"
     )
 
+    audit_logs = relationship("AuditLog", back_populates="user")
+
     def __repr__(self):
         return f"<User(id={self.id_usuario}, nombre={self.nombre})>"

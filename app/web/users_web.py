@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Request, Depends, Form, HTTPException, status
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
-from datetime import datetime
+from datetime import datetime, UTC
 
+from app.core.constants.audit_actions import AuditAction
 from app.db.session import get_db
 from app.api.deps import get_current_user_from_cookie
 from app.models.user import User
@@ -55,18 +56,24 @@ def users_create(
     new_user = User(
         nombre=nombre,
         activo=True,
-        fecha_creacion=datetime.utcnow()
+        fecha_creacion=datetime.now(UTC)
     )
 
     db.add(new_user)
-    db.commit()
+    db.flush()
 
     log_action(
         db,
-        action="create_user",
+        action=AuditAction.CREATE_USER,
         user_id=current_user.id_usuario,
-        description=f"Creó usuario {new_user.nombre}"
+        resource_type="user",
+        resource_id=new_user.id_usuario,
+        description=f"Creó usuario {new_user.nombre}",
+        ip_address=request.client.host,
+        user_agent=request.headers.get("user-agent")
     )
+
+    db.commit()
 
     return RedirectResponse("/users/", status_code=303)
 
@@ -95,6 +102,7 @@ def user_detail(
 
 @router.get("/delete/{user_id}")
 def delete_user(
+    request:Request,
     user_id: int,
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user_from_cookie)
@@ -107,20 +115,30 @@ def delete_user(
     if not user:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
+    user_id = user.id_usuario
+    user_name = user.nombre
+
     db.delete(user)
-    db.commit()
+    db.flush()
 
     log_action(
         db,
-        action="delete_user",
-        user_id=current_user.id_usuario,
-        description=f"Eliminó usuario {user.nombre}"
+        action=AuditAction.DELETE_USER,
+        user_id=user_id,
+        resource_type="user",
+        resource_id=user_id,
+        description=f"Eliminó usuario {user_name}",
+        ip_address=request.client.host,
+        user_agent=request.headers.get("user-agent")
     )
+
+    db.commit()
 
     return RedirectResponse("/users/", status_code=303)
 
 @router.get("/deactivate/{user_id}")
 def deactivate_user(
+    request:Request,
     user_id: int,
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user_from_cookie)
@@ -134,19 +152,25 @@ def deactivate_user(
         raise HTTPException(status_code=404)
 
     user.activo = False
-    db.commit()
 
     log_action(
         db,
-        action="deactivate_user",
+        action=AuditAction.DEACTIVATE_USER,
         user_id=current_user.id_usuario,
-        description=f"Desactivó usuario {user.nombre}"
+        resource_type="user",
+        resource_id=user.id_usuario,
+        description=f"Desactivó usuario {user.nombre}",
+        ip_address=request.client.host,
+        user_agent=request.headers.get("user-agent")
     )
+
+    db.commit()
 
     return RedirectResponse("/users/", status_code=303)
 
 @router.get("/activate/{user_id}")
 def activate_user(
+    request:Request,
     user_id: int,
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user_from_cookie)
@@ -160,6 +184,18 @@ def activate_user(
         raise HTTPException(status_code=404)
 
     user.activo = True
+
+    log_action(
+        db,
+        action=AuditAction.ACTIVATE_USER,
+        user_id=current_user.id_usuario,
+        resource_type="user",
+        resource_id=user.id_usuario,
+        description=f"Activó usuario {user.nombre}",
+        ip_address=request.client.host,
+        user_agent=request.headers.get("user-agent")
+    )
+
     db.commit()
 
     return RedirectResponse("/users/", status_code=303)
