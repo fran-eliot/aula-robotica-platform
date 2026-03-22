@@ -149,7 +149,56 @@ Dashboard
 <div class="card">
 
     <div class="card-header">
+
         <h3 class="card-title">Actividad reciente</h3>
+
+        <!-- FILTROS -->
+        <form method="get" class="mt-2">
+
+            <div class="row">
+
+                <div class="col-md-2">
+                    <input type="text" class="form-control"
+                        name="user_id"
+                        placeholder="User ID"
+                        value="{{ request.query_params.get('user_id', '') }}">
+                </div>
+
+                <div class="col-md-2">
+                    <input type="text" class="form-control"
+                        name="action"
+                        placeholder="Acción"
+                        value="{{ request.query_params.get('action', '') }}">
+                </div>
+
+                <div class="col-md-2">
+                    <input type="date" class="form-control"
+                        name="date_from"
+                        value="{{ request.query_params.get('date_from', '') }}">
+                </div>
+
+                <div class="col-md-2">
+                    <input type="date" class="form-control"
+                        name="date_to"
+                        value="{{ request.query_params.get('date_to', '') }}">
+                </div>
+
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        Filtrar
+                    </button>
+                </div>
+
+                <div class="col-md-2">
+                    <a href="/dashboard/" class="btn btn-secondary w-100">
+                        Limpiar
+                    </a>
+                </div>
+
+            </div>
+
+        </form>
+
     </div>
 
     <div class="card-body">
@@ -169,31 +218,38 @@ Dashboard
 
             <tbody>
 
-            {% for log in recent_logs %}
+            {% if recent_logs %}
+
+                {% for log in recent_logs %}
+                    <tr>
+                        <td>{{ log.created_at.strftime("%d/%m/%Y %H:%M") }}</td>
+
+                        <td>
+                            {% if log.user %}
+                                {{ log.user.nombre }}
+                            {% else %}
+                                Sistema
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            <span class="badge bg-info">{{ log.action }}</span>
+                        </td>
+                        <td>{{ log.description }}</td>
+                        <td>{{ log.ip_address }}</td>
+                        <td>{{ log.user_agent }}</td>
+                    </tr>
+                {% endfor %}
+
+            {% else %}
 
                 <tr>
-
-                    <td>{{ log.created_at.strftime("%d/%m/%Y %H:%M") }}</td>
-
-                    <td>
-                    {% if log.user %}
-                    {{ log.user.nombre }}
-                    {% else %}
-                    Sistema
-                    {% endif %}
+                    <td colspan="6" class="text-center">
+                        No hay resultados con los filtros aplicados
                     </td>
-
-                    <td>{{ log.action }}</td>
-
-                    <td>{{ log.description }}</td>
-
-                    <td>{{ log.ip_address }}</td>
-
-                    <td>{{ log.user_agent }}</td>
-
                 </tr>
 
-            {% endfor %}
+            {% endif %}
 
             </tbody>
 

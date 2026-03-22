@@ -1,6 +1,10 @@
+from typing import Optional
+from datetime import datetime
+
 from fastapi import APIRouter, Request, Depends
 
 from app.api.deps import get_current_user_from_cookie
+from app.core.utils import clean, clean_date, clean_int
 from app.models.identity import Identity
 from sqlalchemy.orm import Session, joinedload
 from app.db.session import get_db
@@ -16,8 +20,18 @@ router = APIRouter(prefix="/dashboard", tags=["Dashboard Web"])
 def dashboard(
     request: Request,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user_from_cookie)
+    current_user = Depends(get_current_user_from_cookie),
+    # filtros
+    user_id: Optional[str] = None,
+    action: Optional[str] = None,
+    date_from: Optional[str] = None,
+    date_to: Optional[str] = None
 ):
+    user_id = clean_int(user_id)
+    action = clean(action)
+    date_from = clean_date(date_from)
+    date_to = clean_date(date_to)
+    
     total_users = db.query(User).count()
 
     active_users = db.query(User).filter(User.activo.is_(True)).count()
@@ -28,11 +42,23 @@ def dashboard(
 
     roles = get_user_roles(db, current_user.id_usuario)
 
-    recent_logs = db.query(AuditLog)\
-        .options(joinedload(AuditLog.user))\
-        .order_by(AuditLog.created_at.desc())\
-        .limit(10)\
-        .all()
+    query = db.query(AuditLog).options(joinedload(AuditLog.user))
+
+    if user_id:
+        query = query.filter(AuditLog.user_id == int(user_id))
+
+    if action:
+        query = query.filter(AuditLog.action.ilike(f"%{action}%"))
+
+    if date_from:
+        date_from_parsed = datetime.strptime(date_from, "%Y-%m-%d")
+        query = query.filter(AuditLog.created_at >= date_from_parsed)
+
+    if date_to:
+        date_to_parsed = datetime.strptime(date_to, "%Y-%m-%d")
+        query = query.filter(AuditLog.created_at <= date_to_parsed)
+
+    recent_logs = query.order_by(AuditLog.created_at.desc()).limit(50).all()
 
     return templates.TemplateResponse(
         "dashboard/dashboard.html",
