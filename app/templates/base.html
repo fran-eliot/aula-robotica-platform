@@ -18,8 +18,11 @@
 <body class="hold-transition sidebar-mini">
 
 {% set ctx = get_template_context(request) %}
-{% set current_user = ctx.current_user %}
-{% set current_user_roles = ctx.current_user_roles %}
+
+{% set current_user = ctx.current_user if ctx else None %}
+{% set current_user_roles = ctx.current_user_roles if ctx else [] %}
+{% set has_role = ctx.has_role if ctx else None %}
+{% set has_perm = ctx.has_perm if ctx else None %}
 
 <div class="wrapper">
 
@@ -102,33 +105,47 @@
 
 
                     <!-- ADMIN -->
-                    {% if "administrador" in current_user_roles %}
+                    {% if has_role("admin") %}
 
-                    <li class="nav-item">
-                    <a href="/users/" class="nav-link">
-                    <i class="nav-icon fas fa-users"></i>
-                    <p>Usuarios</p>
-                    </a>
-                    </li>
+                    <li class="nav-item has-treeview">
+                        <a href="#" class="nav-link">
+                            <i class="nav-icon fas fa-cogs"></i>
+                            <p>
+                                Administración
+                                <i class="right fas fa-angle-left"></i>
+                            </p>
+                        </a>
 
-                    <li class="nav-item">
-                    <a href="/identities/" class="nav-link">
-                    <i class="nav-icon fas fa-id-badge"></i>
-                    <p>Identidades</p>
-                    </a>
-                    </li>
+                        <ul class="nav nav-treeview">
 
-                    <li class="nav-item">
-                    <a href="/roles/" class="nav-link">
-                    <i class="nav-icon fas fa-user-shield"></i>
-                    <p>Roles</p>
-                    </a>
+                            <li class="nav-item">
+                                <a href="/users/" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Usuarios</p>
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a href="/identities/" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Identidades</p>
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a href="/roles/" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Roles</p>
+                                </a>
+                            </li>
+
+                        </ul>
                     </li>
 
                     {% endif %}
 
                     <!-- PROFESOR -->
-                    {% if "profesor" in current_user_roles %}
+                    {% if has_role("profesor") %}
 
                     <li class="nav-item">
                     <a href="/students/" class="nav-link">
@@ -140,7 +157,7 @@
                     {% endif %}
 
                     <!-- ESTUDIANTE -->
-                    {% if "estudiante" in current_user_roles %}
+                    {% if has_role("estudiante") %}
 
                     <li class="nav-item">
                     <a href="/profile/" class="nav-link">

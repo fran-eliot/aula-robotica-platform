@@ -3,13 +3,12 @@ from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
-from app.api.deps import get_current_user_from_cookie
+from app.api.deps import require_admin_web
 from app.models.identity import Identity
 from app.models.user import User
 from app.models.role import Role
 from app.core.security import hash_password
 from app.core.templates import templates
-import app.core.roles
 
 
 router = APIRouter(prefix="/identities", tags=["Identities Web"])
@@ -19,7 +18,7 @@ router = APIRouter(prefix="/identities", tags=["Identities Web"])
 def identities_list(
     request: Request,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user_from_cookie)
+    current_user = Depends(require_admin_web)
 ):
 
     identities = db.query(Identity).all()
@@ -37,7 +36,7 @@ def identities_list(
 def identities_create_form(
     request: Request,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user_from_cookie)
+    current_user = Depends(require_admin_web)
 ):
 
     users = db.query(User).all()
@@ -60,7 +59,7 @@ def identities_create(
     user_id: int = Form(...),
     rol_id: int | None = Form(None),
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user_from_cookie)
+    current_user = Depends(require_admin_web)
 ):
 
     existing = db.query(Identity).filter(
@@ -108,7 +107,7 @@ def edit_identity_form(
     request: Request,
     identity_id: int,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user_from_cookie)
+    current_user = Depends(require_admin_web)
 ):
 
     identity = db.query(Identity).filter(
@@ -139,7 +138,7 @@ def edit_identity(
     rol_id: int = Form(...),
     password: str = Form(None),
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user_from_cookie)
+    current_user = Depends(require_admin_web)
 ):
 
     identity = db.query(Identity).filter(
@@ -165,7 +164,7 @@ def edit_identity(
 def delete_identity(
     identity_id: int,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user_from_cookie)
+    current_user = Depends(require_admin_web)
 ):
 
     identity = db.query(Identity).filter(

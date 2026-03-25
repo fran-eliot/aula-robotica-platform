@@ -3,11 +3,9 @@ from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
-from app.api.deps import get_current_user_from_cookie
+from app.api.deps import require_admin_web
 from app.models.role import Role
 from app.core.templates import templates
-from app.services.user_service import get_user_roles
-from app.core.authorization import require_admin
 
 
 router = APIRouter(prefix="/roles", tags=["Roles Web"])
@@ -17,7 +15,7 @@ router = APIRouter(prefix="/roles", tags=["Roles Web"])
 def roles_list(
     request: Request,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_web)
 ):
        
     roles = db.query(Role).all()
@@ -35,7 +33,7 @@ def roles_list(
 def roles_create_form(
     request: Request,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_web)
 ):
     
     return templates.TemplateResponse(
@@ -51,7 +49,7 @@ def roles_create(
     nombre: str = Form(...),
     descripcion: str = Form(None),
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_web)
 ):
     
     role = Role(
@@ -69,7 +67,7 @@ def roles_create(
 def delete_role(
     role_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_web)
 ):
     
     role = db.query(Role).filter(

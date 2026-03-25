@@ -1,5 +1,6 @@
 # app/services/auth_service.py
 
+from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 
@@ -7,6 +8,7 @@ from app.models.identity import Identity
 from app.models.user import User
 from app.core.security import verify_password, create_access_token
 from app.services.audit_service import log_action
+from app.core.constants.audit_actions import AuditAction
 
 
 def authenticate_user(db: Session, email: str, password: str):
@@ -52,13 +54,6 @@ def authenticate_user(db: Session, email: str, password: str):
             "sub": str(user.id_usuario),
             "roles": roles
         }
-    )
-
-    log_action(
-        db,
-        action="login",
-        user_id=user.id_usuario,
-        description="Inicio de sesión"
     )
 
     return {

@@ -5,7 +5,7 @@ from typing import List
 from app.db.session import get_db
 from app.models.user import User
 from app.schemas.user import UserCreate, UserResponse
-from app.api.deps import get_current_user, require_roles
+from app.api.deps import get_current_user_api, require_roles_api, require_admin_api
 
 
 router = APIRouter()
@@ -20,7 +20,7 @@ router = APIRouter()
     })
 def get_users(
     db: Session = Depends(get_db),
-    user = Depends(require_roles("administrador"))
+    user = Depends(require_admin_api)
 ):
     return db.query(User).all()
 
@@ -36,7 +36,7 @@ def get_users(
 def get_user(
     user_id: int,
     db: Session = Depends(get_db),
-    user = Depends(require_roles("administrador"))
+    user = Depends(require_admin_api)
 ):
     usuario = db.query(User).filter(User.id_usuario == user_id).first()
 
@@ -57,7 +57,7 @@ def get_user(
         401: {"description": "Token inválido o expirado"}
     }
 )
-def get_my_profile(current_user = Depends(get_current_user)):
+def get_my_profile(current_user = Depends(get_current_user_api)):
     return current_user
 
 @router.post("/", 
@@ -71,7 +71,7 @@ def get_my_profile(current_user = Depends(get_current_user)):
 def create_user(
     data: UserCreate,
     db: Session = Depends(get_db),
-    user = Depends(require_roles("administrador"))
+    user = Depends(require_admin_api)
 ):
     nuevo = User(
         nombre=data.nombre,
@@ -95,7 +95,7 @@ def create_user(
 def delete_user(
     user_id: int,
     db: Session = Depends(get_db),
-    user = Depends(require_roles("administrador"))
+    user = Depends(require_admin_api)
 ):
     usuario = db.query(User).filter(User.id_usuario == user_id).first()
 

@@ -5,9 +5,8 @@ from datetime import datetime, UTC
 
 from app.core.constants.audit_actions import AuditAction
 from app.db.session import get_db
-from app.api.deps import get_current_user_from_cookie
+from app.api.deps import get_current_user_web, require_admin_web
 from app.models.user import User
-from app.models.identity import Identity
 from app.core.templates import templates
 from app.services.audit_service import log_action
 
@@ -17,7 +16,7 @@ router = APIRouter(prefix="/users", tags=["Users Web"])
 def users_list(
     request: Request,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user_from_cookie)
+    current_user =  Depends(require_admin_web)
 ):
 
     print("Cookie Token:", request.cookies.get("access_token"))
@@ -35,7 +34,7 @@ def users_list(
 def users_create_form(
     request: Request,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user_from_cookie)
+    current_user =  Depends(require_admin_web)
 ):
 
     return templates.TemplateResponse(
@@ -50,7 +49,7 @@ def users_create(
     request: Request,
     nombre: str = Form(...),
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user_from_cookie)
+    current_user = Depends(require_admin_web)
 ):
 
     new_user = User(
@@ -82,7 +81,7 @@ def user_detail(
     request: Request,
     user_id: int,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user_from_cookie)
+    current_user = Depends(get_current_user_web)
 ):
 
     user = db.query(User).filter(
@@ -105,7 +104,7 @@ def delete_user(
     request:Request,
     user_id: int,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user_from_cookie)
+    current_user =Depends(require_admin_web)
 ):
 
     user = db.query(User).filter(
@@ -141,7 +140,7 @@ def deactivate_user(
     request:Request,
     user_id: int,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user_from_cookie)
+    current_user = Depends(require_admin_web)
 ):
 
     user = db.query(User).filter(
@@ -173,7 +172,7 @@ def activate_user(
     request:Request,
     user_id: int,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user_from_cookie)
+    current_user = Depends(require_admin_web)
 ):
 
     user = db.query(User).filter(

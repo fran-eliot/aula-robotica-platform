@@ -3,7 +3,7 @@ from datetime import datetime
 
 from fastapi import APIRouter, Request, Depends
 
-from app.api.deps import get_current_user_from_cookie
+from app.api.deps import require_roles_web
 from app.core.utils import clean, clean_date, clean_int
 from app.models.identity import Identity
 from sqlalchemy.orm import Session, joinedload
@@ -20,13 +20,14 @@ router = APIRouter(prefix="/dashboard", tags=["Dashboard Web"])
 def dashboard(
     request: Request,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user_from_cookie),
+    current_user = Depends(require_roles_web("admin", "profesor")),
     # filtros
     user_id: Optional[str] = None,
     action: Optional[str] = None,
     date_from: Optional[str] = None,
     date_to: Optional[str] = None
 ):
+    print("👉 DASHBOARD COOKIES:", request.cookies)
     user_id = clean_int(user_id)
     action = clean(action)
     date_from = clean_date(date_from)

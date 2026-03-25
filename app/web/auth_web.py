@@ -4,9 +4,8 @@ from sqlalchemy.orm import Session
 
 from app.core.constants.audit_actions import AuditAction
 from app.db.session import get_db
-from app.api.deps import get_current_user_from_cookie
+from app.api.deps import get_current_user_web
 from app.services.auth_service import authenticate_user
-from app.core.security import create_access_token
 from app.core.templates import templates
 from app.services.audit_service import log_action
 
@@ -56,14 +55,17 @@ def login(
     db.commit()
 
     response = RedirectResponse(
-        url="/dashboard",
-        status_code=302
+        url="/dashboard/",
+        status_code=303
     )
 
     response.set_cookie(
         key="access_token",
         value=token,
-        httponly=True
+        httponly=True,
+        samesite="lax",
+        secure=False,
+        path="/"
     )
 
     return response
@@ -71,7 +73,7 @@ def login(
 @router.get("/logout")
 def logout(request: Request,
            db:Session = Depends(get_db),
-           current_user = Depends(get_current_user_from_cookie)):
+           current_user = Depends(get_current_user_web)):
 
     log_action(
         db,
