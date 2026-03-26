@@ -4,6 +4,7 @@ from app.api import auth, users
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from fastapi import Request
+from app.core.middleware.auth_middleware import AuthMiddleware
 from app.web import auth_web, users_web, dashboard_web, identities_web, roles_web
 from app.core.templates import templates
 
@@ -62,6 +63,8 @@ app.include_router(dashboard_web.router, tags=["Dashboard Web"])
 app.include_router(users_web.router, tags=["Users Web"])
 app.include_router(identities_web.router, tags=["Identities Web"])
 app.include_router(roles_web.router, tags=["Roles Web"])
+
+app.add_middleware(AuthMiddleware)
 
 app.openapi = custom_openapi
 

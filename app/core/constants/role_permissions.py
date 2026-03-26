@@ -1,12 +1,15 @@
 ROLE_PERMISSIONS = {
-    "admin": ["*"],
-
+    "admin": [
+        "create_user",
+        "delete_user",
+        "view_dashboard",
+        "manage_roles"
+    ],
     "profesor": [
         "view_dashboard",
-        "create_user"
+        "view_students"
     ],
-
     "estudiante": [
-        "view_dashboard"
+        "view_profile"
     ]
 }
