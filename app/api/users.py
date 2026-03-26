@@ -5,7 +5,7 @@ from typing import List
 from app.db.session import get_db
 from app.models.user import User
 from app.schemas.user import UserCreate, UserResponse
-from app.api.deps import get_current_user_api, require_roles_api, require_admin_api
+from app.core.deps.api_auth import get_current_user_api, require_admin_api
 
 
 router = APIRouter()

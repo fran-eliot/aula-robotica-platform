@@ -1,5 +1,7 @@
 # app/services/auth_service.py
 
+from datetime import datetime
+
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
@@ -53,7 +55,9 @@ def authenticate_user(db: Session, email: str, password: str):
         data={
             "sub": str(user.id_usuario),
             "roles": roles,
-            "username": user.nombre
+            "username": user.nombre,
+            "iat": datetime.utcnow(),
+            "type": "access"
         }
     )
 

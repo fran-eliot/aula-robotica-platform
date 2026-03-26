@@ -3,7 +3,7 @@ from datetime import datetime
 
 from fastapi import APIRouter, Request, Depends
 
-from app.api.deps import require_roles_web
+from app.core.deps.web_auth import require_roles_web
 from app.core.utils import clean, clean_date, clean_int
 from app.models.identity import Identity
 from sqlalchemy.orm import Session, joinedload
@@ -16,6 +16,7 @@ from app.core.templates import templates
 
 router = APIRouter(prefix="/dashboard", tags=["Dashboard Web"])
 
+@router.get("")
 @router.get("/")
 def dashboard(
     request: Request,

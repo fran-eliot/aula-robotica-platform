@@ -5,7 +5,7 @@ from datetime import datetime, UTC
 
 from app.core.constants.audit_actions import AuditAction
 from app.db.session import get_db
-from app.api.deps import get_current_user_web, require_admin_web
+from app.core.deps.web_auth import get_current_user_web, require_admin_web
 from app.models.user import User
 from app.core.templates import templates
 from app.services.audit_service import log_action

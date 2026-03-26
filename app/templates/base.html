@@ -17,13 +17,13 @@
 
 <body class="hold-transition sidebar-mini">
 
-{% set ctx = get_template_context(request) or {} %}
+{% set ctx = get_template_context(request) %}
 
-{% set current_user_id = ctx.current_user_id if ctx else None %}
-{% set current_username = ctx.current_username if ctx else None %}
-{% set current_user_roles = ctx.current_user_roles if ctx else [] %}
-{% set has_role = ctx.has_role if ctx and ctx.has_role else (lambda *args: False) %}
-{% set has_perm = ctx.has_perm if ctx and ctx.has_perm else (lambda *args: False) %}
+{% set current_user_id = ctx.current_user_id %}
+{% set current_username = ctx.current_username  %}
+{% set current_user_roles = ctx.current_user_roles %}
+{% set has_role = ctx.has_role %}
+{% set has_perm = ctx.has_perm %}
 
 <div class="wrapper">
 

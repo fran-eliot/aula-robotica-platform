@@ -13,6 +13,9 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 ALGORITHM = "HS256"
 
+# =========================
+# PASSWORDS
+# =========================
 
 def hash_password(password: str) -> str:
     return pwd_context.hash(password)
@@ -21,6 +24,9 @@ def hash_password(password: str) -> str:
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
+# =========================
+# TOKEN CREATION
+# =========================
 
 def create_access_token(data: dict) -> str:
     to_encode = data.copy()
@@ -29,7 +35,10 @@ def create_access_token(data: dict) -> str:
         minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
     )
 
-    to_encode.update({"exp": expire})
+    to_encode.update({
+        "exp": expire,
+        "type": "access"
+    })
 
     encoded_jwt = jwt.encode(
         to_encode,
@@ -39,7 +48,26 @@ def create_access_token(data: dict) -> str:
 
     return encoded_jwt
 
-def decode_access_token(token: str):
+def create_refresh_token(data: dict) -> str:
+    to_encode = data.copy()
+
+    expire = datetime.utcnow() + timedelta(days=7)
+
+    to_encode.update({
+        "exp": expire, 
+        "type": "refresh"})
+
+    return jwt.encode(
+        to_encode,
+        settings.SECRET_KEY,
+        algorithm=ALGORITHM
+    )
+
+# =========================
+# TOKEN DECODE
+# =========================
+
+def decode_token(token: str):
     try:
         payload = jwt.decode(
             token,
@@ -53,15 +81,29 @@ def decode_access_token(token: str):
             detail="Token inválido o expirado"
         )
     
-def create_refresh_token(data: dict) -> str:
-    to_encode = data.copy()
+# =========================
+# TOKEN VALIDATION
+# =========================
 
-    expire = datetime.utcnow() + timedelta(days=7)
+def validate_access_token(token: str):
+    payload = decode_token(token)
 
-    to_encode.update({"exp": expire, "type": "refresh"})
+    if payload.get("type") != "access":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token de acceso inválido"
+        )
 
-    return jwt.encode(
-        to_encode,
-        settings.SECRET_KEY,
-        algorithm=ALGORITHM
-    )
+    return payload
+
+
+def validate_refresh_token(token: str):
+    payload = decode_token(token)
+
+    if payload.get("type") != "refresh":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Refresh token inválido"
+        )
+
+    return payload

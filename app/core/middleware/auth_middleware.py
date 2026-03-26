@@ -3,13 +3,14 @@
 from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi.responses import RedirectResponse
 
-from app.core.security import decode_access_token, create_access_token
+from app.core.security import create_access_token, validate_access_token, validate_refresh_token
 
 
 PUBLIC_PATHS = [
     "/login",
     "/logout",
     "/refresh",
+    "/dashboard",
     "/static",
     "/favicon.ico"
 ]
@@ -33,11 +34,14 @@ class AuthMiddleware(BaseHTTPMiddleware):
 
         # 🟡 2. No token → login
         if not access_token:
-            return RedirectResponse("/login")
+            return RedirectResponse("/login",status_code=302)
 
         # 🔵 3. Validar access token
         try:
-            decode_access_token(access_token)
+            payload = validate_access_token(access_token)
+
+            request.state.user = payload
+
             return await call_next(request)
 
         except:
@@ -45,19 +49,22 @@ class AuthMiddleware(BaseHTTPMiddleware):
             refresh_token = request.cookies.get("refresh_token")
 
             if not refresh_token:
-                return RedirectResponse("/login")
+                return RedirectResponse("/login",status_code=302)
 
             try:
-                payload = decode_access_token(refresh_token)
+                payload = validate_refresh_token(refresh_token)
 
                 if payload.get("type") != "refresh":
-                    return RedirectResponse("/login")
+                    return RedirectResponse("/login",status_code=302)
 
                 # 🔥 generar nuevo access token
                 new_access_token = create_access_token({
                     "sub": payload.get("sub"),
                     "roles": payload.get("roles", [])
                 })
+
+                # 👉 IMPORTANTE: inyectar token nuevo en request
+                request.cookies._dict["access_token"] = new_access_token  # hack controlado
 
                 response = await call_next(request)
 
@@ -72,4 +79,4 @@ class AuthMiddleware(BaseHTTPMiddleware):
                 return response
 
             except:
-                return RedirectResponse("/login")
+                return RedirectResponse("/login",status_code=302)

@@ -1,3 +1,11 @@
+# Jerarquía de roles para validación
+
+ROLE_HIERARCHY = {
+    "admin": 3,
+    "profesor": 2,
+    "estudiante": 1
+}
+
 def has_required_role(
     user_roles: list[str],
     allowed_roles: list[str]

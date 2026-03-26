@@ -3,9 +3,9 @@ from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
 from app.core.constants.audit_actions import AuditAction
-from app.core.security import create_access_token, create_refresh_token, decode_access_token
+from app.core.security import create_access_token, create_refresh_token, decode_token, validate_refresh_token
 from app.db.session import get_db
-from app.api.deps import get_current_user_web
+from app.core.deps.web_auth import get_current_user_web
 from app.services.auth_service import authenticate_user
 from app.core.templates import templates
 from app.services.audit_service import log_action
@@ -56,7 +56,7 @@ def login(
     db.commit()
 
     response = RedirectResponse(
-        url="/dashboard/",
+        url="/dashboard",
         status_code=303
     )
 
@@ -72,7 +72,8 @@ def login(
     # 🔥 crear refresh token
     refresh_token = create_refresh_token({
         "sub": str(user.id_usuario),
-        "roles": result.get("roles", [])
+        "roles": result.get("roles", []),
+        "username": user.nombre
     })
 
     response.set_cookie(
@@ -94,7 +95,7 @@ def refresh_token(request: Request):
     if not refresh_token:
         raise HTTPException(status_code=401, detail="No refresh token")
 
-    payload = decode_access_token(refresh_token)
+    payload = validate_refresh_token(refresh_token)
 
     if payload.get("type") != "refresh":
         raise HTTPException(status_code=401, detail="Token inválido")

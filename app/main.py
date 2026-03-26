@@ -66,6 +66,8 @@ app.include_router(roles_web.router, tags=["Roles Web"])
 
 app.add_middleware(AuthMiddleware)
 
+app.router.redirect_slashes = False
+
 app.openapi = custom_openapi
 
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
