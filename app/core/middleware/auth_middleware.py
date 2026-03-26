@@ -6,23 +6,38 @@ from fastapi.responses import RedirectResponse
 from app.core.security import decode_access_token, create_access_token
 
 
+PUBLIC_PATHS = [
+    "/login",
+    "/logout",
+    "/refresh",
+    "/static",
+    "/favicon.ico"
+]
+
+
 class AuthMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request, call_next):
 
-        access_token = request.cookies.get("access_token")
+        path = request.url.path
 
-        # 1️⃣ si no hay token → seguir (login etc)
-        if not access_token:
+        # 🟢 1. Rutas públicas → no tocar
+        if any(path.startswith(p) for p in PUBLIC_PATHS):
             return await call_next(request)
 
-        # 2️⃣ intentar validar access token
+        access_token = request.cookies.get("access_token")
+
+        # 🟡 2. No token → login
+        if not access_token:
+            return RedirectResponse("/login")
+
+        # 🔵 3. Validar access token
         try:
             decode_access_token(access_token)
             return await call_next(request)
 
         except:
-            # 3️⃣ intentar refresh
+            # 🔴 4. Intentar refresh automático
             refresh_token = request.cookies.get("refresh_token")
 
             if not refresh_token:
@@ -34,7 +49,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
                 if payload.get("type") != "refresh":
                     return RedirectResponse("/login")
 
-                # 🔥 generar nuevo access
+                # 🔥 generar nuevo access token
                 new_access_token = create_access_token({
                     "sub": payload.get("sub"),
                     "roles": payload.get("roles", [])
