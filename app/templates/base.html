@@ -17,12 +17,13 @@
 
 <body class="hold-transition sidebar-mini">
 
-{% set ctx = get_template_context(request) %}
+{% set ctx = get_template_context(request) or {} %}
 
-{% set current_user = ctx.current_user if ctx else None %}
+{% set current_user_id = ctx.current_user_id if ctx else None %}
+{% set current_username = ctx.current_username if ctx else None %}
 {% set current_user_roles = ctx.current_user_roles if ctx else [] %}
-{% set has_role = ctx.has_role if ctx else None %}
-{% set has_perm = ctx.has_perm if ctx else None %}
+{% set has_role = ctx.has_role if ctx and ctx.has_role else (lambda *args: False) %}
+{% set has_perm = ctx.has_perm if ctx and ctx.has_perm else (lambda *args: False) %}
 
 <div class="wrapper">
 
@@ -41,11 +42,11 @@
         <!-- usuario -->
         <ul class="navbar-nav ml-auto">
 
-            {% if current_user %}
+            {% if current_username %}
             <li class="nav-item">
                 <span class="nav-link">
                     <i class="fas fa-user"></i>
-                    {{ current_user.nombre }}
+                    {{ current_username }}
                 </span>
             </li>
             {% endif %}
@@ -73,11 +74,11 @@
         <div class="sidebar">
 
             <!-- usuario -->
-            {% if current_user %}
+            {% if current_username %}
             <div class="user-panel mt-3 pb-3 mb-3 d-flex">
                 <div class="info">
                     <a href="#" class="d-block">
-                        {{ current_user.nombre }}
+                        {{ current_username }}
                         
                         {% if current_user_roles %}
                         ({{ current_user_roles[0]|capitalize }})

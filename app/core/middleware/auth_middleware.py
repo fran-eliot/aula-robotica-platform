@@ -21,6 +21,10 @@ class AuthMiddleware(BaseHTTPMiddleware):
 
         path = request.url.path
 
+        # 0. Evitar 
+        if path.startswith("/api"):
+            return await call_next(request)
+
         # 🟢 1. Rutas públicas → no tocar
         if any(path.startswith(p) for p in PUBLIC_PATHS):
             return await call_next(request)

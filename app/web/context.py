@@ -14,7 +14,7 @@ def get_template_context(request: Request):
     Añade automáticamente:
     - Usuario autenticado
     - Roles
-    - Helper has_role()
+    - Helpers has_role(), has_perm()
     """
 
     token = request.cookies.get("access_token")
@@ -24,14 +24,10 @@ def get_template_context(request: Request):
 
     try:
         payload = decode_access_token(token)
+
+        roles = [r.lower() for r in payload.get("roles", [])]
         user_id = int(payload.get("sub"))
-
-        with SessionLocal() as db:
-            user = db.query(User).filter(
-                User.id_usuario == user_id
-            ).first()
-
-            roles = get_user_roles(db, user_id)
+        username = payload.get("username")
 
         # 🔥 Helper reutilizando lógica central
         def has_role(*allowed_roles: str):
@@ -41,7 +37,8 @@ def get_template_context(request: Request):
             return has_permission_from_roles(roles, list(required_permissions))
 
         return {
-            "current_user": user,
+            "current_user_id": user_id,
+            "current_username": username,
             "current_user_roles": roles,  # opcional (se puede eliminar)
             "has_role": has_role,
             "has_perm": has_perm
