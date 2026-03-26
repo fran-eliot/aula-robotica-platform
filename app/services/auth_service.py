@@ -59,5 +59,6 @@ def authenticate_user(db: Session, email: str, password: str):
     return {
         "access_token": access_token,
         "token_type": "bearer",
-        "user":user
+        "user":user,
+        "roles":roles
     }

@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Request, Form, Depends
+from fastapi import APIRouter, HTTPException, Request, Form, Depends
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
 from app.core.constants.audit_actions import AuditAction
+from app.core.security import create_access_token, create_refresh_token, decode_access_token
 from app.db.session import get_db
 from app.api.deps import get_current_user_web
 from app.services.auth_service import authenticate_user
@@ -68,6 +69,53 @@ def login(
         path="/"
     )
 
+    # 🔥 crear refresh token
+    refresh_token = create_refresh_token({
+        "sub": str(user.id_usuario),
+        "roles": result.get("roles", [])
+    })
+
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        httponly=True,
+        samesite="lax",
+        secure=False,
+        path="/"
+    )
+
+    return response
+
+@router.get("/refresh")
+def refresh_token(request: Request):
+
+    refresh_token = request.cookies.get("refresh_token")
+
+    if not refresh_token:
+        raise HTTPException(status_code=401, detail="No refresh token")
+
+    payload = decode_access_token(refresh_token)
+
+    if payload.get("type") != "refresh":
+        raise HTTPException(status_code=401, detail="Token inválido")
+
+    user_id = payload.get("sub")
+    roles = payload.get("roles", [])
+
+    new_access_token = create_access_token({
+        "sub": user_id,
+        "roles": roles
+    })
+
+    response = RedirectResponse("/dashboard")
+
+    response.set_cookie(
+        key="access_token",
+        value=new_access_token,
+        httponly=True,
+        samesite="lax"
+    )
+
     return response
 
 @router.get("/logout")
@@ -93,6 +141,7 @@ def logout(request: Request,
         status_code=302
     )
 
-    response.delete_cookie("access_token")
+    response.delete_cookie("access_token", path="/")
+    response.delete_cookie("refresh_token", path="/")
     
     return response

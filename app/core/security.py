@@ -52,3 +52,16 @@ def decode_access_token(token: str):
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token inválido o expirado"
         )
+    
+def create_refresh_token(data: dict) -> str:
+    to_encode = data.copy()
+
+    expire = datetime.utcnow() + timedelta(days=7)
+
+    to_encode.update({"exp": expire, "type": "refresh"})
+
+    return jwt.encode(
+        to_encode,
+        settings.SECRET_KEY,
+        algorithm=ALGORITHM
+    )
