@@ -1,3 +1,5 @@
+# app/web/context.py
+
 from fastapi import Request
 
 from app.core.authorization.permissions import has_permission_from_roles
@@ -26,15 +28,10 @@ def get_template_context(request: Request):
         # 🔥 1. Intentar usar payload del middleware
         payload = getattr(request.state, "user", None)
 
-        # 🔥 2. Si no existe → intentar cookie
         if not payload:
-            token = request.cookies.get("access_token")
-            if not token:
-                return fallback_context
+            return get_fallback_context()
 
-            payload = validate_access_token(token)
-
-        # 🔥 3. Extraer datos
+        # 🔥 2. Extraer datos
         roles = [r.lower() for r in payload.get("roles", [])]
         user_id = int(payload.get("sub"))
         username = payload.get("username", "Usuario")

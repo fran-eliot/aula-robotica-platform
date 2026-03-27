@@ -10,7 +10,6 @@ PUBLIC_PATHS = [
     "/login",
     "/logout",
     "/refresh",
-    "/dashboard",
     "/static",
     "/favicon.ico"
 ]
@@ -22,7 +21,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
 
         path = request.url.path
 
-        # 0. Evitar 
+        # 0. Evitar llamadas a la api
         if path.startswith("/api"):
             return await call_next(request)
 
@@ -40,7 +39,11 @@ class AuthMiddleware(BaseHTTPMiddleware):
         try:
             payload = validate_access_token(access_token)
 
-            request.state.user = payload
+            request.state.user = {
+                "sub": payload.get("sub"),
+                "roles": payload.get("roles", []),
+                "username": payload.get("username")
+            }
 
             return await call_next(request)
 
@@ -60,8 +63,15 @@ class AuthMiddleware(BaseHTTPMiddleware):
                 # 🔥 generar nuevo access token
                 new_access_token = create_access_token({
                     "sub": payload.get("sub"),
-                    "roles": payload.get("roles", [])
+                    "roles": payload.get("roles", []),
+                    "username": payload.get("username")
                 })
+
+                request.state.user = {
+                    "sub": payload.get("sub"),
+                    "roles": payload.get("roles", []),
+                    "username": payload.get("username")
+                }
 
                 # 👉 IMPORTANTE: inyectar token nuevo en request
                 request.cookies._dict["access_token"] = new_access_token  # hack controlado

@@ -1,3 +1,5 @@
+# app/core/deps/web_auth.py
+
 from fastapi import Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 
@@ -11,15 +13,10 @@ def get_current_user_web(
     request: Request,
     db: Session = Depends(get_db)
 ):
-    token = request.cookies.get("access_token")
-
-    if not token:
-        raise HTTPException(status_code=401)
-
     payload = getattr(request.state, "user", None)
 
     if not payload:
-        payload = validate_access_token(token)
+        raise HTTPException(status_code=401)
 
     user_id = payload.get("sub")
     roles = payload.get("roles", [])
