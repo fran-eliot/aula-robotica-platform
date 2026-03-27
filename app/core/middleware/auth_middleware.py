@@ -42,6 +42,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
             request.state.user = {
                 "sub": payload.get("sub"),
                 "roles": payload.get("roles", []),
+                "permissions": payload.get("permissions",[]),
                 "username": payload.get("username")
             }
 
@@ -59,17 +60,23 @@ class AuthMiddleware(BaseHTTPMiddleware):
 
                 if payload.get("type") != "refresh":
                     return RedirectResponse("/login",status_code=302)
+                
+                roles = payload.get("roles", [])
 
+                permissions = payload.get("permissions",[])
+                
                 # 🔥 generar nuevo access token
                 new_access_token = create_access_token({
                     "sub": payload.get("sub"),
-                    "roles": payload.get("roles", []),
+                    "roles": roles,
+                    "permissions": permissions,
                     "username": payload.get("username")
                 })
 
                 request.state.user = {
                     "sub": payload.get("sub"),
-                    "roles": payload.get("roles", []),
+                    "roles": roles,
+                    "permissions":permissions,
                     "username": payload.get("username")
                 }
 

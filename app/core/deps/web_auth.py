@@ -5,7 +5,6 @@ from sqlalchemy.orm import Session
 
 from app.db.session import get_db
 from app.models.user import User
-from app.core.security import validate_access_token
 from app.core.authorization.roles import has_required_role
 
 

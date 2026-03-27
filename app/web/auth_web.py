@@ -2,8 +2,10 @@ from fastapi import APIRouter, HTTPException, Request, Form, Depends
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
+from app.core.authorization.role_permissions import ROLE_PERMISSIONS
+from app.core.config import settings
 from app.core.constants.audit_actions import AuditAction
-from app.core.security import create_access_token, create_refresh_token, decode_token, validate_refresh_token
+from app.core.security import create_access_token, create_refresh_token, validate_refresh_token
 from app.db.session import get_db
 from app.core.deps.web_auth import get_current_user_web
 from app.services.auth_service import authenticate_user
@@ -38,8 +40,6 @@ def login(
             }
         )
     
-    token = result["access_token"]
-
     user = result["user"]
 
     log_action(
@@ -60,19 +60,34 @@ def login(
         status_code=303
     )
 
+    roles = result.get("roles", [])
+
+    permissions = []
+
+    for role in roles:
+        permissions.extend(ROLE_PERMISSIONS.get(role, []))
+
+    access_token = create_access_token({
+        "sub": str(user.id_usuario),
+        "roles": roles,
+        "permissions": permissions,
+        "username": user.nombre
+    })
+
     response.set_cookie(
         key="access_token",
-        value=token,
+        value=access_token,
         httponly=True,
-        samesite="lax",
-        secure=False,
+        samesite="lax" if settings.DEBUG else "strict",
+        secure = settings.ENV == "prod",
         path="/"
     )
 
     # 🔥 crear refresh token
     refresh_token = create_refresh_token({
         "sub": str(user.id_usuario),
-        "roles": result.get("roles", []),
+        "roles": roles,
+        "permissions": permissions,
         "username": user.nombre
     })
 
@@ -80,8 +95,8 @@ def login(
         key="refresh_token",
         value=refresh_token,
         httponly=True,
-        samesite="lax",
-        secure=False,
+        samesite="lax" if settings.DEBUG else "strict",
+        secure = settings.ENV == "prod",
         path="/"
     )
 
@@ -102,10 +117,14 @@ def refresh_token(request: Request):
 
     user_id = payload.get("sub")
     roles = payload.get("roles", [])
+    username = payload.get("username")
+    permissions = payload.get("permissions",[])
 
     new_access_token = create_access_token({
         "sub": user_id,
-        "roles": roles
+        "roles": roles,
+        "username":username,
+        "permissions":permissions
     })
 
     response = RedirectResponse("/dashboard")
@@ -114,7 +133,9 @@ def refresh_token(request: Request):
         key="access_token",
         value=new_access_token,
         httponly=True,
-        samesite="lax"
+        samesite="lax" if settings.DEBUG else "strict",
+        secure = settings.ENV == "prod",
+        path="/"
     )
 
     return response

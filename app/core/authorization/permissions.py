@@ -1,4 +1,6 @@
-from app.core.constants.role_permissions import ROLE_PERMISSIONS
+# app/core/authorization/permissions.py
+
+from app.core.authorization.role_permissions import ROLE_PERMISSIONS
 
 
 def has_permission(
@@ -24,16 +26,12 @@ def has_permission_from_roles(
     user_roles: list[str],
     required_permissions: list[str]
 ) -> bool:
-    """
-    Comprueba si el usuario tiene al menos uno de los permisos requeridos
-    a partir de sus roles.
-    """
 
     if not user_roles:
         return False
 
     user_roles = [r.lower() for r in user_roles]
-    required_permissions = [p.lower() for p in required_permissions]
+    required_permissions = set(p.lower() for p in required_permissions)
 
     for role in user_roles:
         permissions = ROLE_PERMISSIONS.get(role, [])
@@ -42,8 +40,7 @@ def has_permission_from_roles(
         if "*" in permissions:
             return True
 
-        for perm in required_permissions:
-            if perm in permissions:
-                return True
+        if required_permissions.intersection(permissions):
+            return True
 
     return False

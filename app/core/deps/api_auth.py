@@ -1,3 +1,5 @@
+# app/core/deps/api_auth.py
+
 from fastapi import Depends, HTTPException
 from sqlalchemy.orm import Session
 
