@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 
-from app.models.identity import Identity
+from app.modules.users.identity_model import Identity
 
 
 def get_user_roles(db: Session, user_id: int) -> list[str]:

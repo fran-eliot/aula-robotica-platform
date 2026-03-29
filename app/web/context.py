@@ -5,7 +5,7 @@ from fastapi import Request
 from app.core.authorization.permissions import has_permission_from_roles
 from app.core.security import decode_token, validate_access_token
 from app.core.authorization.roles import has_required_role
-from app.services.user_service import get_user_roles
+from app.modules.users.user_service import get_user_roles
 
 # 🔥 contexto seguro siempre disponible
 def get_fallback_context():

@@ -3,9 +3,9 @@ from sqlalchemy.orm import Session
 from typing import List
 
 from app.db.session import get_db
-from app.models.user import User
-from app.schemas.user import UserCreate, UserResponse
-from app.core.deps.api_auth import get_current_user_api, require_admin_api
+from app.modules.users.user_model import User
+from app.modules.users.user_schemas import UserCreate, UserResponse
+from app.modules.auth.auth_dependencies_api import get_current_user_api, require_admin_api
 
 
 router = APIRouter()

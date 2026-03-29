@@ -1,14 +1,14 @@
-from fastapi import APIRouter, Request, Depends, Form, HTTPException, status
+from fastapi import APIRouter, Request, Depends, Form, HTTPException
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 from datetime import datetime, UTC
 
 from app.core.constants.audit_actions import AuditAction
 from app.db.session import get_db
-from app.core.deps.web_auth import get_current_user_web, require_admin_web
-from app.models.user import User
+from app.modules.auth.auth_dependencies_web import get_current_user_web, require_admin_web
+from app.modules.users.user_model import User
 from app.core.templates import templates
-from app.services.audit_service import log_action
+from app.modules.audit.audit_service import log_action
 
 router = APIRouter(prefix="/users", tags=["Users Web"])
 
@@ -68,8 +68,7 @@ def users_create(
         resource_type="user",
         resource_id=new_user.id_usuario,
         description=f"Creó usuario {new_user.nombre}",
-        ip_address=request.client.host,
-        user_agent=request.headers.get("user-agent")
+        request=request
     )
 
     db.commit()
@@ -127,8 +126,7 @@ def delete_user(
         resource_type="user",
         resource_id=user_id,
         description=f"Eliminó usuario {user_name}",
-        ip_address=request.client.host,
-        user_agent=request.headers.get("user-agent")
+        request=request
     )
 
     db.commit()
@@ -159,8 +157,7 @@ def deactivate_user(
         resource_type="user",
         resource_id=user.id_usuario,
         description=f"Desactivó usuario {user.nombre}",
-        ip_address=request.client.host,
-        user_agent=request.headers.get("user-agent")
+        request=request
     )
 
     db.commit()
@@ -191,8 +188,7 @@ def activate_user(
         resource_type="user",
         resource_id=user.id_usuario,
         description=f"Activó usuario {user.nombre}",
-        ip_address=request.client.host,
-        user_agent=request.headers.get("user-agent")
+        request=request
     )
 
     db.commit()

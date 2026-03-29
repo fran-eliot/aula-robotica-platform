@@ -7,10 +7,10 @@ from app.core.config import settings
 from app.core.constants.audit_actions import AuditAction
 from app.core.security import create_access_token, create_refresh_token, validate_refresh_token
 from app.db.session import get_db
-from app.core.deps.web_auth import get_current_user_web
-from app.services.auth_service import authenticate_user
+from app.modules.auth.auth_dependencies_web import get_current_user_web
+from app.modules.auth.auth_service import authenticate_user
 from app.core.templates import templates
-from app.services.audit_service import log_action
+from app.modules.audit.audit_service import log_action
 
 router = APIRouter()
 
@@ -49,8 +49,7 @@ def login(
         resource_type="user",
         resource_id=user.id_usuario,
         description="Inicio de sesión",
-        ip_address=request.client.host,
-        user_agent=request.headers.get("user-agent")
+        request=request
     )
 
     db.commit()
@@ -152,8 +151,7 @@ def logout(request: Request,
         resource_type="user",
         resource_id=current_user.id_usuario,
         description="Cierre de sesión",
-        ip_address=request.client.host,
-        user_agent=request.headers.get("user-agent")
+        request=request
     )
 
     db.commit()

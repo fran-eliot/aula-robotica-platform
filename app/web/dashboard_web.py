@@ -3,15 +3,15 @@ from datetime import datetime
 
 from fastapi import APIRouter, Request, Depends
 
-from app.core.deps.web_auth import require_roles_web
+from app.modules.auth.auth_dependencies_web import require_roles_web
 from app.core.utils import clean, clean_date, clean_int
-from app.models.identity import Identity
+from app.modules.users.identity_model import Identity
 from sqlalchemy.orm import Session, joinedload
 from app.db.session import get_db
-from app.models.role import Role
-from app.models.user import User
-from app.models.audit_log import AuditLog
-from app.services.user_service import get_user_roles
+from app.modules.users.role_model import Role
+from app.modules.users.user_model import User
+from app.modules.audit.audit_model import AuditLog
+from app.modules.users.user_service import get_user_roles
 from app.core.templates import templates
 
 router = APIRouter(prefix="/dashboard", tags=["Dashboard Web"])

@@ -6,11 +6,25 @@ from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 
-from app.models.identity import Identity
-from app.models.user import User
-from app.core.security import verify_password, create_access_token
-from app.services.audit_service import log_action
+from app.modules.users.identity_model import Identity
+from app.modules.users.user_model import User
+from app.core.security import validate_refresh_token, verify_password, create_access_token
 from app.core.constants.audit_actions import AuditAction
+
+def refresh_access_token(refresh_token: str) -> dict:
+    payload = validate_refresh_token(refresh_token)
+
+    if payload.get("type") != "refresh":
+        raise Exception("Refresh token inválido")
+
+    return {
+        "access_token": create_access_token({
+            "sub": payload.get("sub"),
+            "roles": payload.get("roles", []),
+            "permissions": payload.get("permissions", []),
+            "username": payload.get("username")
+        })
+    }
 
 
 def authenticate_user(db: Session, email: str, password: str):

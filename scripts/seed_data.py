@@ -1,8 +1,8 @@
 from app.db.session import SessionLocal
-from app.models.user import User
-from app.models.role import Role
-from app.models.identity import Identity
-from app.models.audit_log import AuditLog
+from app.modules.users.user_model import User
+from app.modules.users.role_model import Role
+from app.modules.users.identity_model import Identity
+from app.modules.audit.audit_model import AuditLog
 
 from datetime import datetime, UTC
 import random

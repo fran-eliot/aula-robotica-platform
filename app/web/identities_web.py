@@ -3,10 +3,10 @@ from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
-from app.core.deps.web_auth import require_admin_web
-from app.models.identity import Identity
-from app.models.user import User
-from app.models.role import Role
+from app.modules.auth.auth_dependencies_web import require_admin_web
+from app.modules.users.identity_model import Identity
+from app.modules.users.user_model import User
+from app.modules.users.role_model import Role
 from app.core.security import hash_password
 from app.core.templates import templates
 

@@ -3,7 +3,8 @@
 from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi.responses import RedirectResponse
 
-from app.core.security import create_access_token, validate_access_token, validate_refresh_token
+from app.core.security import validate_access_token
+from app.modules.auth.auth_service import refresh_access_token
 
 
 PUBLIC_PATHS = [
@@ -56,28 +57,14 @@ class AuthMiddleware(BaseHTTPMiddleware):
                 return RedirectResponse("/login",status_code=302)
 
             try:
-                payload = validate_refresh_token(refresh_token)
-
-                if payload.get("type") != "refresh":
-                    return RedirectResponse("/login",status_code=302)
+                result = refresh_access_token(refresh_token)
+                new_access_token = result["access_token"]
                 
-                roles = payload.get("roles", [])
-
-                permissions = payload.get("permissions",[])
-                
-                # 🔥 generar nuevo access token
-                new_access_token = create_access_token({
-                    "sub": payload.get("sub"),
-                    "roles": roles,
-                    "permissions": permissions,
-                    "username": payload.get("username")
-                })
-
                 request.state.user = {
                     "sub": payload.get("sub"),
-                    "roles": roles,
-                    "permissions":permissions,
-                    "username": payload.get("username")
+                    "roles": result.get("roles", []),
+                    "permissions": result.get("permissions", []),
+                    "username": result.get("username","Usuario")
                 }
 
                 # 👉 IMPORTANTE: inyectar token nuevo en request

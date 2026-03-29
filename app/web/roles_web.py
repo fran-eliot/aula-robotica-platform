@@ -3,8 +3,8 @@ from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
-from app.core.deps.web_auth import require_admin_web
-from app.models.role import Role
+from app.modules.auth.auth_dependencies_web import require_admin_web
+from app.modules.users.role_model import Role
 from app.core.templates import templates
 
 

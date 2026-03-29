@@ -1,6 +1,9 @@
+# app/modules/audit/audit_service.py
+
+from fastapi import Request
 from sqlalchemy.orm import Session
 from datetime import datetime, UTC
-from app.models.audit_log import AuditLog
+from app.modules.audit.audit_model import AuditLog
 
 
 def log_action(
@@ -10,8 +13,7 @@ def log_action(
     resource_type: str | None = None,
     resource_id: int | None = None,
     description: str | None = None,
-    ip_address: str | None = None,
-    user_agent: str | None = None
+    request: Request | None = None
 ):
 
     log = AuditLog(
@@ -20,10 +22,11 @@ def log_action(
         resource_type=resource_type,
         resource_id=resource_id,
         description=description,
-        ip_address=ip_address,
-        user_agent=user_agent,
+        ip_address=request.client.host if request else None,
+        user_agent=request.headers.get("user-agent") if request else None,
         created_at=datetime.now(UTC)
     )
 
     db.add(log)
+    db.flush()
   

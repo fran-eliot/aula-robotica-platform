@@ -1,13 +1,16 @@
+# app/modules/auth/auth_router.py
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
-from app.services.auth_service import authenticate_user
-from app.schemas.auth import LoginRequest
+from app.modules.auth.auth_service import authenticate_user
+from app.modules.auth.auth_schemas import LoginRequest
 
 router = APIRouter()
 
 @router.post("/login",
+             openapi_extra={"security": []},
              summary="Iniciar sesión, autenticación de usuario",
              description="Autentica una identidad y devuelve un token JWT válido para acceder a los endpoints protegidos.",
              responses={

@@ -2,12 +2,17 @@
 
 from fastapi import FastAPI
 from fastapi.openapi.utils import get_openapi
-from app.api import auth, users
-from fastapi.templating import Jinja2Templates
+from app.modules.users.user_router import router as users_router
 from fastapi.staticfiles import StaticFiles
-from fastapi import Request
 from app.core.middleware.auth_middleware import AuthMiddleware
-from app.web import auth_web, users_web, dashboard_web, identities_web, roles_web
+from app.modules.auth.auth_router import router as auth_router
+from app.web import (
+    auth_web, 
+    users_web, 
+    dashboard_web, 
+    identities_web, 
+    roles_web
+)
 from app.core.templates import templates
 
 
@@ -58,19 +63,28 @@ Todos los endpoints (excepto login) requieren autenticación mediante Bearer Tok
     }
 )
 
-app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
-app.include_router(users.router, prefix="/api/users", tags=["Users"])
+# Agregar middleware de autenticación
+app.add_middleware(AuthMiddleware)
+
+# 🔐 API
+app.include_router(auth_router, prefix="/api/auth", tags=["Authentication"])
+app.include_router(users_router, prefix="/api/users", tags=["Users"])
+
+# 🌐 WEB
 app.include_router(auth_web.router, tags=["Authentication Web"])
 app.include_router(dashboard_web.router, tags=["Dashboard Web"])
 app.include_router(users_web.router, tags=["Users Web"])
 app.include_router(identities_web.router, tags=["Identities Web"])
 app.include_router(roles_web.router, tags=["Roles Web"])
 
-app.add_middleware(AuthMiddleware)
+# Montar directorio de archivos estáticos
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
+# Configurar redirección de rutas sin barra al final
 app.router.redirect_slashes = False
 
+# Personalizar esquema OpenAPI para incluir seguridad JWT
 app.openapi = custom_openapi
 
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
+
 
