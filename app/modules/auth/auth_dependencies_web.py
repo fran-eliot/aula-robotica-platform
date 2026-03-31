@@ -3,6 +3,7 @@
 from fastapi import Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 
+from app.core.authorization.permissions import has_permission
 from app.db.session import get_db
 from app.modules.users.user_model import User
 from app.core.authorization.roles import has_required_role
@@ -42,6 +43,22 @@ def require_roles_web(*allowed_roles: str):
         return current_user
     
     return role_checker
+
+def require_permission_web(*required_permissions: str):
+
+    def permission_checker(current_user = Depends(get_current_user_web)):
+
+        user_permissions = getattr(current_user, "permissions", [])
+
+        print("PERMISOS USER:", user_permissions)
+        print("PERMISOS REQUERIDOS:", required_permissions)
+
+        if not has_permission(user_permissions, list(required_permissions)):
+            raise HTTPException(status_code=403)
+
+        return current_user
+
+    return permission_checker
 
 
 # shortcuts

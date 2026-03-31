@@ -44,3 +44,26 @@ def has_permission_from_roles(
             return True
 
     return False
+
+def get_permissions_from_roles(user_roles: list[str]) -> list[str]:
+    """
+    Devuelve todos los permisos agregados a partir de los roles del usuario.
+    """
+
+    if not user_roles:
+        return []
+
+    user_roles = [r.lower() for r in user_roles]
+
+    permissions = []
+
+    for role in user_roles:
+        role_permissions = ROLE_PERMISSIONS.get(role, [])
+
+        # Admin total
+        if "*" in role_permissions:
+            return ["*"]
+
+        permissions.extend(role_permissions)
+
+    return list(set(permissions))

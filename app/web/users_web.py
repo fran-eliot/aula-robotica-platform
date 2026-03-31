@@ -1,3 +1,5 @@
+# app/web/users_web.py
+
 from fastapi import APIRouter, Request, Depends, Form, HTTPException
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
@@ -5,7 +7,7 @@ from datetime import datetime, UTC
 
 from app.core.constants.audit_actions import AuditAction
 from app.db.session import get_db
-from app.modules.auth.auth_dependencies_web import get_current_user_web, require_admin_web
+from app.modules.auth.auth_dependencies_web import get_current_user_web, require_permission_web
 from app.modules.users.user_model import User
 from app.core.templates import templates
 from app.modules.audit.audit_service import log_action
@@ -16,7 +18,7 @@ router = APIRouter(prefix="/users", tags=["Users Web"])
 def users_list(
     request: Request,
     db: Session = Depends(get_db),
-    current_user =  Depends(require_admin_web)
+    current_user =  Depends(require_permission_web("users:read"))
 ):
 
     print("Cookie Token:", request.cookies.get("access_token"))
@@ -34,7 +36,7 @@ def users_list(
 def users_create_form(
     request: Request,
     db: Session = Depends(get_db),
-    current_user =  Depends(require_admin_web)
+    current_user =  Depends(require_permission_web("users:create"))
 ):
 
     return templates.TemplateResponse(
@@ -49,7 +51,7 @@ def users_create(
     request: Request,
     nombre: str = Form(...),
     db: Session = Depends(get_db),
-    current_user = Depends(require_admin_web)
+    current_user = Depends(require_permission_web("users:create"))
 ):
 
     new_user = User(
@@ -80,7 +82,7 @@ def user_detail(
     request: Request,
     user_id: int,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user_web)
+    current_user = Depends(require_permission_web("users:read"))
 ):
 
     user = db.query(User).filter(
@@ -98,12 +100,25 @@ def user_detail(
         }
     )
 
-@router.get("/delete/{user_id}")
+@router.get("/me")
+def my_profile(
+    request: Request,
+    current_user = Depends(get_current_user_web)
+):
+    return templates.TemplateResponse(
+        "users/user_detail.html",
+        {
+            "request": request,
+            "user": current_user
+        }
+    )
+
+@router.post("/delete/{user_id}")
 def delete_user(
     request:Request,
     user_id: int,
     db: Session = Depends(get_db),
-    current_user =Depends(require_admin_web)
+    current_user = Depends(require_permission_web("users:delete"))
 ):
 
     user = db.query(User).filter(
@@ -122,7 +137,7 @@ def delete_user(
     log_action(
         db,
         action=AuditAction.DELETE_USER,
-        user_id=user_id,
+        user_id=current_user.id_usuario,
         resource_type="user",
         resource_id=user_id,
         description=f"Eliminó usuario {user_name}",
@@ -138,7 +153,7 @@ def deactivate_user(
     request:Request,
     user_id: int,
     db: Session = Depends(get_db),
-    current_user = Depends(require_admin_web)
+    current_user = Depends(require_permission_web("users:update"))
 ):
 
     user = db.query(User).filter(
@@ -169,7 +184,7 @@ def activate_user(
     request:Request,
     user_id: int,
     db: Session = Depends(get_db),
-    current_user = Depends(require_admin_web)
+    current_user = Depends(require_permission_web("users:update"))
 ):
 
     user = db.query(User).filter(

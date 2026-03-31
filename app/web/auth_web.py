@@ -8,7 +8,7 @@ from app.core.constants.audit_actions import AuditAction
 from app.core.security import create_access_token, create_refresh_token, validate_refresh_token
 from app.db.session import get_db
 from app.modules.auth.auth_dependencies_web import get_current_user_web
-from app.modules.auth.auth_service import authenticate_user
+from app.modules.auth.auth_service import authenticate_user, refresh_access_token
 from app.core.templates import templates
 from app.modules.audit.audit_service import log_action
 
@@ -39,9 +39,10 @@ def login(
                 "error": "Credenciales incorrectas"
             }
         )
-    
+
     user = result["user"]
 
+    # 🔥 auditoría
     log_action(
         db,
         action=AuditAction.LOGIN,
@@ -54,48 +55,28 @@ def login(
 
     db.commit()
 
+    # 🔥 respuesta
     response = RedirectResponse(
         url="/dashboard",
         status_code=303
     )
 
-    roles = result.get("roles", [])
-
-    permissions = []
-
-    for role in roles:
-        permissions.extend(ROLE_PERMISSIONS.get(role, []))
-
-    access_token = create_access_token({
-        "sub": str(user.id_usuario),
-        "roles": roles,
-        "permissions": permissions,
-        "username": user.nombre
-    })
-
+    # 🔥 usar tokens ya generados
     response.set_cookie(
         key="access_token",
-        value=access_token,
+        value=result["access_token"],
         httponly=True,
         samesite="lax" if settings.DEBUG else "strict",
-        secure = settings.ENV == "prod",
+        secure=not settings.DEBUG,
         path="/"
     )
 
-    # 🔥 crear refresh token
-    refresh_token = create_refresh_token({
-        "sub": str(user.id_usuario),
-        "roles": roles,
-        "permissions": permissions,
-        "username": user.nombre
-    })
-
     response.set_cookie(
         key="refresh_token",
-        value=refresh_token,
+        value=result["refresh_token"],
         httponly=True,
         samesite="lax" if settings.DEBUG else "strict",
-        secure = settings.ENV == "prod",
+        secure=not settings.DEBUG,
         path="/"
     )
 
@@ -108,36 +89,30 @@ def refresh_token(request: Request):
 
     if not refresh_token:
         raise HTTPException(status_code=401, detail="No refresh token")
+    
+    try:
+        # 🔥 1. Validar refresh token
+        payload = validate_refresh_token(refresh_token)
 
-    payload = validate_refresh_token(refresh_token)
+        # 🔥 2. Generar nuevo access token
+        new_access_token = refresh_access_token(payload)
 
-    if payload.get("type") != "refresh":
-        raise HTTPException(status_code=401, detail="Token inválido")
+        # 🔥 3. Respuesta
+        response = RedirectResponse("/dashboard")
 
-    user_id = payload.get("sub")
-    roles = payload.get("roles", [])
-    username = payload.get("username")
-    permissions = payload.get("permissions",[])
+        response.set_cookie(
+            key="access_token",
+            value=new_access_token,
+            httponly=True,
+            samesite="lax" if settings.DEBUG else "strict",
+            secure=not settings.DEBUG,  # 👈 mejor así
+            path="/"
+        )
 
-    new_access_token = create_access_token({
-        "sub": user_id,
-        "roles": roles,
-        "username":username,
-        "permissions":permissions
-    })
+        return response
 
-    response = RedirectResponse("/dashboard")
-
-    response.set_cookie(
-        key="access_token",
-        value=new_access_token,
-        httponly=True,
-        samesite="lax" if settings.DEBUG else "strict",
-        secure = settings.ENV == "prod",
-        path="/"
-    )
-
-    return response
+    except Exception:
+        raise HTTPException(status_code=401, detail="Refresh token inválido")
 
 @router.get("/logout")
 def logout(request: Request,
