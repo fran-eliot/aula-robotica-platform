@@ -7,6 +7,7 @@ from app.core.authorization.permissions import has_permission
 from app.db.session import get_db
 from app.modules.users.user_model import User
 from app.core.authorization.roles import has_required_role
+from app.modules.users.user_service import can_access_user, get_user_or_404
 
 
 def get_current_user_web(
@@ -46,6 +47,7 @@ def require_roles_web(*allowed_roles: str):
     
     return role_checker
 
+
 def require_permission_web(*required_permissions: str):
 
     def permission_checker(current_user = Depends(get_current_user_web)):
@@ -62,6 +64,41 @@ def require_permission_web(*required_permissions: str):
 
     return permission_checker
 
+
+def require_owner_or_permission_web(permission: str):
+
+    def checker(
+        user_id: int,
+        db: Session = Depends(get_db),
+        current_user = Depends(get_current_user_web)
+    ):
+        user = get_user_or_404(db, user_id)
+
+        if not can_access_user(current_user, user, [permission]):
+            raise HTTPException(status_code=403, detail="No autorizado")
+
+        return user
+    
+    return checker
+
+def require_permission_and_not_self_web(permission: str):
+
+    def checker(
+        user_id: int,
+        db: Session = Depends(get_db),
+        current_user = Depends(get_current_user_web)
+    ):
+        user = get_user_or_404(db, user_id)
+
+        if current_user.id_usuario == user.id_usuario:
+            raise HTTPException(status_code=400, detail="No puedes eliminarte a ti mismo")
+
+        if not has_permission(current_user.permissions, [permission]):
+            raise HTTPException(status_code=403, detail="No autorizado")
+
+        return user
+
+    return checker
 
 # shortcuts
 require_admin_web = require_roles_web("admin")

@@ -2,10 +2,9 @@
 
 from fastapi import Request
 
+from app.core.authorization import permissions
 from app.core.authorization.permissions import has_permission_from_roles
-from app.core.security import decode_token, validate_access_token
 from app.core.authorization.roles import has_required_role
-from app.modules.users.user_service import get_user_roles
 
 # 🔥 contexto seguro siempre disponible
 def get_fallback_context():
@@ -14,7 +13,8 @@ def get_fallback_context():
         "current_username": None,
         "current_user_roles": [],
         "has_role": lambda *args: False,
-        "has_perm": lambda *args: False
+        "has_perm": lambda *args: False,
+        "is_owner": lambda target_user: False
     }
 
 def get_template_context(request: Request):
@@ -41,14 +41,23 @@ def get_template_context(request: Request):
             return has_required_role(roles, list(allowed_roles))
 
         def has_perm(*required_permissions: str):
-            return has_permission_from_roles(roles, list(required_permissions))
+            return any(
+                perm in permissions
+                for perm in required_permissions
+            )
+        
+        def is_owner(target_user):
+            if not target_user:
+                return False
+            return getattr(target_user, "id_usuario", None) == user_id
 
         return {
             "current_user_id": user_id,
             "current_username": username,
             "current_user_roles": roles,
             "has_role": has_role,
-            "has_perm": has_perm
+            "has_perm": has_perm,
+            "is_owner": is_owner
         }
 
     except Exception as e:

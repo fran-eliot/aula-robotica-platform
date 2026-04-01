@@ -5,6 +5,7 @@ from datetime import datetime,UTC
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
+from app.core.authorization.permissions import has_permission
 from app.core.constants.audit_actions import AuditAction
 from app.modules.audit.audit_service import audit_user_action
 from app.modules.users.identity_model import Identity
@@ -24,6 +25,20 @@ def get_user_roles(db: Session, user_id: int) -> list[str]:
         return [identity.rol.nombre]
 
     return []
+
+
+def is_owner(current_user, target_user) -> bool:
+    return current_user.id_usuario == target_user.id_usuario
+
+
+def can_access_user(current_user, target_user, required_permissions: list[str]) -> bool:
+    # 👤 dueño
+    if is_owner(current_user, target_user):
+        return True
+
+    # 🔐 permisos
+    return has_permission(current_user.roles_token, required_permissions)
+
 
 def get_all_users(db: Session):
     return db.query(User).all()
@@ -54,6 +69,7 @@ def create_user_with_audit(db, nombre, current_user:None, request:None):
         )
 
     return user
+
 
 def delete_user_with_audit(db, user, current_user: None, request: None):
     user_id = user.id_usuario
@@ -87,6 +103,7 @@ def set_user_active_with_audit(db, user, active, current_user: None, request: No
             request,
             description
         )
+
 
 def get_user_or_404(db: Session, user_id: int):
     user = get_user_by_id(db, user_id)

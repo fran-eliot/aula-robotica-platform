@@ -17,13 +17,14 @@
 
 <body class="hold-transition sidebar-mini">
 
-{% set ctx = get_template_context(request) %}
-
-{% set current_user_id = ctx.current_user_id %}
-{% set current_username = ctx.current_username  %}
-{% set current_user_roles = ctx.current_user_roles %}
-{% set has_role = ctx.has_role %}
-{% set has_perm = ctx.has_perm %}
+{% macro menu_item(url, icon, label) %}
+<li class="nav-item">
+    <a href="{{ url }}" class="nav-link">
+        <i class="nav-icon {{ icon }}"></i>
+        <p>{{ label }}</p>
+    </a>
+</li>
+{% endmacro %}
 
 <div class="wrapper">
 
@@ -51,10 +52,13 @@
             </li>
             {% endif %}
 
+            <!-- 🔐 logout seguro -->
             <li class="nav-item">
-                <a href="/logout" class="nav-link">
-                    <i class="fas fa-sign-out-alt"></i>
-                </a>
+                <form action="/logout" method="post" style="display:inline;">
+                    <button class="nav-link btn btn-link" style="border:none;">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </form>
             </li>
 
         </ul>
@@ -79,9 +83,9 @@
                 <div class="info">
                     <a href="#" class="d-block">
                         {{ current_username }}
-                        
+
                         {% if current_user_roles %}
-                        ({{ current_user_roles[0]|capitalize }})
+                        ({{ current_user_roles | join(", ") | capitalize }})
                         {% endif %}
                     </a>
                 </div>
@@ -96,17 +100,10 @@
                     role="menu">
 
                     <!-- Dashboard -->
-                    <li class="nav-item">
-                        <a href="/dashboard" class="nav-link">
-                            <i class="nav-icon fas fa-tachometer-alt"></i>
-                            <p>Dashboard</p>
-                        </a>
-                    </li>
+                    {{ menu_item("/dashboard", "fas fa-tachometer-alt", "Dashboard") }}
 
-
-
-                    <!-- ADMIN -->
-                    {% if has_role("admin") %}
+                    <!-- ADMIN / GESTIÓN -->
+                    {% if has_perm("users:read") or has_perm("roles:read") or has_perm("identities:read") %}
 
                     <li class="nav-item has-treeview">
                         <a href="#" class="nav-link">
@@ -119,26 +116,32 @@
 
                         <ul class="nav nav-treeview">
 
+                            {% if has_perm("users:read") %}
                             <li class="nav-item">
                                 <a href="/users/" class="nav-link">
                                     <i class="far fa-circle nav-icon"></i>
                                     <p>Usuarios</p>
                                 </a>
                             </li>
+                            {% endif %}
 
+                            {% if has_perm("identities:read") %}
                             <li class="nav-item">
                                 <a href="/identities/" class="nav-link">
                                     <i class="far fa-circle nav-icon"></i>
                                     <p>Identidades</p>
                                 </a>
                             </li>
+                            {% endif %}
 
+                            {% if has_perm("roles:read") %}
                             <li class="nav-item">
                                 <a href="/roles/" class="nav-link">
                                     <i class="far fa-circle nav-icon"></i>
                                     <p>Roles</p>
                                 </a>
                             </li>
+                            {% endif %}
 
                         </ul>
                     </li>
@@ -146,29 +149,14 @@
                     {% endif %}
 
                     <!-- PROFESOR -->
-                    {% if has_role("profesor") %}
-
-                    <li class="nav-item">
-                    <a href="/students/" class="nav-link">
-                    <i class="nav-icon fas fa-user-graduate"></i>
-                    <p>Estudiantes</p>
-                    </a>
-                    </li>
-
+                    {% if has_perm("students:read") %}
+                        {{ menu_item("/students/", "fas fa-user-graduate", "Estudiantes") }}
                     {% endif %}
 
-                    <!-- ESTUDIANTE -->
-                    {% if has_role("estudiante") %}
-
-                    <li class="nav-item">
-                    <a href="/profile/" class="nav-link">
-                    <i class="nav-icon fas fa-user"></i>
-                    <p>Mi perfil</p>
-                    </a>
-                    </li>
-
+                    <!-- PERFIL -->
+                    {% if current_user_id %}
+                        {{ menu_item("/users/me", "fas fa-user", "Mi perfil") }}
                     {% endif %}
-             
 
                 </ul>
 
@@ -189,14 +177,9 @@
         </section>
 
         <section class="content">
-
             <div class="container-fluid">
-
-                {% block content %}
-                {% endblock %}
-
+                {% block content %}{% endblock %}
             </div>
-
         </section>
 
     </div>

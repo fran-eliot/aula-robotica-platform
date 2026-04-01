@@ -5,13 +5,10 @@ from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 from datetime import UTC
 
-from app.core.constants.audit_actions import AuditAction
 from app.db.session import get_db
-from app.modules.auth.auth_dependencies_web import get_current_user_web, require_permission_web
+from app.modules.auth.auth_dependencies_web import get_current_user_web, require_permission_web, require_owner_or_permission_web
 from app.modules.users import user_service
-from app.modules.users.user_model import User
 from app.core.templates import templates
-from app.modules.audit.audit_service import log_action
 
 router = APIRouter(prefix="/users", tags=["Users Web"])
 
@@ -64,12 +61,8 @@ def users_create(
 @router.get("/{user_id}")
 def user_detail(
     request: Request,
-    user_id: int,
-    db: Session = Depends(get_db),
-    current_user = Depends(require_permission_web("users:read"))
+    user = Depends(require_owner_or_permission_web("users:read"))
 ):
-
-    user = user_service.get_user_or_404(db, user_id)
 
     return templates.TemplateResponse(
         "users/user_detail.html",
@@ -102,6 +95,10 @@ def delete_user(
 
     user = user_service.get_user_or_404(db, user_id)
 
+    # 🔥 evitar que se borre a sí mismo
+    if current_user.id_usuario == user.id_usuario:
+        raise HTTPException(status_code=400, detail="No puedes eliminarte a ti mismo")
+
     user_service.delete_user_with_audit(db, user, current_user, request)
 
     db.commit()
@@ -111,12 +108,10 @@ def delete_user(
 @router.post("/{user_id}/deactivate")
 def deactivate_user(
     request:Request,
-    user_id: int,
+    user = Depends(require_owner_or_permission_web("users:update")),
     db: Session = Depends(get_db),
-    current_user = Depends(require_permission_web("users:update"))
+    current_user = Depends(get_current_user_web)
 ):
-
-    user = user_service.get_user_or_404(db, user_id)
 
     user_service.set_user_active_with_audit(db, user, False, current_user, request)
 
@@ -127,12 +122,10 @@ def deactivate_user(
 @router.post("/{user_id}/activate")
 def activate_user(
     request:Request,
-    user_id: int,
+    user = Depends(require_owner_or_permission_web("users:update")),
     db: Session = Depends(get_db),
-    current_user = Depends(require_permission_web("users:update"))
+    current_user = Depends(get_current_user_web)
 ):
-
-    user = user_service.get_user_or_404(db, user_id)
 
     user_service.set_user_active_with_audit(db, user, True, current_user, request)
 

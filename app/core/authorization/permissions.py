@@ -67,3 +67,9 @@ def get_permissions_from_roles(user_roles: list[str]) -> list[str]:
         permissions.extend(role_permissions)
 
     return list(set(permissions))
+
+def can_access_resource(current_user, owner_id, permissions):
+    if current_user.id_usuario == owner_id:
+        return True
+
+    return has_permission(current_user.permissions, permissions)
