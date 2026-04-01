@@ -3,11 +3,12 @@
 from fastapi import APIRouter, Request, Depends, Form, HTTPException
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
-from datetime import datetime, UTC
+from datetime import UTC
 
 from app.core.constants.audit_actions import AuditAction
 from app.db.session import get_db
 from app.modules.auth.auth_dependencies_web import get_current_user_web, require_permission_web
+from app.modules.users import user_service
 from app.modules.users.user_model import User
 from app.core.templates import templates
 from app.modules.audit.audit_service import log_action
@@ -22,7 +23,7 @@ def users_list(
 ):
 
     print("Cookie Token:", request.cookies.get("access_token"))
-    users = db.query(User).all()
+    users = user_service.get_all_users(db)
 
     return templates.TemplateResponse(
         "users/users_list.html",
@@ -54,24 +55,7 @@ def users_create(
     current_user = Depends(require_permission_web("users:create"))
 ):
 
-    new_user = User(
-        nombre=nombre,
-        activo=True,
-        fecha_creacion=datetime.now(UTC)
-    )
-
-    db.add(new_user)
-    db.flush()
-
-    log_action(
-        db,
-        action=AuditAction.CREATE_USER,
-        user_id=current_user.id_usuario,
-        resource_type="user",
-        resource_id=new_user.id_usuario,
-        description=f"Creó usuario {new_user.nombre}",
-        request=request
-    )
+    user_service.create_user_with_audit(db, nombre, current_user, request)
 
     db.commit()
 
@@ -85,12 +69,7 @@ def user_detail(
     current_user = Depends(require_permission_web("users:read"))
 ):
 
-    user = db.query(User).filter(
-        User.id_usuario == user_id
-    ).first()
-
-    if not user:
-        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    user = user_service.get_user_or_404(db, user_id)
 
     return templates.TemplateResponse(
         "users/user_detail.html",
@@ -100,7 +79,7 @@ def user_detail(
         }
     )
 
-@router.get("/me")
+@router.get("/me", name="my_profile")
 def my_profile(
     request: Request,
     current_user = Depends(get_current_user_web)
@@ -113,7 +92,7 @@ def my_profile(
         }
     )
 
-@router.post("/delete/{user_id}")
+@router.post("/{user_id}/delete")
 def delete_user(
     request:Request,
     user_id: int,
@@ -121,34 +100,15 @@ def delete_user(
     current_user = Depends(require_permission_web("users:delete"))
 ):
 
-    user = db.query(User).filter(
-        User.id_usuario == user_id
-    ).first()
+    user = user_service.get_user_or_404(db, user_id)
 
-    if not user:
-        raise HTTPException(status_code=404, detail="Usuario no encontrado")
-
-    user_id = user.id_usuario
-    user_name = user.nombre
-
-    db.delete(user)
-    db.flush()
-
-    log_action(
-        db,
-        action=AuditAction.DELETE_USER,
-        user_id=current_user.id_usuario,
-        resource_type="user",
-        resource_id=user_id,
-        description=f"Eliminó usuario {user_name}",
-        request=request
-    )
+    user_service.delete_user_with_audit(db, user, current_user, request)
 
     db.commit()
 
     return RedirectResponse("/users/", status_code=303)
 
-@router.get("/deactivate/{user_id}")
+@router.post("/{user_id}/deactivate")
 def deactivate_user(
     request:Request,
     user_id: int,
@@ -156,30 +116,15 @@ def deactivate_user(
     current_user = Depends(require_permission_web("users:update"))
 ):
 
-    user = db.query(User).filter(
-        User.id_usuario == user_id
-    ).first()
+    user = user_service.get_user_or_404(db, user_id)
 
-    if not user:
-        raise HTTPException(status_code=404)
-
-    user.activo = False
-
-    log_action(
-        db,
-        action=AuditAction.DEACTIVATE_USER,
-        user_id=current_user.id_usuario,
-        resource_type="user",
-        resource_id=user.id_usuario,
-        description=f"Desactivó usuario {user.nombre}",
-        request=request
-    )
+    user_service.set_user_active_with_audit(db, user, False, current_user, request)
 
     db.commit()
 
     return RedirectResponse("/users/", status_code=303)
 
-@router.get("/activate/{user_id}")
+@router.post("/{user_id}/activate")
 def activate_user(
     request:Request,
     user_id: int,
@@ -187,24 +132,9 @@ def activate_user(
     current_user = Depends(require_permission_web("users:update"))
 ):
 
-    user = db.query(User).filter(
-        User.id_usuario == user_id
-    ).first()
+    user = user_service.get_user_or_404(db, user_id)
 
-    if not user:
-        raise HTTPException(status_code=404)
-
-    user.activo = True
-
-    log_action(
-        db,
-        action=AuditAction.ACTIVATE_USER,
-        user_id=current_user.id_usuario,
-        resource_type="user",
-        resource_id=user.id_usuario,
-        description=f"Activó usuario {user.nombre}",
-        request=request
-    )
+    user_service.set_user_active_with_audit(db, user, True, current_user, request)
 
     db.commit()
 

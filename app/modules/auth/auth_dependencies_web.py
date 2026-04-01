@@ -20,6 +20,7 @@ def get_current_user_web(
 
     user_id = payload.get("sub")
     roles = payload.get("roles", [])
+    permissions = payload.get("permissions", [])
 
     user = db.query(User).filter(User.id_usuario == int(user_id)).first()
 
@@ -27,6 +28,7 @@ def get_current_user_web(
         raise HTTPException(status_code=401)
 
     user.roles_token = roles
+    user.permissions = permissions
     return user
 
 

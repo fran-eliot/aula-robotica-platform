@@ -1,7 +1,12 @@
 # app/modules/users/user_service.py
 
+from datetime import datetime,UTC
+
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
+from app.core.constants.audit_actions import AuditAction
+from app.modules.audit.audit_service import audit_user_action
 from app.modules.users.identity_model import Identity
 from app.modules.users.user_model import User
 
@@ -30,21 +35,61 @@ def get_user_by_id(db: Session, user_id: int):
     ).first()
 
 
-def create_user(db: Session, nombre: str):
-    user = User(
-        nombre=nombre,
-        activo=True
-    )
+def create_user_with_audit(db, nombre, current_user:None, request:None):
+    user = User(nombre=nombre, 
+                activo=True,
+                fecha_creacion=datetime.now(datetime.UTC))
 
     db.add(user)
     db.flush()
 
+    if current_user and request:
+        audit_user_action(
+            db, 
+            AuditAction.CREATE_USER,
+            current_user,
+            user,
+            request,
+            f"Creó usuario {user.nombre}"
+        )
+
     return user
 
+def delete_user_with_audit(db, user, current_user: None, request: None):
+    user_id = user.id_usuario
+    user_name = user.nombre
 
-def delete_user(db: Session, user: User):
     db.delete(user)
 
+    if current_user and request:
+        audit_user_action(
+            db,     
+            AuditAction.DELETE_USER,
+            current_user,
+            user,
+            request,
+            f"Eliminó usuario {user_name}"
+        )
 
-def set_user_active(db: Session, user: User, active: bool):
+
+def set_user_active_with_audit(db, user, active, current_user: None, request: None):
     user.activo = active
+
+    if current_user and request:
+        action = AuditAction.ACTIVATE_USER if active else AuditAction.DEACTIVATE_USER
+        description = f"{'Activó' if active else 'Desactivó'} usuario {user.nombre}"
+
+        audit_user_action(
+            db,
+            action,
+            current_user,
+            user,
+            request,
+            description
+        )
+
+def get_user_or_404(db: Session, user_id: int):
+    user = get_user_by_id(db, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    return user

@@ -30,3 +30,13 @@ def log_action(
     db.add(log)
     db.flush()
   
+def audit_user_action(db, action, current_user, target_user, request, description):
+    log_action(
+        db,
+        action=action,
+        user_id=current_user.id_usuario,
+        resource_type="user",
+        resource_id=target_user.id_usuario,
+        description=description,
+        request=request
+    )
