@@ -1,7 +1,10 @@
+# scripts/seed_data.py
+# Script para poblar la base de datos con datos de ejemplo para desarrollo y pruebas.
+
 from app.db.session import SessionLocal
 from app.modules.users.user_model import User
-from app.modules.users.role_model import Role
-from app.modules.users.identity_model import Identity
+from app.modules.roles.role_model import Role, Permission
+from app.modules.identities.identity_model import Identity
 from app.modules.audit.audit_model import AuditLog
 
 from datetime import datetime, UTC
@@ -22,9 +25,14 @@ def seed():
     # =========================
     # ROLES
     # =========================
-    admin_role = Role(nombre="admin")
-    profesor_role = Role(nombre="profesor")
-    estudiante_role = Role(nombre="estudiante")
+
+    if db.query(Role).count() > 0:
+        print("⚠️ Ya existen datos en la tabla de roles, abortando seed")
+        return
+
+    admin_role = Role(nombre="admin", descripcion="Rol con todos los permisos")
+    profesor_role = Role(nombre="profesor", descripcion="Rol para profesores")
+    estudiante_role = Role(nombre="estudiante", descripcion="Rol para estudiantes")
 
     db.add_all([admin_role, profesor_role, estudiante_role])
     db.commit()
@@ -34,6 +42,49 @@ def seed():
     db.refresh(estudiante_role)
 
     print("✔ Roles creados")
+
+    # =========================
+    # PERMISOS
+    # =========================
+
+    permissions_data = [
+        "users:read",
+        "users:create",
+        "users:update",
+        "users:delete"
+    ]
+
+    permissions = {}
+
+    for name in permissions_data:
+        perm = Permission(nombre=name)
+        db.add(perm)
+        db.flush()
+        permissions[name] = perm
+
+    print("✔ Permisos creados")
+
+    # =========================
+    # ASIGNAR PERMISOS A ROLES
+    # =========================
+
+    # Admin → todos
+    admin_role.permissions = list(permissions.values())
+
+    # Profesor → read + update
+    profesor_role.permissions = [
+        permissions["users:read"],
+        permissions["users:update"]
+    ]
+
+    # Estudiante → solo read
+    estudiante_role.permissions = [
+        permissions["users:read"]
+    ]
+
+    db.commit()
+
+    print("✔ Permisos asignados a roles")
 
     # =========================
     # USUARIOS

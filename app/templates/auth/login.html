@@ -2,87 +2,123 @@
 <html lang="es">
 <head>
     <meta charset="utf-8">
-    <title>Login - Aula de Robótica</title>
+    <title>Login | Aula Robótica</title>
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <!-- AdminLTE CSS -->
+    <!-- AdminLTE -->
     <link rel="stylesheet" href="/static/adminlte/css/adminlte.min.css">
 
     <!-- FontAwesome -->
     <link rel="stylesheet" href="/static/adminlte/plugins/fontawesome-free/css/all.min.css">
 
+    <style>
+        .login-logo b {
+            font-weight: 600;
+        }
+
+        .login-card-body {
+            border-radius: 10px;
+        }
+
+        .input-group-text {
+            background-color: #f4f6f9;
+        }
+
+        .btn-primary {
+            border-radius: 6px;
+        }
+
+        .login-footer {
+            font-size: 0.85rem;
+            color: #6c757d;
+            text-align: center;
+            margin-top: 10px;
+        }
+    </style>
 </head>
 
 <body class="hold-transition login-page">
 
 <div class="login-box">
 
+    <!-- LOGO -->
     <div class="login-logo">
-        <b>Aula de Robótica</b>
+        <b>Aula Robótica</b>
     </div>
 
-    <div class="card">
+    <div class="card shadow-sm">
+
         <div class="card-body login-card-body">
 
+            <!-- TITULO -->
             <p class="login-box-msg">
-                Iniciar sesión
+                Accede a tu cuenta
             </p>
 
+            <!-- ERROR -->
             {% if error %}
             <div class="alert alert-danger">
+                <i class="fas fa-exclamation-circle"></i>
                 {{ error }}
             </div>
             {% endif %}
 
+            <!-- FORM -->
             <form action="/login" method="post">
 
+                <!-- EMAIL -->
                 <div class="input-group mb-3">
-
                     <input
                         type="email"
                         name="email"
                         class="form-control"
                         placeholder="Email"
                         required
+                        autofocus
                     >
-
                     <div class="input-group-append">
                         <div class="input-group-text">
                             <span class="fas fa-envelope"></span>
                         </div>
                     </div>
-
                 </div>
 
+                <!-- PASSWORD -->
                 <div class="input-group mb-3">
-
                     <input
                         type="password"
                         name="password"
+                        id="password"
                         class="form-control"
-                        placeholder="Password"
+                        placeholder="Contraseña"
                         required
                     >
-
                     <div class="input-group-append">
-                        <div class="input-group-text">
-                            <span class="fas fa-lock"></span>
+                        <div class="input-group-text"
+                             style="cursor:pointer"
+                             onclick="togglePassword()">
+                            <span id="eyeIcon" class="fas fa-eye"></span>
                         </div>
                     </div>
-
                 </div>
 
+                <!-- ACTIONS -->
                 <div class="row">
 
-                    <div class="col-8"></div>
+                    <!-- remember futuro -->
+                    <div class="col-6 d-flex align-items-center">
+                        <small class="text-muted">
+                            Acceso seguro
+                        </small>
+                    </div>
 
-                    <div class="col-4">
+                    <div class="col-6">
                         <button
                             type="submit"
                             class="btn btn-primary btn-block"
                         >
-                            Entrar
+                            <i class="fas fa-sign-in-alt"></i> Entrar
                         </button>
                     </div>
 
@@ -90,16 +126,38 @@
 
             </form>
 
+            <!-- FOOTER -->
+            <div class="login-footer">
+                Aula de Robótica · Plataforma educativa
+            </div>
+
         </div>
+
     </div>
 
 </div>
-
 
 <!-- JS -->
 <script src="/static/adminlte/plugins/jquery/jquery.min.js"></script>
 <script src="/static/adminlte/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script src="/static/adminlte/js/adminlte.min.js"></script>
+
+<script>
+function togglePassword() {
+    const input = document.getElementById("password");
+    const icon = document.getElementById("eyeIcon");
+
+    if (input.type === "password") {
+        input.type = "text";
+        icon.classList.remove("fa-eye");
+        icon.classList.add("fa-eye-slash");
+    } else {
+        input.type = "password";
+        icon.classList.remove("fa-eye-slash");
+        icon.classList.add("fa-eye");
+    }
+}
+</script>
 
 </body>
 </html>

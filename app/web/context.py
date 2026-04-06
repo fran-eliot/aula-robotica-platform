@@ -1,65 +1,164 @@
 # app/web/context.py
+# 🌐 Contexto global para plantillas Jinja
 
 from fastapi import Request
 
-from app.core.authorization import permissions
-from app.core.authorization.permissions import has_permission_from_roles
+from app.core.authorization.permissions import has_permission
 from app.core.authorization.roles import has_required_role
+from app.core.authorization.policies import can_user_action
 
-# 🔥 contexto seguro siempre disponible
+from app.core.services.menu_service import (
+    get_menu_structure,
+    filter_menu_by_permissions,
+    mark_active_menu,
+    build_smart_breadcrumbs
+)
+
+from app.core.utils.audit_ui import get_audit_icon, get_audit_color
+from app.db.session import SessionLocal
+from app.utils.flash import get_flash
+
+
+# =========================================================
+# 🛡️ CONTEXTO FALLBACK (seguro)
+# =========================================================
 def get_fallback_context():
+    """
+    Contexto mínimo seguro cuando:
+    - No hay usuario autenticado
+    - O ocurre un error
+    """
+
     return {
         "current_user_id": None,
         "current_username": None,
         "current_user_roles": [],
         "has_role": lambda *args: False,
         "has_perm": lambda *args: False,
-        "is_owner": lambda target_user: False
+        "is_owner": lambda target_user: False,
+        "can": lambda *args, **kwargs: False,
+        "menu": [],
+        "breadcrumbs": [],
+        "page_title": "Aula Robótica",
+        "page_heading": "",
+        "flash_messages": [],
+        "get_audit_icon": lambda action: "fa-info-circle",
+        "get_audit_color": lambda action: "bg-primary"
     }
 
+
+# =========================================================
+# 🌐 CONTEXTO GLOBAL PRINCIPAL
+# =========================================================
 def get_template_context(request: Request):
     """
-    Contexto global disponible en todas las plantillas Jinja.
+    Contexto global disponible en todas las plantillas.
+
+    Incluye:
+    - Usuario actual
+    - Permisos
+    - Helpers de autorización
+    - Menú dinámico
+    - Breadcrumbs
+    - Flash messages
     """
 
-    fallback_context = get_fallback_context()
-
     try:
-        # 🔥 1. Intentar usar payload del middleware
+        # =========================================================
+        # 🔐 1. OBTENER USUARIO DESDE MIDDLEWARE
+        # =========================================================
         payload = getattr(request.state, "user", None)
 
         if not payload:
             return get_fallback_context()
 
-        # 🔥 2. Extraer datos
-        roles = [r.lower() for r in payload.get("roles", [])]
-        user_id = int(payload.get("sub"))
+        # =========================================================
+        # 👤 2. DATOS DEL USUARIO
+        # =========================================================
+        user_id = int(payload.get("sub") or 0)
         username = payload.get("username", "Usuario")
+        roles = [r.lower() for r in payload.get("roles", [])]
+        permissions = payload.get("permissions", [])
 
-        # 🔥 Helpers reutilizando core
-        def has_role(*allowed_roles: str):
+        # =========================================================
+        # 🔧 3. HELPERS DE AUTORIZACIÓN
+        # =========================================================
+
+        def has_role(*allowed_roles: str) -> bool:
             return has_required_role(roles, list(allowed_roles))
 
-        def has_perm(*required_permissions: str):
-            return any(
-                perm in permissions
-                for perm in required_permissions
-            )
-        
-        def is_owner(target_user):
-            if not target_user:
-                return False
-            return getattr(target_user, "id_usuario", None) == user_id
+        def has_perm(*required_permissions: str) -> bool:
+            return has_permission(permissions, list(required_permissions))
 
+        def is_owner(target_user) -> bool:
+            return (
+                target_user
+                and getattr(target_user, "id_usuario", None) == user_id
+            )
+
+        def can(action: str, target=None) -> bool:
+            return can_user_action(action, payload, target)
+
+        # =========================================================
+        # 📋 4. MENÚ DINÁMICO
+        # =========================================================
+        menu = filter_menu_by_permissions(
+            get_menu_structure(),
+            has_perm
+        )
+
+        menu = mark_active_menu(menu, request.url.path)
+
+        # =========================================================
+        # 🧭 5. BREADCRUMBS
+        # =========================================================
+        with SessionLocal() as db:
+            breadcrumbs = build_smart_breadcrumbs(menu, request, db)
+
+        # =========================================================
+        # 🏷️ 6. TÍTULOS DINÁMICOS
+        # =========================================================
+        page_heading = breadcrumbs[-1]["label"] if breadcrumbs else ""
+        page_title = (
+            f"{page_heading} | Aula Robótica"
+            if page_heading else "Aula Robótica"
+        )
+
+        # =========================================================
+        # 💬 7. FLASH MESSAGES
+        # =========================================================
+        flash_messages = get_flash(request)
+
+        # =========================================================
+        # 📦 8. CONTEXTO FINAL
+        # =========================================================
         return {
             "current_user_id": user_id,
             "current_username": username,
             "current_user_roles": roles,
+
+            # 🔐 helpers
             "has_role": has_role,
             "has_perm": has_perm,
-            "is_owner": is_owner
+            "is_owner": is_owner,
+            "can": can,
+
+            # 🧭 navegación
+            "menu": menu,
+            "breadcrumbs": breadcrumbs,
+
+            # 🏷️ UI
+            "page_title": page_title,
+            "page_heading": page_heading,
+
+            # 💬 mensajes
+            "flash_messages": flash_messages,
+
+            # 🎨 audit UI helpers
+            "get_audit_icon": get_audit_icon,
+            "get_audit_color": get_audit_color
         }
 
-    except Exception as e:
-        print("🔥 ERROR CONTEXT:", e)
-        return fallback_context
+    except Exception:
+        # ⚠️ Nunca romper el render de plantillas
+        return get_fallback_context()

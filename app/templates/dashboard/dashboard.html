@@ -1,80 +1,21 @@
 {% extends "base.html" %}
 
-{% block title %}
-Dashboard
-{% endblock %}
-
-{% block page_title %}
-Dashboard
-{% endblock %}
-
 {% block content %}
 
+<!-- =========================================================
+📊 MÉTRICAS PRINCIPALES
+========================================================= -->
 <div class="row">
 
-    <!-- Usuario -->
+    <!-- TOTAL USERS -->
     <div class="col-lg-4 col-6">
-        <div class="small-box bg-info">
-            <div class="inner">
-                <h4>{{ current_user.nombre }}</h4>
-                <p>Usuario autenticado</p>
-            </div>
+        <div class="small-box bg-info shadow-sm"
+             style="cursor:pointer"
+             onclick="window.location='/users/'">
 
-            <div class="icon">
-                <i class="fas fa-user"></i>
-            </div>
-        </div>
-    </div>
-
-
-    <!-- Rol -->
-    <div class="col-lg-4 col-6">
-        <div class="small-box bg-success">
-            <div class="inner">
-
-                {% if current_user_roles %}
-                    <h4>{{ current_user_roles[0] }}</h4>
-                {% else %}
-                    <h4>Sin rol</h4>
-                {% endif %}
-
-                <p>Rol principal</p>
-            </div>
-
-            <div class="icon">
-                <i class="fas fa-id-badge"></i>
-            </div>
-        </div>
-    </div>
-
-
-    <!-- Sistema -->
-    <div class="col-lg-4 col-6">
-        <div class="small-box bg-warning">
-            <div class="inner">
-                <h4>Aula Robótica</h4>
-                <p>Sistema activo</p>
-            </div>
-
-            <div class="icon">
-                <i class="fas fa-robot"></i>
-            </div>
-        </div>
-    </div>
-
-</div>
-
-
-<!-- Métricas del sistema -->
-
-<div class="row">
-
-    <!-- Total usuarios -->
-    <div class="col-lg-3 col-6">
-        <div class="small-box bg-primary">
             <div class="inner">
                 <h3>{{ total_users }}</h3>
-                <p>Usuarios registrados</p>
+                <p>Total usuarios</p>
             </div>
 
             <div class="icon">
@@ -82,15 +23,16 @@ Dashboard
             </div>
 
             <a href="/users/" class="small-box-footer">
-            Gestionar <i class="fas fa-arrow-circle-right"></i>
+                Ver usuarios <i class="fas fa-arrow-circle-right"></i>
             </a>
         </div>
     </div>
 
+    <!-- ACTIVE USERS -->
+    <div class="col-lg-4 col-6">
+        <div class="small-box bg-success shadow-sm"
+             title="Usuarios activos actualmente">
 
-    <!-- Usuarios activos -->
-    <div class="col-lg-3 col-6">
-        <div class="small-box bg-success">
             <div class="inner">
                 <h3>{{ active_users }}</h3>
                 <p>Usuarios activos</p>
@@ -100,160 +42,116 @@ Dashboard
                 <i class="fas fa-user-check"></i>
             </div>
 
-            <a href="/users/" class="small-box-footer">
-            Gestionar <i class="fas fa-arrow-circle-right"></i>
-            </a>
+            <div class="small-box-footer text-white-50">
+                Estado saludable del sistema
+            </div>
         </div>
     </div>
 
+    <!-- INACTIVE USERS -->
+    <div class="col-lg-4 col-6">
+        <div class="small-box 
+                    {% if inactive_users > 0 %}bg-warning{% else %}bg-secondary{% endif %}
+                    shadow-sm"
+             title="Usuarios desactivados">
 
-    <!-- Identidades -->
-    <div class="col-lg-3 col-6">
-        <div class="small-box bg-warning">
             <div class="inner">
-                <h3>{{ identities }}</h3>
-                <p>Identidades registradas</p>
+                <h3>{{ inactive_users }}</h3>
+                <p>Usuarios inactivos</p>
             </div>
 
             <div class="icon">
-                <i class="fas fa-id-card"></i>
+                <i class="fas fa-user-times"></i>
             </div>
 
-            <a href="/identities/" class="small-box-footer">
-            Gestionar <i class="fas fa-arrow-circle-right"></i>
-            </a>
-        </div>
-    </div>
-
-
-    <!-- Roles -->
-    <div class="col-lg-3 col-6">
-        <div class="small-box bg-danger">
-            <div class="inner">
-                <h3>{{ total_roles }}</h3>
-                <p>Roles definidos</p>
+            <div class="small-box-footer text-white-50">
+                {% if inactive_users > 0 %}
+                    Requiere revisión
+                {% else %}
+                    Sin incidencias
+                {% endif %}
             </div>
-
-            <div class="icon">
-                <i class="fas fa-user-shield"></i>
-            </div>
-
-            <a href="/roles/" class="small-box-footer">
-            Gestionar <i class="fas fa-arrow-circle-right"></i>
-            </a>
         </div>
     </div>
 
 </div>
 
-<div class="card">
+<!-- =========================================================
+🧾 ACTIVIDAD RECIENTE
+========================================================= -->
+<div class="card shadow-sm">
 
-    <div class="card-header">
+    <!-- HEADER -->
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h3 class="card-title">
+            <i class="fas fa-history"></i> Actividad reciente
+        </h3>
 
-        <h3 class="card-title">Actividad reciente</h3>
+        <!-- FUTURO: filtro -->
+        <small class="text-muted">Últimos eventos del sistema</small>
+    </div>
 
-        <!-- FILTROS -->
-        <form method="get" class="mt-2">
+    <!-- BODY -->
+    <div class="card-body">
 
-            <div class="row">
+        {% if recent_logs %}
 
-                <div class="col-md-2">
-                    <input type="text" class="form-control"
-                        name="user_id"
-                        placeholder="User ID"
-                        value="{{ request.query_params.get('user_id', '') }}">
-                </div>
+        <div class="timeline">
 
-                <div class="col-md-2">
-                    <input type="text" class="form-control"
-                        name="action"
-                        placeholder="Acción"
-                        value="{{ request.query_params.get('action', '') }}">
-                </div>
+            {% for log in recent_logs %}
 
-                <div class="col-md-2">
-                    <input type="date" class="form-control"
-                        name="date_from"
-                        value="{{ request.query_params.get('date_from', '') }}">
-                </div>
+            <div>
 
-                <div class="col-md-2">
-                    <input type="date" class="form-control"
-                        name="date_to"
-                        value="{{ request.query_params.get('date_to', '') }}">
-                </div>
+                <!-- ICONO DINÁMICO -->
+                <i class="fas 
+                   {{ get_audit_icon(log.action) }} 
+                   {{ get_audit_color(log.action) }}"
+                   title="{{ log.action }}">
+                </i>
 
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary w-100">
-                        Filtrar
-                    </button>
-                </div>
+                <div class="timeline-item">
 
-                <div class="col-md-2">
-                    <a href="/dashboard/" class="btn btn-secondary w-100">
-                        Limpiar
-                    </a>
+                    <!-- FECHA -->
+                    <span class="time">
+                        <i class="fas fa-clock"></i>
+                        {{ log.created_at.strftime("%d/%m %H:%M") }}
+                    </span>
+
+                    <!-- DESCRIPCIÓN -->
+                    <h3 class="timeline-header">
+                        {{ log.description }}
+                    </h3>
+
+                    <!-- USUARIO -->
+                    {% if log.user %}
+                    <div class="timeline-body">
+                        <i class="fas fa-user"></i>
+                        {{ log.user.nombre }}
+                    </div>
+                    {% endif %}
+
                 </div>
 
             </div>
 
-        </form>
+            {% endfor %}
 
-    </div>
+        </div>
 
-    <div class="card-body">
+        {% else %}
 
-        <table class="table table-sm">
+        <!-- EMPTY STATE -->
+        <div class="text-center text-muted p-4">
 
-            <thead>
-                <tr>
-                    <th>Fecha</th>
-                    <th>Usuario</th>
-                    <th>Acción</th>
-                    <th>Descripción</th>
-                    <th>IP</th>
-                    <th>Navegador</th>
-                </tr>
-            </thead>
+            <i class="fas fa-history fa-2x mb-2"></i>
 
-            <tbody>
+            <p>No hay actividad reciente</p>
 
-            {% if recent_logs %}
+            <small>Las acciones aparecerán aquí automáticamente</small>
 
-                {% for log in recent_logs %}
-                    <tr>
-                        <td>{{ log.created_at.strftime("%d/%m/%Y %H:%M") }}</td>
+        </div>
 
-                        <td>
-                            {% if log.user %}
-                                {{ log.user.nombre }}
-                            {% else %}
-                                Sistema
-                            {% endif %}
-                        </td>
-
-                        <td>
-                            <span class="badge bg-info">{{ log.action }}</span>
-                        </td>
-                        <td>{{ log.description }}</td>
-                        <td>{{ log.ip_address }}</td>
-                        <td>{{ log.user_agent }}</td>
-                    </tr>
-                {% endfor %}
-
-            {% else %}
-
-                <tr>
-                    <td colspan="6" class="text-center">
-                        No hay resultados con los filtros aplicados
-                    </td>
-                </tr>
-
-            {% endif %}
-
-            </tbody>
-
-        </table>
+        {% endif %}
 
     </div>
 

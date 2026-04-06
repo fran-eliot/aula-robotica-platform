@@ -1,0 +1,15 @@
+{% macro select(name, label, options, selected=None) %}
+<div class="form-group">
+    <label>{{ label }}</label>
+    <select name="{{ name }}" class="form-control">
+
+        {% for value, text in options %}
+        <option value="{{ value }}"
+            {% if value == selected %}selected{% endif %}>
+            {{ text }}
+        </option>
+        {% endfor %}
+
+    </select>
+</div>
+{% endmacro %}

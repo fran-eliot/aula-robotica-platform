@@ -1,0 +1,17 @@
+{% macro table(headers, rows) %}
+<table class="table table-bordered table-hover">
+
+    <thead>
+        <tr>
+            {% for h in headers %}
+                <th>{{ h }}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+
+    <tbody>
+        {{ rows() }}
+    </tbody>
+
+</table>
+{% endmacro %}

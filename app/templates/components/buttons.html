@@ -1,0 +1,23 @@
+<td>
+
+    {% if can("view", user) %}
+        <a href="/users/{{ user.id_usuario }}" class="btn btn-info btn-sm">
+            Ver
+        </a>
+    {% endif %}
+
+    {% if can("edit", user) %}
+        <a href="/users/{{ user.id_usuario }}/edit" class="btn btn-warning btn-sm">
+            Editar
+        </a>
+    {% endif %}
+
+    {% if can("delete", user) %}
+        <form method="post" action="/users/{{ user.id_usuario }}/delete" style="display:inline;">
+            <button class="btn btn-danger btn-sm">
+                Eliminar
+            </button>
+        </form>
+    {% endif %}
+
+</td>

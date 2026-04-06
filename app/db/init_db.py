@@ -5,9 +5,10 @@ from app.db.base import Base
 
 # Importar modelos
 from app.modules.users.user_model import User
-from app.modules.users.role_model import Role
-from app.modules.users.identity_model import Identity
+from app.modules.roles.role_model import Role, Permission, RolePermission
 from app.modules.users.user_role_model import UserRole
+from app.modules.identities.identity_model import Identity
+
 
 def init_db():
     Base.metadata.create_all(bind=engine)

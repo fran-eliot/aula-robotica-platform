@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="utf-8">
-    <title>{% block title %}Aula de Robótica EPS-UAH{% endblock %}</title>
+    <title>{{ ctx.page_title }}</title>
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -14,6 +14,19 @@
 
     {% block extra_css %}{% endblock %}
 </head>
+{% set ctx = get_template_context(request) %}
+
+{% set current_user_id = ctx.current_user_id %}
+{% set current_username = ctx.current_username %}
+{% set current_user_roles = ctx.current_user_roles %}
+{% set has_role = ctx.has_role %}
+{% set has_perm = ctx.has_perm %}
+{% set is_owner = ctx.is_owner %}
+{% set menu = ctx.menu %}
+{% set breadcrumbs = ctx.breadcrumbs %}
+{% set page_title = ctx.page_title %}
+{% set page_heading = ctx.page_heading %}
+{% set can = ctx.can %}
 
 <body class="hold-transition sidebar-mini">
 
@@ -85,7 +98,7 @@
                         {{ current_username }}
 
                         {% if current_user_roles %}
-                        ({{ current_user_roles | join(", ") | capitalize }})
+                        ({{ current_user_roles | map('capitalize') | join(', ') }})
                         {% endif %}
                     </a>
                 </div>
@@ -93,86 +106,94 @@
             {% endif %}
 
             <!-- menú -->
-            <nav class="mt-2">
+            <ul class="nav nav-pills nav-sidebar flex-column">
 
-                <ul class="nav nav-pills nav-sidebar flex-column"
-                    data-widget="treeview"
-                    role="menu">
+            {% for item in menu %}
 
-                    <!-- Dashboard -->
-                    {{ menu_item("/dashboard", "fas fa-tachometer-alt", "Dashboard") }}
+                {% if item.children %}
 
-                    <!-- ADMIN / GESTIÓN -->
-                    {% if has_perm("users:read") or has_perm("roles:read") or has_perm("identities:read") %}
+                <li class="nav-item has-treeview {% if item.open %}menu-open{% endif %}">
+                    <a href="#" class="nav-link {% if item.active %}active{% endif %}">
+                        <i class="nav-icon {{ item.icon }}"></i>
+                        <p>
+                            {{ item.label }}
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
+                    </a>
 
-                    <li class="nav-item has-treeview">
-                        <a href="#" class="nav-link">
-                            <i class="nav-icon fas fa-cogs"></i>
-                            <p>
-                                Administración
-                                <i class="right fas fa-angle-left"></i>
-                            </p>
-                        </a>
+                    <ul class="nav nav-treeview">
+                        {% for child in item.children %}
+                        <li class="nav-item">
+                            <a href="{{ child.url }}"
+                            class="nav-link {% if child.active %}active{% endif %}">
+                                <i class="{{ child.icon }} nav-icon"></i>
+                                <p>{{ child.label }}</p>
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
 
-                        <ul class="nav nav-treeview">
+                </li>
 
-                            {% if has_perm("users:read") %}
-                            <li class="nav-item">
-                                <a href="/users/" class="nav-link">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>Usuarios</p>
-                                </a>
-                            </li>
-                            {% endif %}
+                {% else %}
 
-                            {% if has_perm("identities:read") %}
-                            <li class="nav-item">
-                                <a href="/identities/" class="nav-link">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>Identidades</p>
-                                </a>
-                            </li>
-                            {% endif %}
+                <li class="nav-item">
+                    <a href="{{ item.url }}"
+                    class="nav-link {% if item.active %}active{% endif %}">
+                        <i class="nav-icon {{ item.icon }}"></i>
+                        <p>{{ item.label }}</p>
+                    </a>
+                </li>
 
-                            {% if has_perm("roles:read") %}
-                            <li class="nav-item">
-                                <a href="/roles/" class="nav-link">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>Roles</p>
-                                </a>
-                            </li>
-                            {% endif %}
+                {% endif %}
 
-                        </ul>
-                    </li>
-
-                    {% endif %}
-
-                    <!-- PROFESOR -->
-                    {% if has_perm("students:read") %}
-                        {{ menu_item("/students/", "fas fa-user-graduate", "Estudiantes") }}
-                    {% endif %}
-
-                    <!-- PERFIL -->
-                    {% if current_user_id %}
-                        {{ menu_item("/users/me", "fas fa-user", "Mi perfil") }}
-                    {% endif %}
-
-                </ul>
-
-            </nav>
+            {% endfor %}
+            </ul>
 
         </div>
 
     </aside>
 
+    <!-- Flash messages -->
+    <div class="container-fluid mt-2">
+
+        {% if ctx.flash_messages %}
+            {% for msg in ctx.flash_messages %}
+            <div class="alert alert-{{ msg.category }} alert-dismissible fade show">
+                {{ msg.message }}
+                <button type="button" class="close" data-dismiss="alert">
+                    &times;
+                </button>
+            </div>
+            {% endfor %}
+        {% endif %}
+
+    </div>
 
     <!-- CONTENT -->
     <div class="content-wrapper">
 
         <section class="content-header">
             <div class="container-fluid">
-                <h1>{% block page_title %}{% endblock %}</h1>
+
+                <h1>{{ ctx.page_heading }}</h1>
+
+                {% if breadcrumbs %}
+                <ol class="breadcrumb float-sm-right">
+                    {% for crumb in breadcrumbs %}
+                        {% if crumb.url %}
+                        <li class="breadcrumb-item">
+                            <a href="{{ crumb.url }}">{{ crumb.label }}</a>
+                        </li>
+                        {% else %}
+                        <li class="breadcrumb-item active">
+                            {{ crumb.label }}
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                </ol>
+                {% endif %}
+
             </div>
         </section>
 

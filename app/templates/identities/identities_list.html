@@ -1,79 +1,70 @@
 {% extends "base.html" %}
 
-{% block title %}
-Identidades
-{% endblock %}
-
 {% block content %}
 
 <div class="card">
 
-    <div class="card-header">
-        <h3 class="card-title">Identidades</h3>
+    <div class="card-header d-flex justify-content-between">
+        <h3 class="card-title">
+            <i class="fas fa-id-badge"></i> Identidades
+        </h3>
 
-        <div class="card-tools">
-            <a href="/identities/create" class="btn btn-primary btn-sm">
-                Crear identidad
-            </a>
-        </div>
+        <a href="/identities/form" class="btn btn-primary btn-sm">
+            <i class="fas fa-plus"></i> Nueva
+        </a>
     </div>
 
+    <div class="card-body p-0">
 
-    <div class="card-body">
+        {% if identities %}
 
-        <table class="table table-bordered">
+        <table class="table table-hover">
 
             <thead>
                 <tr>
-                    <th>ID</th>
                     <th>Email</th>
                     <th>Usuario</th>
                     <th>Rol</th>
-                    <th>Acciones</th>
+                    <th></th>
                 </tr>
             </thead>
 
             <tbody>
-
-            {% for identity in identities %}
-
+                {% for i in identities %}
                 <tr>
 
-                    <td>{{ identity.id_identidad }}</td>
+                    <td>{{ i.email }}</td>
+                    <td>{{ i.usuario.nombre if i.usuario else "-" }}</td>
+                    <td>{{ i.rol.nombre if i.rol else "-" }}</td>
 
-                    <td>{{ identity.email }}</td>
+                    <td class="text-right">
 
-                    <td>
-                    {% if identity.rol %}
-                        {{ identity.rol.nombre }}
-                    {% else %}
-                        Sin rol
-                    {% endif %}
-                    </td>
-
-                    <td>{{ identity.rol.nombre }}</td>
-
-                    <td>
-
-                        <a href="/identities/edit/{{ identity.id_identidad }}"
-                        class="btn btn-warning btn-sm">
-                        Editar
+                        <a href="/identities/{{ i.id }}/edit"
+                           class="btn btn-warning btn-sm">
+                            <i class="fas fa-edit"></i>
                         </a>
 
-                        <a href="/identities/delete/{{ identity.id_identidad }}"
-                        class="btn btn-danger btn-sm">
-                        Eliminar
-                        </a>
+                        <form method="post"
+                              action="/identities/{{ i.id }}/delete"
+                              style="display:inline;">
+                            <button class="btn btn-danger btn-sm">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
 
                     </td>
 
                 </tr>
-
-            {% endfor %}
-
+                {% endfor %}
             </tbody>
 
         </table>
+
+        {% else %}
+        <div class="p-4 text-center text-muted">
+            No hay identidades
+        </div>
+        {% endif %}
 
     </div>
 

@@ -1,34 +1,85 @@
 # app/modules/users/user_model.py
+# 👤 Modelo de Usuario (núcleo del sistema)
 
 from sqlalchemy import Column, Integer, String, Boolean, DateTime
 from sqlalchemy.orm import relationship
 from datetime import datetime
 
 from app.db.base import Base
+from app.modules.users.user_role_model import UserRole
 
 
 class User(Base):
+    """
+    Modelo principal de usuario.
+
+    Representa a una persona dentro del sistema.
+    No contiene credenciales (eso va en Identity).
+    """
+
     __tablename__ = "usuarios"
 
-    id_usuario = Column(Integer, primary_key=True, index=True)
-    nombre = Column(String(150), nullable=False)
-    activo = Column(Boolean, default=True, nullable=False)
-    fecha_creacion = Column(DateTime, default=datetime.utcnow, nullable=False)
+    # =========================================================
+    # 🔑 CAMPOS
+    # =========================================================
 
-    # Relaciones
+    id_usuario = Column(
+        Integer,
+        primary_key=True,
+        index=True
+    )
+
+    nombre = Column(
+        String(150),
+        nullable=False
+    )
+
+    activo = Column(
+        Boolean,
+        default=True,
+        nullable=False
+    )
+
+    fecha_creacion = Column(
+        DateTime,
+        default=datetime.utcnow,
+        nullable=False
+    )
+
+    # =========================================================
+    # 🔗 RELACIONES
+    # =========================================================
+
+    # 🔐 Identidades (login, email, provider...)
     identidades = relationship(
         "Identity",
         back_populates="usuario",
-        cascade="all, delete"
+        cascade="all, delete",
+        passive_deletes=True
     )
 
+    # 🛡 Roles (RBAC many-to-many)
     roles = relationship(
         "Role",
-        secondary="user_rol",
+        secondary=UserRole.__table__,
         back_populates="usuarios"
     )
 
-    audit_logs = relationship("AuditLog", back_populates="user")
+    # 🧾 Auditoría
+    audit_logs = relationship(
+        "AuditLog",
+        back_populates="user"
+    )
+
+    # =========================================================
+    # 🧠 HELPERS (ligeros, sin lógica de negocio pesada)
+    # =========================================================
+
+    def is_active(self) -> bool:
+        """
+        Indica si el usuario está activo.
+        """
+        return self.activo
 
     def __repr__(self):
-        return f"<User(id={self.id_usuario}, nombre={self.nombre})>"
+        return f"<User(id={self.id_usuario}, nombre='{self.nombre}')>"

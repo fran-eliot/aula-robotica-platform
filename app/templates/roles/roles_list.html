@@ -1,68 +1,170 @@
 {% extends "base.html" %}
 
-{% block title %}Roles{% endblock %}
-
-{% block page_title %}Roles{% endblock %}
-
 {% block content %}
 
 <div class="card">
 
-<div class="card-header">
+    <!-- ============================= -->
+    <!-- HEADER -->
+    <!-- ============================= -->
+    <div class="card-header d-flex justify-content-between align-items-center">
 
-<h3 class="card-title">Roles</h3>
+        <h3 class="card-title">
+            <i class="fas fa-user-shield"></i> Roles
+        </h3>
 
-<div class="card-tools">
-<a href="/roles/create" class="btn btn-primary btn-sm">
-Crear rol
-</a>
-</div>
+        {% if has_perm("users:update") %}
+        <a href="/roles/form" class="btn btn-primary btn-sm">
+            <i class="fas fa-plus"></i> Nuevo rol
+        </a>
+        {% endif %}
 
-</div>
+    </div>
 
-<div class="card-body">
+    <!-- ============================= -->
+    <!-- TABLA -->
+    <!-- ============================= -->
+    <div class="card-body p-0">
 
-<table class="table table-bordered">
+        {% if roles %}
 
-<thead>
-<tr>
-<th>ID</th>
-<th>Nombre</th>
-<th>Descripción</th>
-<th>Acciones</th>
-</tr>
-</thead>
+        <table class="table table-hover text-nowrap">
 
-<tbody>
+            <thead>
+                <tr>
+                    <th>Rol</th>
+                    <th>Descripción</th>
+                    <th>Permisos</th>
+                    <th>Estado</th>
+                    <th style="width:180px">Acciones</th>
+                </tr>
+            </thead>
 
-{% for role in roles %}
+            <tbody>
 
-<tr>
+                {% for role in roles %}
+                <tr style="cursor:pointer"
+                    onclick="window.location='/roles/{{ role.id_rol }}'">
 
-<td>{{ role.id_rol }}</td>
+                    <!-- ============================= -->
+                    <!-- NOMBRE -->
+                    <!-- ============================= -->
+                    <td>
+                        <strong>
+                            {{ role.nombre | capitalize }}
+                        </strong>
+                        <br>
+                        <small class="text-muted">
+                            {{ role.permissions | length }} permisos
+                        </small>
+                    </td>
 
-<td>{{ role.nombre }}</td>
+                    <!-- ============================= -->
+                    <!-- DESCRIPCIÓN -->
+                    <!-- ============================= -->
+                    <td>
+                        {{ role.descripcion or "-" }}
+                    </td>
 
-<td>{{ role.descripcion }}</td>
+                    <!-- ============================= -->
+                    <!-- PERMISOS -->
+                    <!-- ============================= -->
+                    <td title="{{ role.permissions | map(attribute='nombre') | join(', ') }}">
 
-<td>
+                        {% if role.permissions %}
 
-<a href="/roles/delete/{{ role.id_rol }}"
-class="btn btn-danger btn-sm">
-Eliminar
-</a>
+                            {% for perm in role.permissions[:3] %}
+                                <span class="badge badge-info"
+                                      title="{{ perm.nombre }}">
+                                    {{ perm.nombre.split(":")[1] }}
+                                </span>
+                            {% endfor %}
 
-</td>
+                            {% if role.permissions | length > 3 %}
+                                <span class="badge badge-secondary">
+                                    +{{ role.permissions | length - 3 }}
+                                </span>
+                            {% endif %}
 
-</tr>
+                        {% else %}
+                            <span class="badge badge-warning">
+                                Sin permisos
+                            </span>
+                        {% endif %}
 
-{% endfor %}
+                    </td>
 
-</tbody>
+                    <!-- ============================= -->
+                    <!-- ESTADO -->
+                    <!-- ============================= -->
+                    <td>
+                        {% if role.permissions %}
+                            <span class="badge badge-success">
+                                <i class="fas fa-check"></i> Activo
+                            </span>
+                        {% else %}
+                            <span class="badge badge-danger">
+                                <i class="fas fa-exclamation-triangle"></i> Incompleto
+                            </span>
+                        {% endif %}
+                    </td>
 
-</table>
+                    <!-- ============================= -->
+                    <!-- ACCIONES -->
+                    <!-- ============================= -->
+                    <td onclick="event.stopPropagation()">
 
-</div>
+                        {% if has_perm("users:update") %}
+                        <a href="/roles/{{ role.id_rol }}/edit"
+                           class="btn btn-warning btn-sm"
+                           title="Editar">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        {% endif %}
+
+                        {% if has_perm("users:delete") %}
+                        <form method="post"
+                              action="/roles/{{ role.id_rol }}/delete"
+                              style="display:inline;">
+                            <button class="btn btn-danger btn-sm"
+                                    title="Eliminar"
+                                    onclick="return confirm('¿Eliminar rol?')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                        {% endif %}
+
+                    </td>
+
+                </tr>
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+        {% else %}
+
+        <!-- ============================= -->
+        <!-- EMPTY STATE -->
+        <!-- ============================= -->
+        <div class="text-center p-5 text-muted">
+
+            <i class="fas fa-user-shield fa-2x mb-2"></i>
+
+            <p>No hay roles definidos</p>
+
+            {% if has_perm("users:update") %}
+            <a href="/roles/form" class="btn btn-primary btn-sm">
+                Crear primer rol
+            </a>
+            {% endif %}
+
+        </div>
+
+        {% endif %}
+
+    </div>
 
 </div>
 

@@ -1,98 +1,205 @@
 {% extends "base.html" %}
 
-{% block title %}
-Usuarios
-{% endblock %}
-
-{% block page_title %}
-Gestión de Usuarios
-{% endblock %}
-
 {% block content %}
 
 <div class="card">
 
-    <div class="card-header">
-        <h3 class="card-title">Listado de usuarios</h3>
+    <!-- HEADER -->
+    <div class="card-header d-flex justify-content-between align-items-center">
 
-        <div class="card-tools">
-            <a href="/users/create" class="btn btn-primary btn-sm">
-                Crear usuario
-            </a>
-        </div>
+        <h3 class="card-title">
+            <i class="fas fa-users"></i> Usuarios
+            {% if users %}
+                <span class="badge badge-secondary ml-2">{{ users|length }}</span>
+            {% endif %}
+        </h3>
+
+        {% if can("create") %}
+        <a href="/users/form" class="btn btn-primary btn-sm">
+            <i class="fas fa-plus"></i> Nuevo usuario
+        </a>
+        {% endif %}
+
     </div>
 
-
+    <!-- FILTROS -->
     <div class="card-body">
 
-        <table class="table table-bordered table-striped">
+        <form method="get" class="mb-3">
+
+            <div class="row">
+
+                <div class="col-md-4">
+                    <input type="text"
+                           name="search"
+                           value="{{ search }}"
+                           class="form-control"
+                           placeholder="Buscar por nombre...">
+                </div>
+
+                <div class="col-md-3">
+                    <select name="status" class="form-control">
+                        <option value="all" {% if status == "all" %}selected{% endif %}>Todos</option>
+                        <option value="active" {% if status == "active" %}selected{% endif %}>Activos</option>
+                        <option value="inactive" {% if status == "inactive" %}selected{% endif %}>Inactivos</option>
+                    </select>
+                </div>
+
+                <div class="col-md-5 text-right">
+
+                    <button class="btn btn-primary">
+                        <i class="fas fa-search"></i> Buscar
+                    </button>
+
+                    <a href="/users/" class="btn btn-secondary">
+                        Limpiar
+                    </a>
+
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
+
+    <!-- TABLA -->
+    <div class="card-body p-0">
+
+        {% if users %}
+
+        <table class="table table-hover text-nowrap">
 
             <thead>
                 <tr>
                     <th>ID</th>
                     <th>Nombre</th>
-                    <th>Activo</th>
-                    <th>Fecha creación</th>
-                    <th>Acciones</th>
+                    <th>Estado</th>
+                    <th class="text-right" style="width: 180px">Acciones</th>
                 </tr>
             </thead>
 
             <tbody>
 
                 {% for user in users %}
-
-                <tr class="{% if not user.activo %}table-secondary{% endif %}">
+                <tr onclick="window.location.href='/users/{{ user.id_usuario }}'"
+                    style="cursor:pointer">
 
                     <td>{{ user.id_usuario }}</td>
 
-                    <td>{{ user.nombre }}</td>
-
                     <td>
-                        {% if user.activo %}
-
-                        <a href="/users/deactivate/{{ user.id_usuario }}"
-                        class="btn btn-warning btn-sm">
-                        Desactivar
-                        </a>
-
-                        {% else %}
-
-                        <a href="/users/activate/{{ user.id_usuario }}"
-                        class="btn btn-success btn-sm">
-                        Reactivar
-                        </a>
-
-                        {% endif %}
-
-                        <a href="/users/delete/{{ user.id_usuario }}"
-                        class="btn btn-danger btn-sm" onclick="return confirm('¿Eliminar definitivamente este usuario?')">
-                        Eliminar
+                        <a href="/users/{{ user.id_usuario }}">
+                            {{ user.nombre }}
                         </a>
                     </td>
 
-                    <td>{{ user.fecha_creacion }}</td>
-
                     <td>
+                        {% if user.activo %}
+                            <span class="badge badge-success">
+                                <i class="fas fa-check"></i> Activo
+                            </span>
+                        {% else %}
+                            <span class="badge badge-secondary">
+                                <i class="fas fa-ban"></i> Inactivo
+                            </span>
+                        {% endif %}
+                    </td>
 
-                        <a href="/users/{{ user.id_usuario }}" class="btn btn-info btn-sm">
-                            Ver
-                        </a>
+                    <td class="text-right" onclick="event.stopPropagation();">
 
-                        <a href="/users/delete/{{ user.id_usuario }}" class="btn btn-danger btn-sm">
-                            Eliminar
+                        {% if can("view", user) %}
+                        <a href="/users/{{ user.id_usuario }}"
+                           class="btn btn-info btn-sm"
+                           title="Ver">
+                            <i class="fas fa-eye"></i>
                         </a>
+                        {% endif %}
+
+                        {% if can("edit", user) %}
+                        <a href="/users/{{ user.id_usuario }}/edit"
+                           class="btn btn-warning btn-sm"
+                           title="Editar">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        {% endif %}
+
+                        {% if can("edit", user) %}
+                            {% if user.activo %}
+                            <a href="/users/{{ user.id_usuario }}/deactivate"
+                               class="btn btn-secondary btn-sm"
+                               title="Desactivar">
+                                <i class="fas fa-ban"></i>
+                            </a>
+                            {% else %}
+                            <a href="/users/{{ user.id_usuario }}/activate"
+                               class="btn btn-success btn-sm"
+                               title="Activar">
+                                <i class="fas fa-check"></i>
+                            </a>
+                            {% endif %}
+                        {% endif %}
+
+                        {% if can("delete", user) %}
+                        <form method="post"
+                              action="/users/{{ user.id_usuario }}/delete"
+                              style="display:inline;">
+                            <button class="btn btn-danger btn-sm"
+                                    title="Eliminar"
+                                    onclick="return confirm('¿Eliminar usuario?')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                        {% endif %}
 
                     </td>
 
                 </tr>
-
                 {% endfor %}
 
             </tbody>
 
         </table>
 
+        {% else %}
+
+        <!-- EMPTY STATE -->
+        <div class="text-center p-4 text-muted">
+
+            <i class="fas fa-search fa-2x mb-2"></i>
+
+            <p>No se encontraron resultados</p>
+
+            {% if can("create") %}
+            <a href="/users/form" class="btn btn-primary btn-sm">
+                Crear usuario
+            </a>
+            {% endif %}
+
+        </div>
+
+        {% endif %}
+
     </div>
+
+    <!-- PAGINACIÓN -->
+    {% if total_pages > 1 %}
+    <div class="card-footer clearfix">
+
+        <ul class="pagination pagination-sm m-0 float-right">
+
+            {% for p in range(1, total_pages + 1) %}
+            <li class="page-item {% if p == page %}active{% endif %}">
+                <a class="page-link"
+                   href="?page={{ p }}&search={{ search }}&status={{ status }}">
+                    {{ p }}
+                </a>
+            </li>
+            {% endfor %}
+
+        </ul>
+
+    </div>
+    {% endif %}
 
 </div>
 

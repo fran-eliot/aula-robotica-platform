@@ -73,3 +73,5 @@ def can_access_resource(current_user, owner_id, permissions):
         return True
 
     return has_permission(current_user.permissions, permissions)
+
+

@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="card">
+
+    <div class="card-header">
+        <h3 class="card-title">
+            {{ "Editar identidad" if identity else "Crear identidad" }}
+        </h3>
+    </div>
+
+    <form method="post"
+          action="{% if identity %}/identities/{{ identity.id }}/edit{% else %}/identities/form{% endif %}">
+
+        <div class="card-body">
+
+            <!-- EMAIL -->
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email"
+                       name="email"
+                       class="form-control"
+                       value="{{ identity.email if identity else '' }}"
+                       required>
+            </div>
+
+            <!-- PASSWORD -->
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password"
+                       name="password"
+                       class="form-control">
+
+                {% if identity %}
+                <small class="text-muted">Dejar vacío para no cambiar</small>
+                {% endif %}
+            </div>
+
+            <!-- USER -->
+            <div class="form-group">
+                <label>Usuario</label>
+                <select name="user_id" class="form-control">
+
+                    {% for u in users %}
+                    <option value="{{ u.id_usuario }}"
+                        {% if identity and identity.user_id == u.id_usuario %}selected{% endif %}>
+                        {{ u.nombre }}
+                    </option>
+                    {% endfor %}
+
+                </select>
+            </div>
+
+            <!-- ROLE -->
+            <div class="form-group">
+                <label>Rol</label>
+                <select name="rol_id" class="form-control">
+
+                    {% for r in roles %}
+                    <option value="{{ r.id_rol }}"
+                        {% if identity and identity.rol_id == r.id_rol %}selected{% endif %}>
+                        {{ r.nombre }}
+                    </option>
+                    {% endfor %}
+
+                </select>
+            </div>
+
+        </div>
+
+        <div class="card-footer">
+
+            <button class="btn btn-primary">
+                Guardar
+            </button>
+
+            <a href="/identities/" class="btn btn-secondary">
+                Cancelar
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}

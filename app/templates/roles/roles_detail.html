@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="row">
+
+    <!-- ============================= -->
+    <!-- 🧑‍💼 INFO DEL ROL -->
+    <!-- ============================= -->
+    <div class="col-md-4">
+
+        <div class="card card-primary">
+
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-user-shield"></i>
+                    {{ role.nombre | capitalize }}
+                </h3>
+            </div>
+
+            <div class="card-body">
+
+                <!-- DESCRIPCIÓN -->
+                <p>
+                    <strong>Descripción:</strong><br>
+                    <span class="text-muted">
+                        {{ role.descripcion or "Sin descripción" }}
+                    </span>
+                </p>
+
+                <!-- CONTADOR -->
+                <p>
+                    <strong>Permisos:</strong>
+                    <span class="badge badge-info">
+                        {{ role.permissions | length }}
+                    </span>
+                </p>
+
+                <!-- ESTADO -->
+                <p>
+                    <strong>Estado:</strong><br>
+                    {% if role.permissions %}
+                        <span class="badge badge-success">
+                            <i class="fas fa-check"></i> Activo
+                        </span>
+                    {% else %}
+                        <span class="badge badge-danger">
+                            <i class="fas fa-exclamation-triangle"></i> Incompleto
+                        </span>
+                    {% endif %}
+                </p>
+
+                <hr>
+
+                <!-- ACCIONES -->
+                <div class="d-flex justify-content-between">
+
+                    <a href="/roles/" class="btn btn-secondary btn-sm">
+                        <i class="fas fa-arrow-left"></i>
+                    </a>
+
+                    <div>
+
+                        {% if has_perm("users:update") %}
+                        <a href="/roles/{{ role.id_rol }}/edit"
+                           class="btn btn-warning btn-sm">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        {% endif %}
+
+                        {% if has_perm("users:delete") %}
+                        <form method="post"
+                              action="/roles/{{ role.id_rol }}/delete"
+                              style="display:inline;">
+                            <button class="btn btn-danger btn-sm"
+                                    onclick="return confirm('¿Eliminar rol?')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ============================= -->
+    <!-- 🔐 PERMISOS -->
+    <!-- ============================= -->
+    <div class="col-md-8">
+
+        <div class="card">
+
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-shield-alt"></i> Permisos
+                </h3>
+            </div>
+
+            <div class="card-body">
+
+                {% if grouped_permissions %}
+
+                    {% for module, perms in grouped_permissions.items() %}
+
+                    <div class="mb-4">
+
+                        <!-- MÓDULO -->
+                        <h5 class="text-primary">
+                            <i class="fas fa-folder"></i>
+                            {{ module | capitalize }}
+                            <small class="text-muted">
+                                ({{ perms | length }})
+                            </small>
+                        </h5>
+
+                        <!-- PERMISOS -->
+                        <div class="mt-2">
+
+                            {% for perm in perms %}
+                                <span class="badge badge-info mr-1 mb-1"
+                                      title="{{ perm.name }}">
+                                    {{ perm.action }}
+                                </span>
+                            {% endfor %}
+
+                        </div>
+
+                    </div>
+
+                    {% endfor %}
+
+                {% else %}
+
+                    <div class="text-muted text-center">
+                        <i class="fas fa-exclamation-circle"></i>
+                        Este rol no tiene permisos asignados
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ============================= -->
+<!-- 📜 AUDITORÍA -->
+<!-- ============================= -->
+<div class="card mt-3">
+
+    <div class="card-header">
+        <h3 class="card-title">
+            <i class="fas fa-history"></i> Historial de actividad
+        </h3>
+    </div>
+
+    <div class="card-body p-0">
+
+        {% if logs %}
+
+        <table class="table table-sm table-hover">
+
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Usuario</th>
+                    <th>Acción</th>
+                    <th>Detalle</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for log in logs %}
+                <tr>
+
+                    <td>
+                        {{ log.created_at.strftime("%d/%m/%Y %H:%M") }}
+                    </td>
+
+                    <td>
+                        {{ log.user.nombre if log.user else "Sistema" }}
+                    </td>
+
+                    <td>
+                        <span class="badge {{ get_audit_color(log.action) }}">
+                            <i class="fas {{ get_audit_icon(log.action) }}"></i>
+                            {{ log.action }}
+                        </span>
+                    </td>
+
+                    <td>
+                        {{ log.description }}
+                    </td>
+
+                </tr>
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+        {% else %}
+
+        <div class="p-4 text-center text-muted">
+            <i class="fas fa-clock"></i><br>
+            No hay actividad registrada
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}

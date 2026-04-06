@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="card">
+
+    <!-- HEADER -->
+    <div class="card-header">
+        <h3 class="card-title">
+            <i class="fas fa-user-tag"></i>
+            {{ role and "Editar rol" or "Nuevo rol" }}
+        </h3>
+    </div>
+
+    <form method="post">
+
+        <div class="card-body">
+
+            <!-- ============================= -->
+            <!-- 📝 DATOS DEL ROL -->
+            <!-- ============================= -->
+            <div class="row">
+
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Nombre del rol</label>
+                        <input type="text"
+                               name="nombre"
+                               class="form-control"
+                               value="{{ role.nombre if role else '' }}"
+                               placeholder="Ej: admin, profesor..."
+                               required>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Descripción</label>
+                        <input type="text"
+                               name="descripcion"
+                               class="form-control"
+                               value="{{ role.descripcion if role else '' }}"
+                               placeholder="Descripción opcional">
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ============================= -->
+            <!-- 🔐 PERMISOS AGRUPADOS -->
+            <!-- ============================= -->
+            <div class="form-group mt-4">
+
+                <label>
+                    <i class="fas fa-shield-alt"></i>
+                    Permisos
+                </label>
+
+                {% for module, perms in grouped_permissions.items() %}
+                <div class="card mb-3">
+
+                    <!-- CABECERA DEL MÓDULO -->
+                    <div class="card-header d-flex justify-content-between align-items-center">
+
+                        <strong>
+                            <i class="fas fa-folder"></i>
+                            {{ module | capitalize }}
+                        </strong>
+
+                        <!-- seleccionar todo -->
+                        <button type="button"
+                                class="btn btn-sm btn-outline-primary"
+                                onclick="toggleModule('{{ module }}')">
+                            Seleccionar todo
+                        </button>
+
+                    </div>
+
+                    <!-- PERMISOS -->
+                    <div class="card-body">
+
+                        <div class="row">
+
+                            {% for perm in perms %}
+                            <div class="col-md-4 mb-2">
+
+                                <div class="form-check">
+
+                                    <input class="form-check-input perm-{{ module }}"
+                                           type="checkbox"
+                                           name="permissions"
+                                           value="{{ perm.id }}"
+                                           id="perm_{{ perm.id }}"
+                                           {% if role and perm.id in [p.id for p in role.permissions] %}checked{% endif %}>
+
+                                    <label class="form-check-label" for="perm_{{ perm.id }}">
+                                        <span class="badge badge-light">
+                                            {{ perm.action }}
+                                        </span>
+                                    </label>
+
+                                </div>
+
+                            </div>
+                            {% endfor %}
+
+                        </div>
+
+                    </div>
+
+                </div>
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+        <!-- ============================= -->
+        <!-- FOOTER -->
+        <!-- ============================= -->
+        <div class="card-footer d-flex justify-content-between">
+
+            <a href="/roles/" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Volver
+            </a>
+
+            <button class="btn btn-primary">
+                <i class="fas fa-save"></i>
+                {{ role and "Actualizar" or "Crear" }}
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+<!-- ============================= -->
+<!-- JS UX -->
+<!-- ============================= -->
+<script>
+function toggleModule(module) {
+    const checkboxes = document.querySelectorAll(".perm-" + module);
+
+    const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+
+    checkboxes.forEach(cb => cb.checked = !allChecked);
+}
+</script>
+
+{% endblock %}
