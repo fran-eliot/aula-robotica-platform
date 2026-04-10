@@ -1,3 +1,6 @@
+# core/middleware/auth_middleware.py
+# 🔐 Middleware de autenticación y refresh automático
+
 from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi.responses import RedirectResponse
 
@@ -29,6 +32,8 @@ class AuthMiddleware(BaseHTTPMiddleware):
             return await call_next(request)
 
         access_token = request.cookies.get("access_token")
+
+        print("COOKIES EN MIDDLEWARE:", request.cookies)
 
         # 🟡 2. No token → login
         if not access_token:

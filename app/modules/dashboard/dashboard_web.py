@@ -29,6 +29,8 @@ def dashboard(
     - Actividad reciente (audit logs)
     """
 
+    print("Entrando al dashboard con usuario:", current_user.nombre)
+   
     # =========================================================
     # 📊 OBTENER MÉTRICAS
     # =========================================================
@@ -37,10 +39,20 @@ def dashboard(
     # =========================================================
     # 🎨 RENDER TEMPLATE
     # =========================================================
-    return templates.TemplateResponse(
-        "dashboard/dashboard.html",
-        {
-            "request": request,
-            **metrics  # expandimos directamente en el contexto
-        }
-    )
+    try:
+        return templates.TemplateResponse(
+            "dashboard/dashboard.html",
+            {
+                "request": request,
+                **metrics  # expandimos directamente en el contexto
+            }
+        )
+    except Exception as e:
+        print("Error renderizando dashboard:", e)
+        return templates.TemplateResponse(
+            "dashboard/dashboard.html",
+            {
+                "request": request,
+                "error": "Error al cargar el dashboard"
+            }
+        )

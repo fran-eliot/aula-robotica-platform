@@ -4,6 +4,7 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 
+from app.modules.roles.role_model import Role
 from app.modules.users.user_model import User
 from app.modules.audit.audit_model import AuditLog
 
@@ -34,6 +35,12 @@ def get_dashboard_metrics(db: Session) -> dict:
     inactive_users = int(user_stats.inactive or 0)
 
     # =========================================================
+    # 🛡️ MÉTRICAS DE ROLES
+    # =========================================================
+
+    total_roles = db.query(func.count(Role.id_rol)).scalar() or 0
+
+    # =========================================================
     # 🧾 LOGS RECIENTES
     # =========================================================
 
@@ -52,5 +59,6 @@ def get_dashboard_metrics(db: Session) -> dict:
         "total_users": total_users,
         "active_users": active_users,
         "inactive_users": inactive_users,
+        "total_roles": total_roles,
         "recent_logs": recent_logs
     }

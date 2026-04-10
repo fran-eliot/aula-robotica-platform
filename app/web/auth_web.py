@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.db.session import get_db
 from app.core.templates import templates
-from app.core.presentation import settings
+from app.core.config import settings
 from app.core.constants.audit_actions import AuditAction
 from app.core.security import validate_refresh_token
 

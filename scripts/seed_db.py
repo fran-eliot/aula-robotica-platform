@@ -51,7 +51,21 @@ def seed():
         "users:read",
         "users:create",
         "users:update",
-        "users:delete"
+        "users:delete",
+
+        "roles:read",
+        "roles:create",
+        "roles:update",
+        "roles:delete",
+
+        "identities:read",
+        "identities:create",
+        "identities:update",
+        "identities:delete",
+
+        "dashboard:read",
+        "students:read",
+        "audit:read"
     ]
 
     permissions = {}
@@ -119,34 +133,51 @@ def seed():
     print("✔ Usuarios creados")
 
     # =========================
+    # ASIGNAR ROLES A USUARIOS (RBAC REAL)
+    # =========================
+
+    # Admins
+    for user in admins:
+        user.roles.append(admin_role)
+
+    # Profesores
+    for user in profesores:
+        user.roles.append(profesor_role)
+
+    # Estudiantes
+    for user in alumnos:
+        user.roles.append(estudiante_role)
+
+    db.commit()
+
+    # =========================
     # IDENTIDADES
     # =========================
 
-    def create_identity(user, email, role):
+    def create_identity(user, email):
         return Identity(
             email=email,
             provider="local",
             password_hash=hash_password("1234"),
-            user_id=user.id_usuario,
-            rol_id=role.id_rol
+            user_id=user.id_usuario
         )
 
     identities = []
 
     # Admins
-    identities.append(create_identity(admins[0], "admin1@robotica.es", admin_role))
-    identities.append(create_identity(admins[1], "admin2@robotica.es", admin_role))
+    identities.append(create_identity(admins[0], "admin1@robotica.es"))
+    identities.append(create_identity(admins[1], "admin2@robotica.es"))
 
     # Profesores
     for i, profesor in enumerate(profesores):
         identities.append(
-            create_identity(profesor, f"profesor{i+1}@uah.es", profesor_role)
+            create_identity(profesor, f"profesor{i+1}@uah.es")
         )
 
     # Alumnos (rol por defecto estudiante)
     for i, alumno in enumerate(alumnos):
         identities.append(
-            create_identity(alumno, f"alumno{i+1}@uah.es", estudiante_role)
+            create_identity(alumno, f"alumno{i+1}@uah.es")
         )
 
     db.add_all(identities)

@@ -62,17 +62,6 @@ class Identity(Base):
     )
 
     # =========================================================
-    # 🎭 RELACIÓN CON ROL (legacy / acceso rápido)
-    # =========================================================
-    rol_id = Column(
-        Integer,
-        ForeignKey("roles.id_rol"),
-        nullable=True
-    )
-
-    rol = relationship("Role")
-
-    # =========================================================
     # 🧾 REPRESENTACIÓN
     # =========================================================
     def __repr__(self):

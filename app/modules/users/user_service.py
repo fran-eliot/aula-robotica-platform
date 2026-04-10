@@ -256,6 +256,13 @@ def get_user_permissions(user):
     Devuelve permisos efectivos (sin duplicados).
     """
 
+    print(f"Obteniendo permisos para usuario {user.nombre} (ID: {user.id_usuario})")
+
+    for role in user.roles:
+        print(f"ROL: {role.nombre}")
+        for perm in role.permissions:
+            print(f"  - PERMISO: {perm.nombre}")
+
     return list({
         perm.nombre
         for role in user.roles

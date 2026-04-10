@@ -12,7 +12,7 @@ from app.core.security import (
     create_refresh_token,
     verify_password
 )
-from app.core.authorization.permissions import get_user_permissions
+from app.modules.users.user_service import get_user_permissions
 
 
 # =========================================================
@@ -100,18 +100,18 @@ def authenticate_user(
         )
 
     # =========================================================
-    # 🎭 4. ROLES EFECTIVOS
+    # 🎭 ROLES EFECTIVOS (RBAC PURO)
     # =========================================================
-    # ⚠️ prioridad: identity.rol (legacy) → user.roles (RBAC)
-    if identity.rol:
-        roles = [identity.rol.nombre.lower()]
-    else:
-        roles = [role.nombre.lower() for role in user.roles]
+    roles = [role.nombre.lower() for role in user.roles]
 
     # =========================================================
     # 🔑 5. PERMISOS EFECTIVOS
     # =========================================================
     permissions = get_user_permissions(user)
+
+    print("USER ROLES:", [r.nombre for r in user.roles])
+
+    print("PERMISSIONS GENERADAS:", permissions)
 
     # =========================================================
     # 🪪 6. PAYLOAD BASE

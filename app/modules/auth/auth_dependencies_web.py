@@ -29,6 +29,8 @@ def get_current_user_web(
 
     payload = getattr(request.state, "user", None)
 
+    print("PAYLOAD EN DEPENDENCY:", payload)
+
     if not payload:
         raise HTTPException(status_code=401, detail="No autenticado")
 
@@ -93,6 +95,9 @@ def require_permission_web(*required_permissions: str):
     ) -> User:
 
         user_permissions = getattr(current_user, "permissions", [])
+
+        print("USER PERMISSIONS", user_permissions)
+        print("REQUIRED PERMISSIONS", required_permissions)
 
         if not has_permission(
             user_permissions,

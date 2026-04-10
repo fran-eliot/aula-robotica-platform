@@ -1,4 +1,5 @@
 # app/core/services/menu_service.py
+# 📋 Servicio de menú dinámico basado en permisos
 
 import re
 from app.core.presentation.breadcrumbs import DYNAMIC_BREADCRUMBS
@@ -13,6 +14,7 @@ def get_menu_structure():
             "label": "Dashboard",
             "icon": "fas fa-tachometer-alt",
             "url": "/dashboard",
+            "permission": "dashboard:read"
         },
         {
             "label": "Administración",

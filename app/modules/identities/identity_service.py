@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.core.security import hash_password
 from app.modules.identities.identity_model import Identity
-from app.modules.roles.role_model import Role
+from app.modules.users.user_model import User
 
 
 # =========================================================
@@ -51,7 +51,6 @@ def create_identity(
     email: str,
     password: str,
     user_id: int,
-    rol_id: int | None = None,
     provider: str = "local"
 ):
     """
@@ -59,8 +58,8 @@ def create_identity(
 
     Incluye:
     - validación de email único
-    - asignación de rol por defecto
     - hash de contraseña
+    - 🔥 sincronización RBAC (user.roles)
     """
 
     # 🔎 1. Email único
@@ -74,32 +73,16 @@ def create_identity(
             detail="Email ya registrado"
         )
 
-    # 🎓 2. Rol por defecto (fallback)
-    if not rol_id:
-
-        default_role = db.query(Role).filter(
-            Role.nombre == "estudiante"
-        ).first()
-
-        if not default_role:
-            raise HTTPException(
-                status_code=500,
-                detail="Rol 'estudiante' no existe"
-            )
-
-        rol_id = default_role.id_rol
-
-    # 🔐 3. Crear identidad
+    # 🔐 2. Crear identidad
     identity = Identity(
         email=email,
         password_hash=hash_password(password),
         user_id=user_id,
-        rol_id=rol_id,
         provider=provider
     )
 
     db.add(identity)
-    db.flush()  # obtiene ID sin commit
+    db.flush()
 
     return identity
 
@@ -112,20 +95,18 @@ def update_identity(
     identity: Identity,
     email: str,
     user_id: int,
-    rol_id: int,
     provider: str,
     password: str | None = None
 ):
     """
     Actualiza una identidad existente.
 
-    - Permite cambio de email, usuario, rol y provider
+    - Permite cambio de email, usuario y provider
     - Password opcional (solo si se envía)
     """
 
     identity.email = email
     identity.user_id = user_id
-    identity.rol_id = rol_id
     identity.provider = provider
 
     # 🔐 actualización de password opcional
