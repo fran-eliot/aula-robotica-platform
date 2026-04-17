@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="row mb-3">
+
+    {% if can("read", "users") %}
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-info shadow-sm"
+             style="cursor:pointer"
+             onclick="window.location='/users/'">
+            <div class="inner">
+                <h3>{{ total_users }}</h3>
+                <p>Total usuarios</p>
+            </div>
+            <div class="icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <a href="/users/" class="small-box-footer">
+                Ver usuarios <i class="fas fa-arrow-circle-right"></i>
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+
+    {% if can("read", "users") %}
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-success shadow-sm">
+            <div class="inner">
+                <h3>{{ active_users }}</h3>
+                <p>Usuarios activos</p>
+            </div>
+            <div class="icon">
+                <i class="fas fa-user-check"></i>
+            </div>
+            <div class="small-box-footer text-white-50">
+                Estado saludable del sistema
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+
+    {% if can("read", "users") %}
+    <div class="col-lg-3 col-6">
+        <div class="small-box 
+            {% if inactive_users > 0 %}bg-warning{% else %}bg-secondary{% endif %}
+            shadow-sm">
+            <div class="inner">
+                <h3>{{ inactive_users }}</h3>
+                <p>Usuarios inactivos</p>
+            </div>
+            <div class="icon">
+                <i class="fas fa-user-times"></i>
+            </div>
+            <div class="small-box-footer text-white-50">
+                {% if inactive_users > 0 %}
+                    Requiere revisión
+                {% else %}
+                    Sin incidencias
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+
+    {% if can("read", "roles") %}
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-primary shadow-sm"
+             style="cursor:pointer"
+             onclick="window.location='/roles/'">
+            <div class="inner">
+                <h3>{{ total_roles }}</h3>
+                <p>Total roles</p>
+            </div>
+            <div class="icon">
+                <i class="fas fa-user-shield"></i>
+            </div>
+            <a href="/roles/" class="small-box-footer">
+                Ver roles <i class="fas fa-arrow-circle-right"></i>
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
+
+<!-- ===================== ACTIVIDAD ===================== -->
+<div class="card shadow-sm">
+
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h3 class="card-title">
+            <i class="fas fa-history"></i> Actividad reciente
+        </h3>
+        <small class="text-muted">Últimos eventos del sistema</small>
+    </div>
+
+    <div class="card-body">
+
+        {% if recent_logs %}
+
+        <div class="timeline">
+
+            {% for log in recent_logs %}
+            <div>
+
+                <i class="fas 
+                   {{ get_audit_icon(log.action) }} 
+                   {{ get_audit_color(log.action) }}">
+                </i>
+
+                <div class="timeline-item">
+
+                    <span class="time">
+                        <i class="fas fa-clock"></i>
+                        {{ log.created_at.strftime("%d/%m %H:%M") }}
+                    </span>
+
+                    <h3 class="timeline-header">
+                        {{ log.description or "Acción registrada" }}
+                        <span class="badge badge-light ml-2">
+                            {{ log.action }}
+                        </span>
+                    </h3>
+
+                    {% if log.user %}
+                    <div class="timeline-body">
+                        <i class="fas fa-user"></i>
+                        {{ log.user.nombre }}
+                    </div>
+                    {% endif %}
+
+                </div>
+
+            </div>
+            {% endfor %}
+
+        </div>
+
+        {% else %}
+
+        <div class="text-center text-muted p-4">
+            <i class="fas fa-history fa-2x mb-2"></i>
+            <p>No hay actividad reciente</p>
+            <small>Las acciones aparecerán aquí automáticamente</small>
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}

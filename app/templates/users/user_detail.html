@@ -1,250 +1,142 @@
+{# =========================================================
+   users/user_detail.html
+   ========================================================= #}
 {% extends "base.html" %}
+
+{% from "components/buttons.html" import btn, btn_delete %}
+{% from "components/badges.html" import status, permission %}
+{% from "components/audit_table.html" import audit_table %}
+{% from "components/tabs.html" import tabs %}
+{% from "components/detail_layout.html" import detail_layout %}
 
 {% block content %}
 
-<div class="row">
+{% call(side) detail_layout("Usuario", "user-circle") %}
 
-    <!-- ========================= -->
-    <!-- PERFIL -->
-    <!-- ========================= -->
-    <div class="col-md-4">
-
-        <div class="card card-primary card-outline">
+    {% if side == "left" %}
+        <div class="card card-primary card-outline shadow-sm">
 
             <div class="card-body box-profile text-center">
 
-                <i class="fas fa-user fa-3x text-primary mb-2"></i>
+                <i class="fas fa-user-circle fa-3x text-primary mb-2"></i>
 
                 <h3 class="profile-username">
                     {{ user.nombre }}
                 </h3>
 
-                <p class="text-muted">
-                    ID: {{ user.id_usuario }}
+                <p class="text-muted mb-2">
+                    Usuario #{{ user.id_usuario }}
                 </p>
 
-                {% if user.activo %}
-                    <span class="badge badge-success">Activo</span>
-                {% else %}
-                    <span class="badge badge-secondary">Inactivo</span>
-                {% endif %}
+                {{ status(user.activo) }}
 
             </div>
 
             <div class="card-footer text-center">
 
-                {% if can("edit", user) %}
-                <a href="/users/{{ user.id_usuario }}/edit"
-                   class="btn btn-warning btn-sm">
-                    <i class="fas fa-edit"></i> Editar
-                </a>
+                {% if can("update", "users", user) %}
+                    {{ btn("/users/" ~ user.id_usuario ~ "/edit", "Editar", "warning", "edit") }}
                 {% endif %}
 
-                {% if can("delete", user) %}
-                <form method="post"
-                      action="/users/{{ user.id_usuario }}/delete"
-                      style="display:inline;">
-                    <button class="btn btn-danger btn-sm"
-                            onclick="return confirm('¿Eliminar usuario?')">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </form>
+                {% if can("delete", "users", user) %}
+                    {{ btn_delete("/users/" ~ user.id_usuario ~ "/delete", "¿Eliminar usuario?") }}
                 {% endif %}
 
             </div>
 
         </div>
+    {% endif %}
 
-    </div>
-
-    <!-- ========================= -->
-    <!-- TABS -->
-    <!-- ========================= -->
-    <div class="col-md-8">
-
-        <div class="card">
-
-            <div class="card-header p-2">
-                <ul class="nav nav-pills">
-
-                    <li class="nav-item">
-                        <a class="nav-link active" href="#roles" data-toggle="tab">
-                            Roles
-                        </a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="nav-link" href="#permissions" data-toggle="tab">
-                            Permisos
-                        </a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="nav-link" href="#audit" data-toggle="tab">
-                            Auditoría
-                        </a>
-                    </li>
-
-                </ul>
-            </div>
-
+    {% if side == "right" %}
+        <div class="card shadow-sm">
             <div class="card-body">
 
-                <div class="tab-content">
+                {% call(tab) tabs([
+                    {"key":"roles","label":"Roles","icon":"user-tag"},
+                    {"key":"permissions","label":"Permisos","icon":"key"},
+                    {"key":"audit","label":"Auditoría","icon":"history"}
+                ], id="user_detail_tabs") %}
 
-                    <!-- ========================= -->
-                    <!-- ROLES -->
-                    <!-- ========================= -->
-                    <div class="tab-pane active" id="roles">
+                    {# ================= ROLES ================= #}
+                    {% if tab == "roles" %}
 
                         {% if user.roles %}
-
-                        <ul class="list-group">
-
-                            {% for role in user.roles %}
-                            <li class="list-group-item d-flex justify-content-between">
-
-                                <span>
-                                    <i class="fas fa-user-tag"></i>
-                                    {{ role.nombre }}
-                                </span>
-
-                            </li>
-                            {% endfor %}
-
-                        </ul>
-
+                            <div class="d-flex flex-wrap">
+                                {% for role in user.roles %}
+                                    <span class="badge badge-primary mr-1 mb-1 p-2">
+                                        <i class="fas fa-user-tag"></i>
+                                        {{ role.nombre }}
+                                    </span>
+                                {% endfor %}
+                            </div>
                         {% else %}
-                        <p class="text-muted">Sin roles asignados</p>
+                            <div class="text-muted">
+                                Sin roles asignados
+                            </div>
                         {% endif %}
 
-                    </div>
+                    {% endif %}
 
-                    <!-- ========================= -->
-                    <!-- PERMISOS -->
-                    <!-- ========================= -->
-                    <div class="tab-pane" id="permissions">
+
+                    {# ================= PERMISSIONS ================= #}
+                    {% if tab == "permissions" %}
 
                         {% if permissions_with_origin %}
 
-                        <table class="table table-sm">
+                            <table class="table table-sm table-hover">
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th>Módulo</th>
+                                        <th>Acción</th>
+                                        <th>Origen</th>
+                                    </tr>
+                                </thead>
 
-                            <thead>
-                                <tr>
-                                    <th>Módulo</th>
-                                    <th>Acción</th>
-                                    <th>Origen</th>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-
-                                {% for perm in permissions_with_origin %}
-
-                                {% set color = {
-                                    "read": "secondary",
-                                    "create": "success",
-                                    "update": "warning",
-                                    "delete": "danger"
-                                }[perm.action] if perm.action in ["read","create","update","delete"] else "info" %}
-
-                                <tr>
-
-                                    <td>
-                                        <span class="badge badge-dark">
-                                            {{ perm.module }}
-                                        </span>
-                                    </td>
-
-                                    <td>
-                                        <span class="badge badge-{{ color }}">
-                                            {{ perm.action }}
-                                        </span>
-                                    </td>
-
-                                    <td>
-                                        {% for role in perm.roles %}
-                                            <span class="badge badge-light">
-                                                {{ role }}
+                                <tbody>
+                                    {% for perm in permissions_with_origin %}
+                                    <tr>
+                                        <td>
+                                            <span class="badge badge-dark">
+                                                {{ perm.module }}
                                             </span>
-                                        {% endfor %}
-                                    </td>
+                                        </td>
 
-                                </tr>
+                                        <td>
+                                            {{ permission(perm.action) }}
+                                        </td>
 
-                                {% endfor %}
-
-                            </tbody>
-
-                        </table>
-
-                        {% else %}
-                        <p class="text-muted">Sin permisos</p>
-                        {% endif %}
-
-                    </div>
-
-                    <!-- ========================= -->
-                    <!-- AUDITORÍA -->
-                    <!-- ========================= -->
-                    <div class="tab-pane" id="audit">
-
-                        {% if audit_logs %}
-
-                        <table class="table table-sm">
-
-                            <thead>
-                                <tr>
-                                    <th>Acción</th>
-                                    <th>Fecha</th>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-
-                                {% for log in audit_logs %}
-                                <tr>
-
-                                    <td>
-
-                                        {% set badge = {
-                                            "LOGIN": "success",
-                                            "LOGOUT": "secondary",
-                                            "CREATE_USER": "primary",
-                                            "DELETE_USER": "danger"
-                                        }[log.action] if log.action in ["LOGIN","LOGOUT","CREATE_USER","DELETE_USER"] else "dark" %}
-
-                                        <span class="badge badge-{{ badge }}">
-                                            {{ log.action }}
-                                        </span>
-
-                                    </td>
-
-                                    <td>
-                                        {{ log.created_at.strftime("%d/%m/%Y %H:%M") }}
-                                    </td>
-
-                                </tr>
-                                {% endfor %}
-
-                            </tbody>
-
-                        </table>
+                                        <td>
+                                            {% for role in perm.roles %}
+                                                <span class="badge badge-light mr-1">
+                                                    {{ role }}
+                                                </span>
+                                            {% endfor %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
 
                         {% else %}
-                        <p class="text-muted">Sin actividad</p>
+                            <div class="text-muted">
+                                Sin permisos asignados
+                            </div>
                         {% endif %}
 
-                    </div>
+                    {% endif %}
 
-                </div>
+
+                    {# ================= AUDIT ================= #}
+                    {% if tab == "audit" %}
+                        {{ audit_table(audit_logs) }}
+                    {% endif %}
+
+                {% endcall %}
 
             </div>
-
         </div>
+    {% endif %}
 
-    </div>
-
-</div>
+{% endcall %}
 
 {% endblock %}

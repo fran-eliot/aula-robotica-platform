@@ -1,9 +1,11 @@
 # app/modules/identities/identities_web.py
 
-from fastapi import APIRouter, Request, Depends, Form
+from fastapi import APIRouter, HTTPException, Request, Depends, Form
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
+from app.core.constants.actions import Actions
+from app.core.constants.resources import Resources
 from app.db.session import get_db
 from app.core.templates import templates
 
@@ -25,7 +27,7 @@ router = APIRouter(prefix="/identities", tags=["Identities Web"])
 def identities_list(
     request: Request,
     db: Session = Depends(get_db),
-    current_user = Depends(require_permission_web("users:read"))
+    current_user = Depends(require_permission_web(Resources.IDENTITIES, Actions.READ))
 ):
     identities = db.query(Identity).all()
 
@@ -34,6 +36,27 @@ def identities_list(
         {
             "request": request,
             "identities": identities
+        }
+    )
+
+
+@router.get("/{identity_id}")
+def identity_detail(
+    request: Request,
+    identity_id: int,
+    db: Session = Depends(get_db),
+    current_user = Depends(require_permission_web(Resources.IDENTITIES, Actions.READ))
+):
+    identity = db.query(Identity).get(identity_id)
+
+    if not identity:
+        raise HTTPException(status_code=404, detail="Identidad no encontrada")
+
+    return templates.TemplateResponse(
+        "identities/identity_detail.html",
+        {
+            "request": request,
+            "identity": identity
         }
     )
 
@@ -47,7 +70,7 @@ def identity_form(
     request: Request,
     identity_id: int | None = None,
     db: Session = Depends(get_db),
-    current_user = Depends(require_permission_web("users:update"))
+    current_user = Depends(require_permission_web(Resources.IDENTITIES, Actions.UPDATE))
 ):
     identity = None
 
@@ -79,10 +102,9 @@ def identity_save(
     email: str = Form(...),
     password: str = Form(None),
     user_id: int = Form(...),
-    rol_id: int = Form(...),
     identity_id: int | None = None,
     db: Session = Depends(get_db),
-    current_user = Depends(require_permission_web("users:update"))
+    current_user = Depends(require_permission_web(Resources.IDENTITIES, Actions.UPDATE))
 ):
 
     identity = None
@@ -107,7 +129,6 @@ def identity_save(
             email=email,
             password_hash=hash_password(password),
             user_id=user_id,
-            rol_id=rol_id,
             provider="local"
         )
 
@@ -120,7 +141,6 @@ def identity_save(
     else:
         identity.email = email
         identity.user_id = user_id
-        identity.rol_id = rol_id
 
         if password:
             identity.password_hash = hash_password(password)
@@ -139,7 +159,7 @@ def identity_save(
 def identity_delete(
     identity_id: int,
     db: Session = Depends(get_db),
-    current_user = Depends(require_permission_web("users:delete"))
+    current_user = Depends(require_permission_web(Resources.IDENTITIES, Actions.DELETE))
 ):
     identity = db.query(Identity).get(identity_id)
 

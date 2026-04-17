@@ -1,6 +1,12 @@
 # app/modules/dashboard/dashboard_web.py
 # 🌐 Router web para dashboard
 
+import logging
+
+from app.core.constants.actions import Actions
+from app.core.constants.resources import Resources
+logger = logging.getLogger(__name__)
+
 from fastapi import APIRouter, Request, Depends
 from sqlalchemy.orm import Session
 
@@ -16,21 +22,23 @@ router = APIRouter()
 def dashboard(
     request: Request,
     db: Session = Depends(get_db),
-    current_user = Depends(require_permission_web("users:read"))
+    current_user = Depends(require_permission_web(Resources.DASHBOARD, Actions.READ))
 ):
     """
     Vista principal del dashboard.
 
     Requiere:
-    - Permiso: users:read
+    - Permiso: dashboard:read
 
     Muestra:
-    - Métricas de usuarios
+    - Métricas de usuarios, roles, identidades, estudiantes
     - Actividad reciente (audit logs)
     """
 
-    print("Entrando al dashboard con usuario:", current_user.nombre)
-   
+    logger.info("Entrando al dashboard con usuario: %s", current_user.nombre)
+
+    request.scope["db"] = db  # Inyectamos db en el scope para acceso global en templates
+
     # =========================================================
     # 📊 OBTENER MÉTRICAS
     # =========================================================
@@ -48,7 +56,7 @@ def dashboard(
             }
         )
     except Exception as e:
-        print("Error renderizando dashboard:", e)
+        logger.exception("Error renderizando dashboard: %s", e)
         return templates.TemplateResponse(
             "dashboard/dashboard.html",
             {

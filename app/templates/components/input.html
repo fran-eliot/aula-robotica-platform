@@ -1,11 +1,16 @@
-{% macro input(name, label, value="", errors=None, type="text", required=False) %}
-<div class="form-group">
-    <label>{{ label }}</label>
+{% macro input(name, label=None, value="", errors=None, type="text", required=False, placeholder="") %}
+
+<div class="form-group mb-0">
+
+    {% if label %}
+        <label>{{ label }}</label>
+    {% endif %}
 
     <input
         type="{{ type }}"
         name="{{ name }}"
         value="{{ value }}"
+        placeholder="{{ placeholder }}"
         class="form-control {% if errors %}is-invalid{% endif %}"
         {% if required %}required{% endif %}
     >
@@ -15,5 +20,7 @@
         {{ errors[0] }}
     </div>
     {% endif %}
+
 </div>
+
 {% endmacro %}

@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% from "components/form.html" import input, checkbox, multi_checkbox, form_actions %}
+{% from "components/form_layout.html" import form_card, form_row, form_col %}
+{% from "components/validation_summary.html" import validation_summary %}
+
+{% block content %}
+
+{% call form_card(
+    ("Editar usuario" if user else "Crear usuario"),
+    action=('/users/' ~ user.id_usuario ~ '/edit' if user else '/users/form')
+) %}
+
+    <!-- ================= VALIDATION ================= -->
+    {{ validation_summary(errors) }}
+
+    <!-- ================= DATOS ================= -->
+    {% call form_row() %}
+
+        {% call form_col(6) %}
+            {{ input(
+                "nombre",
+                "Nombre completo",
+                form_data.nombre if form_data else (user.nombre if user else ""),
+                errors.nombre if errors else None,
+                required=True,
+                placeholder="Ej: Juan Pérez"
+            ) }}
+        {% endcall %}
+
+    {% endcall %}
+
+
+    <!-- ================= ESTADO ================= -->
+    <div class="mt-3">
+        {{ checkbox(
+            "activo",
+            "Usuario activo",
+            form_data.activo if form_data else (user.activo if user else True),
+            help_text="Los usuarios inactivos no podrán acceder al sistema."
+        ) }}
+    </div>
+
+
+    <!-- ================= ROLES ================= -->
+    <div class="mt-4">
+
+        <label class="font-weight-bold">
+            <i class="fas fa-user-shield"></i> Roles
+        </label>
+
+        {{ multi_checkbox(
+            "roles",
+            roles,
+            form_data.roles if form_data else (
+                (user.roles | map(attribute='id_rol') | list) if user else []
+            )
+        ) }}
+
+        <small class="form-text text-muted">
+            Puedes asignar múltiples roles. Los permisos se heredarán automáticamente.
+        </small>
+
+    </div>
+
+
+    <!-- ================= FOOTER ================= -->
+    {{ form_actions(
+        "/users/" if not user else "/users/" ~ user.id_usuario,
+        "Guardar cambios" if user else "Crear usuario"
+    ) }}
+
+{% endcall %}
+
+{% endblock %}

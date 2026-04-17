@@ -1,0 +1,93 @@
+{% macro permission_matrix(grouped_permissions, selected_permissions=[], readonly=False) %}
+
+<div class="mt-4">
+
+    <label class="font-weight-bold">
+        <i class="fas fa-shield-alt"></i>
+        Permisos del sistema
+    </label>
+
+    {% for module, perms in grouped_permissions.items() %}
+
+    {% set module_perms = perms | selectattr("id", "in", selected_permissions) | list %}
+
+    {% if module_perms %}
+
+    <div class="card card-outline card-secondary mb-3">
+
+        <!-- HEADER -->
+        <div class="card-header">
+            <strong>
+                <i class="fas fa-folder"></i>
+                {{ module | capitalize }}
+                <small class="text-muted">({{ module_perms | length }})</small>
+            </strong>
+        </div>
+
+        <!-- BODY -->
+        <div class="card-body">
+
+            <div class="d-flex flex-wrap">
+
+                {% for perm in module_perms %}
+
+                {% set action = perm.nombre.split(':')[1] if ':' in perm.nombre else perm.nombre %}
+
+                {% set color = {
+                    "read": "secondary",
+                    "create": "success",
+                    "update": "warning",
+                    "delete": "danger"
+                }[action] if action in ["read","create","update","delete"] else "dark" %}
+
+                {% if readonly %}
+                    <!-- SOLO VISUAL -->
+                    <span class="badge badge-{{ color }} mr-1 mb-1">
+                        {{ action }}
+                    </span>
+                {% else %}
+                    <!-- CHECKBOX -->
+                    <div class="custom-control custom-checkbox mr-2 mb-2">
+
+                        <input class="custom-control-input perm-{{ module }}"
+                               type="checkbox"
+                               name="permissions"
+                               value="{{ perm.id }}"
+                               id="perm_{{ perm.id }}"
+                               {% if perm.id in selected_permissions %}checked{% endif %}>
+
+                        <label class="custom-control-label"
+                               for="perm_{{ perm.id }}">
+                            <span class="badge badge-{{ color }}">
+                                {{ action }}
+                            </span>
+                        </label>
+
+                    </div>
+                {% endif %}
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+    {% endif %}
+
+    {% endfor %}
+
+</div>
+
+{% if not readonly %}
+<script>
+function toggleModule(module) {
+    const checkboxes = document.querySelectorAll(".perm-" + module);
+    const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+    checkboxes.forEach(cb => cb.checked = !allChecked);
+}
+</script>
+{% endif %}
+
+{% endmacro %}

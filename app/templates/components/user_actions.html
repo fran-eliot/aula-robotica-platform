@@ -1,0 +1,34 @@
+{% from "components/actions.html" import action_button with context %}
+
+{% macro user_actions(user) %}
+
+{% if can("read", "users") %}
+    {{ action_button(
+        "/users/" ~ user.id_usuario,
+        "fa-eye",
+        "info",
+        "Ver"
+    ) }}
+{% endif %}
+
+{% if can("update", "users") %}
+    {{ action_button(
+        "/users/" ~ user.id_usuario ~ "/edit",
+        "fa-edit",
+        "warning",
+        "Editar"
+    ) }}
+{% endif %}
+
+{% if can("delete", "users") %}
+    {{ action_button(
+        "/users/" ~ user.id_usuario ~ "/delete",
+        "fa-trash",
+        "danger",
+        "Eliminar",
+        confirm="¿Eliminar usuario?",
+        method="post"
+    ) }}
+{% endif %}
+
+{% endmacro %}

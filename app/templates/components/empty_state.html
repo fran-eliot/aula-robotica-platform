@@ -1,0 +1,40 @@
+{% from "components/buttons.html" import btn %}
+
+{% macro empty_state(
+    icon="inbox",
+    title="Sin resultados",
+    message=None,
+    action_url=None,
+    action_label="Crear",
+    action_icon="plus",
+    action_perm=None,
+    resource=None
+) %}
+
+<div class="text-center p-5 text-muted">
+
+    <!-- ICONO -->
+    <i class="fas fa-{{ icon }} fa-2x mb-3"></i>
+
+    <!-- TÍTULO -->
+    <h5 class="mb-1">{{ title }}</h5>
+
+    <!-- TEXTO -->
+    {% if message %}
+    <p class="text-muted mb-3">
+        {{ message }}
+    </p>
+    {% endif %}
+
+    <!-- BOTÓN OPCIONAL -->
+    {% if action_url %}
+
+        {% if not action_perm or can(action_perm, resource) %}
+            {{ btn(action_url, action_label, "primary", action_icon) }}
+        {% endif %}
+
+    {% endif %}
+
+</div>
+
+{% endmacro %}

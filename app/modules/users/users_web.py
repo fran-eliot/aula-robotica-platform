@@ -5,6 +5,9 @@ from fastapi.responses import RedirectResponse
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
+from app.core.constants.actions import Actions
+from app.core.constants.resources import Resources
+from app.core.render import render
 from app.db.session import get_db
 from app.core.templates import templates
 
@@ -37,6 +40,7 @@ from app.modules.users.user_schemas import UserUpdate
 # 🧰 Utils
 from app.core.utils.validation import format_pydantic_errors
 from app.utils.flash import flash_success
+from app.web.context import get_template_context
 
 
 router = APIRouter(prefix="/users", tags=["Users Web"])
@@ -52,7 +56,7 @@ def users_list(
     status: str = "all",  # all | active | inactive
     page: int = 1,
     db: Session = Depends(get_db),
-    current_user = Depends(require_permission_web("users:read"))
+    current_user = Depends(require_permission_web(Resources.USERS, Actions.READ))
 ):
     """
     Listado de usuarios con búsqueda, filtro y paginación.
@@ -70,10 +74,10 @@ def users_list(
 
     total_pages = (total + per_page - 1) // per_page
 
-    return templates.TemplateResponse(
+    return render(
+        request,
         "users/users_list.html",
         {
-            "request": request,
             "users": users,
             "search": search,
             "status": status,
@@ -92,7 +96,7 @@ def user_form(
     request: Request,
     user_id: int | None = None,
     db: Session = Depends(get_db),
-    current_user = Depends(require_permission_web("users:update"))
+    current_user = Depends(require_permission_web(Resources.USERS, Actions.UPDATE))
 ):
     """
     Formulario reutilizable para crear o editar usuarios.
@@ -106,9 +110,10 @@ def user_form(
     roles = get_all_roles(db)
 
     return templates.TemplateResponse(
-        "users/user_form.html",
+        "users/users_form.html",
         {
             "request": request,
+            **get_template_context(request),
             "user": user,
             "roles": roles,
             "form_data": None,
@@ -129,7 +134,7 @@ def user_save(
     roles: list[int] = Form([]),
     user_id: int | None = None,
     db: Session = Depends(get_db),
-    current_user = Depends(require_owner_or_permission_web("users:update"))
+    current_user = Depends(require_owner_or_permission_web(Resources.USERS, Actions.UPDATE))
 ):
     """
     Guarda usuario:
@@ -150,9 +155,10 @@ def user_save(
 
     except ValidationError as e:
         return templates.TemplateResponse(
-            "users/user_form.html",
+            "users/users_form.html",
             {
                 "request": request,
+                **get_template_context(request),
                 "user": user,
                 "roles": get_all_roles(db),  # 🔥 importante
                 "form_data": {
@@ -215,7 +221,7 @@ def user_detail(
     request: Request,
     user_id: int,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user_web)
+    current_user = Depends(require_owner_or_permission_web(Resources.USERS, Actions.READ))
 ):
     """
     Vista completa del usuario:
@@ -226,13 +232,14 @@ def user_detail(
 
     context = build_user_detail_view(db, user_id)
 
-    return templates.TemplateResponse(
+    return render(
+        request,
         "users/user_detail.html",
         {
-            "request": request,
-            **context
+            **context,
         }
     )
+    
 
 
 # =========================================================
@@ -250,10 +257,10 @@ def my_profile(
 
     context = build_user_detail_view(db, current_user.id_usuario)
 
-    return templates.TemplateResponse(
+    return render(
+        request,
         "users/user_detail.html",
         {
-            "request": request,
             **context
         }
     )
@@ -268,7 +275,7 @@ def update_user_roles(
     user_id: int,
     roles: list[int] = Form([]),
     db: Session = Depends(get_db),
-    current_user = Depends(require_permission_web("users:update"))
+    current_user = Depends(require_permission_web(Resources.USERS, Actions.UPDATE))
 ):
     """
     Sincroniza los roles del usuario.
@@ -293,7 +300,7 @@ def delete_user(
     request: Request,
     user_id: int,
     db: Session = Depends(get_db),
-    current_user = Depends(require_permission_and_not_self_web("users:delete"))
+    current_user = Depends(require_permission_and_not_self_web(Resources.USERS, Actions.DELETE))
 ):
     """
     Elimina un usuario (con auditoría).
@@ -316,7 +323,7 @@ def delete_user(
 @router.post("/{user_id}/deactivate")
 def deactivate_user(
     request: Request,
-    user = Depends(require_owner_or_permission_web("users:update")),
+    user = Depends(require_owner_or_permission_web(Resources.USERS, Actions.UPDATE)),
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user_web)
 ):
@@ -336,7 +343,7 @@ def deactivate_user(
 @router.post("/{user_id}/activate")
 def activate_user(
     request: Request,
-    user = Depends(require_owner_or_permission_web("users:update")),
+    user = Depends(require_owner_or_permission_web(Resources.USERS, Actions.UPDATE)),
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user_web)
 ):

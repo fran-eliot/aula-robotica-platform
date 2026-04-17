@@ -4,6 +4,7 @@
 from fastapi import Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 
+from app.core.authorization.policies import can_user_action
 from app.db.session import get_db
 from app.modules.users.user_model import User
 from app.modules.users.user_service import can_access_user, get_user_or_404
@@ -85,9 +86,9 @@ def require_roles_web(*allowed_roles: str):
 # =========================================================
 # 🔑 REQUIRE PERMISSIONS
 # =========================================================
-def require_permission_web(*required_permissions: str):
+def require_permission_web(resource: str, action: str):
     """
-    Permite acceso solo si el usuario tiene los permisos indicados.
+    Guard RBAC estándar basado en resource + action.
     """
 
     def permission_checker(
@@ -96,13 +97,12 @@ def require_permission_web(*required_permissions: str):
 
         user_permissions = getattr(current_user, "permissions", [])
 
-        print("USER PERMISSIONS", user_permissions)
-        print("REQUIRED PERMISSIONS", required_permissions)
+        required_permission = f"{resource}:{action}"
 
-        if not has_permission(
-            user_permissions,
-            list(required_permissions)
-        ):
+        print("USER PERMISSIONS", user_permissions)
+        print("REQUIRED PERMISSION", required_permission)
+
+        if required_permission not in user_permissions:
             raise HTTPException(
                 status_code=403,
                 detail="No tienes permisos suficientes"
@@ -116,26 +116,22 @@ def require_permission_web(*required_permissions: str):
 # =========================================================
 # 👤 OWNER OR PERMISSION
 # =========================================================
-def require_owner_or_permission_web(permission: str):
+def require_owner_or_permission_web(resource: str, action: str):
     """
     Permite acceso si:
-    - El usuario es el dueño
-    - O tiene el permiso indicado
+    - Es owner
+    - O tiene permiso RBAC
     """
 
     def checker(
         user_id: int,
         db: Session = Depends(get_db),
-        current_user: User = Depends(get_current_user_web)
-    ) -> User:
+        current_user: dict = Depends(get_current_user_web)
+    ):
 
         target_user = get_user_or_404(db, user_id)
 
-        if not can_access_user(
-            current_user,
-            target_user,
-            [permission]
-        ):
+        if not can_user_action(action, resource, current_user, target_user):
             raise HTTPException(
                 status_code=403,
                 detail="No autorizado"
@@ -149,33 +145,30 @@ def require_owner_or_permission_web(permission: str):
 # =========================================================
 # 🚫 PERMISSION + NOT SELF
 # =========================================================
-def require_permission_and_not_self_web(permission: str):
+def require_permission_and_not_self_web(resource: str, action: str):
     """
-    Permite acción solo si:
-    - Tiene permiso
-    - Y NO es sobre sí mismo (ej: delete)
+    Permite acción si:
+    - Tiene permiso RBAC
+    - Y NO es sobre sí mismo
     """
 
     def checker(
         user_id: int,
         db: Session = Depends(get_db),
-        current_user: User = Depends(get_current_user_web)
-    ) -> User:
+        current_user: dict = Depends(get_current_user_web)
+    ):
 
         target_user = get_user_or_404(db, user_id)
 
         # 🚫 evitar auto-acción peligrosa
-        if current_user.id_usuario == target_user.id_usuario:
+        if target_user.id_usuario == int(current_user.get("sub")):
             raise HTTPException(
                 status_code=400,
                 detail="No puedes realizar esta acción sobre ti mismo"
             )
 
-        # 🔐 validar permisos
-        if not has_permission(
-            current_user.permissions,
-            [permission]
-        ):
+        # 🔐 RBAC
+        if not can_user_action(action, current_user, target_user):
             raise HTTPException(
                 status_code=403,
                 detail="No autorizado"

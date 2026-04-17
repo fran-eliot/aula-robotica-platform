@@ -1,0 +1,32 @@
+{% macro filters_bar(action="", method="get") %}
+
+<form method="{{ method }}" action="{{ action }}">
+
+    <div class="row align-items-end">
+
+        <!-- CAMPOS DINÁMICOS -->
+        <div class="col-md-9">
+            <div class="row">
+                {{ caller() }}
+            </div>
+        </div>
+
+        <!-- BOTONES -->
+        <div class="col-md-3 text-right">
+
+            <button class="btn btn-primary">
+                <i class="fas fa-search"></i>
+            </button>
+
+            <a href="{{ action or request.url.path }}"
+               class="btn btn-outline-secondary">
+                Limpiar
+            </a>
+
+        </div>
+
+    </div>
+
+</form>
+
+{% endmacro %}

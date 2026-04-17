@@ -31,7 +31,9 @@ def login_page(request: Request):
     """
     return templates.TemplateResponse(
         "auth/login.html",
-        {"request": request}
+        {"request": request,
+         
+         }
     )
 
 

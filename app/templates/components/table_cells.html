@@ -1,0 +1,18 @@
+{% macro user_name_cell(user) %}
+<a href="/users/{{ user.id_usuario }}" class="font-weight-bold text-dark">
+    {{ user.nombre }}
+</a>
+{% endmacro %}
+
+
+{% macro user_status_cell(user) %}
+{% if user.activo %}
+    <span class="badge badge-success">
+        <i class="fas fa-check"></i> Activo
+    </span>
+{% else %}
+    <span class="badge badge-secondary">
+        <i class="fas fa-ban"></i> Inactivo
+    </span>
+{% endif %}
+{% endmacro %}

@@ -1,0 +1,36 @@
+{% from "components/buttons.html" import btn %}
+
+{% macro page_header(title, icon=None, count=None, create_url=None, create_label="Nuevo", create_perm=None, resource=None) %}
+
+
+<div class="card-header d-flex justify-content-between align-items-center">
+
+    <!-- LEFT: título -->
+    <h3 class="card-title">
+
+        {% if icon %}
+            <i class="fas fa-{{ icon }}"></i>
+        {% endif %}
+
+        {{ title }}
+
+        {% if count is not none %}
+            <span class="badge badge-secondary ml-2">
+                {{ count }}
+            </span>
+        {% endif %}
+
+    </h3>
+
+    <!-- RIGHT: botón -->
+    {% if create_url %}
+
+        {% if not create_perm or can(create_perm, resource) %}
+            {{ btn(create_url, create_label, "primary", "plus") }}
+        {% endif %}
+
+    {% endif %}
+
+</div>
+
+{% endmacro %}

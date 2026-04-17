@@ -1,176 +1,63 @@
 {% extends "base.html" %}
 
+{% from "components/metric_card.html" import metric_card %}
+{% from "components/audit_table.html" import audit_table %}
+
+
 {% block content %}
 
-<!-- =========================================================
-📊 MÉTRICAS PRINCIPALES
-========================================================= -->
-<div class="row">
+<div class="row mb-3">
 
-    <!-- TOTAL USERS -->
-    <div class="col-lg-4 col-6">
-        <div class="small-box bg-info shadow-sm"
-             style="cursor:pointer"
-             onclick="window.location='/users/'">
+    {% if can("read", "users") %}
+        {{ metric_card(
+            "Total usuarios",
+            total_users,
+            "fas fa-users",
+            "info",
+            "/users/"
+        ) }}
 
-            <div class="inner">
-                <h3>{{ total_users }}</h3>
-                <p>Total usuarios</p>
-            </div>
+        {{ metric_card(
+            "Usuarios activos",
+            active_users,
+            "fas fa-user-check",
+            "success"
+        ) }}
 
-            <div class="icon">
-                <i class="fas fa-users"></i>
-            </div>
+        {{ metric_card(
+            "Usuarios inactivos",
+            inactive_users,
+            "fas fa-user-times",
+            "warning" if inactive_users > 0 else "secondary"
+        ) }}
+    {% endif %}
 
-            <a href="/users/" class="small-box-footer">
-                Ver usuarios <i class="fas fa-arrow-circle-right"></i>
-            </a>
-        </div>
-    </div>
-
-    <!-- ACTIVE USERS -->
-    <div class="col-lg-4 col-6">
-        <div class="small-box bg-success shadow-sm"
-             title="Usuarios activos actualmente">
-
-            <div class="inner">
-                <h3>{{ active_users }}</h3>
-                <p>Usuarios activos</p>
-            </div>
-
-            <div class="icon">
-                <i class="fas fa-user-check"></i>
-            </div>
-
-            <div class="small-box-footer text-white-50">
-                Estado saludable del sistema
-            </div>
-        </div>
-    </div>
-
-    <!-- INACTIVE USERS -->
-    <div class="col-lg-4 col-6">
-        <div class="small-box 
-                    {% if inactive_users > 0 %}bg-warning{% else %}bg-secondary{% endif %}
-                    shadow-sm"
-             title="Usuarios desactivados">
-
-            <div class="inner">
-                <h3>{{ inactive_users }}</h3>
-                <p>Usuarios inactivos</p>
-            </div>
-
-            <div class="icon">
-                <i class="fas fa-user-times"></i>
-            </div>
-
-            <div class="small-box-footer text-white-50">
-                {% if inactive_users > 0 %}
-                    Requiere revisión
-                {% else %}
-                    Sin incidencias
-                {% endif %}
-            </div>
-        </div>
-    </div>
-
-    <!-- TOTAL ROLES -->
-    <div class="col-lg-4 col-6">
-        <div class="small-box bg-primary shadow-sm">
-
-            <div class="inner">
-                <h3>{{ total_roles }}</h3>
-                <p>Total roles</p>
-            </div>
-
-            <div class="icon">
-                <i class="fas fa-user-shield"></i>
-            </div>
-
-            <a href="/roles/" class="small-box-footer">
-                Ver roles <i class="fas fa-arrow-circle-right"></i>
-            </a>
-        </div>
-    </div>
+    {% if can("read", "roles") %}
+        {{ metric_card(
+            "Total roles",
+            total_roles,
+            "fas fa-user-shield",
+            "primary",
+            "/roles/"
+        ) }}
+    {% endif %}
 
 </div>
 
-<!-- =========================================================
-🧾 ACTIVIDAD RECIENTE
-========================================================= -->
+
+<!-- ===================== ACTIVIDAD ===================== -->
 <div class="card shadow-sm">
 
-    <!-- HEADER -->
     <div class="card-header d-flex justify-content-between align-items-center">
         <h3 class="card-title">
             <i class="fas fa-history"></i> Actividad reciente
         </h3>
-
-        <!-- FUTURO: filtro -->
         <small class="text-muted">Últimos eventos del sistema</small>
     </div>
 
-    <!-- BODY -->
-    <div class="card-body">
+    <div class="card-body p-0">
 
-        {% if recent_logs %}
-
-        <div class="timeline">
-
-            {% for log in recent_logs %}
-
-            <div>
-
-                <!-- ICONO DINÁMICO -->
-                <i class="fas 
-                   {{ get_audit_icon(log.action) }} 
-                   {{ get_audit_color(log.action) }}"
-                   title="{{ log.action }}">
-                </i>
-
-                <div class="timeline-item">
-
-                    <!-- FECHA -->
-                    <span class="time">
-                        <i class="fas fa-clock"></i>
-                        {{ log.created_at.strftime("%d/%m %H:%M") }}
-                    </span>
-
-                    <!-- DESCRIPCIÓN -->
-                    <h3 class="timeline-header">
-                        {{ log.description }}
-                    </h3>
-
-                    <!-- USUARIO -->
-                    {% if log.user %}
-                    <div class="timeline-body">
-                        <i class="fas fa-user"></i>
-                        {{ log.user.nombre }}
-                    </div>
-                    {% endif %}
-
-                </div>
-
-            </div>
-
-            {% endfor %}
-
-        </div>
-
-        {% else %}
-
-        <!-- EMPTY STATE -->
-        <div class="text-center text-muted p-4">
-
-            <i class="fas fa-history fa-2x mb-2"></i>
-
-            <p>No hay actividad reciente</p>
-
-            <small>Las acciones aparecerán aquí automáticamente</small>
-
-        </div>
-
-        {% endif %}
+        {{ audit_table(recent_logs) }}
 
     </div>
 

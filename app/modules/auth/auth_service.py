@@ -12,13 +12,37 @@ from app.core.security import (
     create_refresh_token,
     verify_password
 )
+from app.modules.users.user_model import User
 from app.modules.users.user_service import get_user_permissions
+
+# =========================================================
+# 🪪 BUILD AUTH PAYLOAD (RBAC)
+# =========================================================
+def build_auth_payload(user):
+    """
+    Construye el payload estándar para JWT.
+    """
+
+    roles = sorted({
+        role.nombre.strip().lower()
+        for role in user.roles
+    })
+
+    permissions = get_user_permissions(user)
+
+    return {
+        "sub": str(user.id_usuario),
+        "roles": roles,
+        "permissions": permissions,
+        "username": user.nombre,
+        "iat": datetime.now(timezone.utc).timestamp()
+    }
 
 
 # =========================================================
 # 🔄 REFRESH TOKEN → ACCESS TOKEN
 # =========================================================
-def refresh_access_token(payload: dict) -> str:
+def refresh_access_token(payload: dict, db: Session) -> str:
     """
     Genera un nuevo access token a partir de un refresh token válido.
     """
@@ -30,14 +54,21 @@ def refresh_access_token(payload: dict) -> str:
             detail="Refresh token inválido"
         )
 
-    # 🔁 Generar nuevo access token
+    user_id = int(payload.get("sub"))
+    user = db.query(User).get(user_id)
+
+    if not user or not user.activo:
+        raise HTTPException(
+            status_code=403,
+            detail="Usuario no válido o desactivado"
+        )
+
+    base_payload = build_auth_payload(user)
+
+        # 🔁 Generar nuevo access token
     return create_access_token({
-        "sub": payload.get("sub"),
-        "roles": payload.get("roles", []),
-        "permissions": payload.get("permissions", []),
-        "username": payload.get("username"),
-        "type": "access",
-        "iat": datetime.now(timezone.utc).timestamp()
+        **base_payload,
+        "type": "access"
     })
 
 
@@ -99,46 +130,29 @@ def authenticate_user(
             detail="Usuario desactivado o inválido"
         )
 
-    # =========================================================
-    # 🎭 ROLES EFECTIVOS (RBAC PURO)
-    # =========================================================
-    roles = [role.nombre.lower() for role in user.roles]
+    # 🎭 4. OBTENER ROLES Y PERMISOS
+
+    payload_base = build_auth_payload(user)
+
+    print("USER ROLES:", [r.nombre.strip().lower() for r in user.roles])
+
+    print("PERMISSIONS GENERADAS:", payload_base["permissions"])
 
     # =========================================================
-    # 🔑 5. PERMISOS EFECTIVOS
-    # =========================================================
-    permissions = get_user_permissions(user)
-
-    print("USER ROLES:", [r.nombre for r in user.roles])
-
-    print("PERMISSIONS GENERADAS:", permissions)
-
-    # =========================================================
-    # 🪪 6. PAYLOAD BASE
-    # =========================================================
-    base_payload = {
-        "sub": str(user.id_usuario),
-        "roles": roles,
-        "permissions": permissions,
-        "username": user.nombre,
-        "iat": datetime.now(timezone.utc).timestamp()
-    }
-
-    # =========================================================
-    # 🔥 7. TOKENS
+    # 🔥 5. TOKENS
     # =========================================================
     access_token = create_access_token({
-        **base_payload,
+        **payload_base,
         "type": "access"
     })
 
     refresh_token = create_refresh_token({
-        **base_payload,
+        **payload_base,
         "type": "refresh"
     })
 
     # =========================================================
-    # 📦 8. RESPONSE
+    # 📦 6. RESPONSE
     # =========================================================
     return {
         "access_token": access_token,

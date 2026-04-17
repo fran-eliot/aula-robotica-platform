@@ -263,8 +263,8 @@ def get_user_permissions(user):
         for perm in role.permissions:
             print(f"  - PERMISO: {perm.nombre}")
 
-    return list({
-        perm.nombre
+    return sorted({
+        perm.nombre.strip().lower()
         for role in user.roles
         for perm in role.permissions
     })

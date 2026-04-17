@@ -5,8 +5,10 @@ from fastapi import APIRouter, Request, Depends, Form, HTTPException
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
+from app.core.constants.actions import Actions
+from app.core.constants.resources import Resources
+from app.core.render import render
 from app.db.session import get_db
-from app.core.templates import templates
 from app.utils.flash import flash_success, flash_error
 
 from app.modules.auth.auth_dependencies_web import require_permission_web
@@ -32,7 +34,7 @@ router = APIRouter(prefix="/roles", tags=["Roles Web"])
 def roles_list(
     request: Request,
     db: Session = Depends(get_db),
-    current_user = Depends(require_permission_web("users:read"))
+    current_user = Depends(require_permission_web(Resources.ROLES, Actions.READ))
 ):
     """
     Lista todos los roles.
@@ -40,46 +42,13 @@ def roles_list(
 
     roles = get_all_roles(db)
 
-    return templates.TemplateResponse(
+    return render(
+        request,
         "roles/roles_list.html",
         {
-            "request": request,
             "roles": roles
         }
     )
-
-
-# =========================================================
-# 🔍 DETALLE
-# =========================================================
-@router.get("/{role_id}")
-def role_detail(
-    request: Request,
-    role_id: int,
-    db: Session = Depends(get_db),
-    current_user = Depends(require_permission_web("users:read"))
-):
-    """
-    Vista detalle de rol:
-    - Permisos agrupados
-    - Auditoría
-    """
-
-    role = get_role_or_404(db, role_id)
-
-    grouped_permissions = group_permissions(role.permissions)
-    logs = get_role_audit_logs(db, role_id)
-
-    return templates.TemplateResponse(
-        "roles/roles_detail.html",
-        {
-            "request": request,
-            "role": role,
-            "grouped_permissions": grouped_permissions,
-            "logs": logs
-        }
-    )
-
 
 # =========================================================
 # 📝 FORMULARIO (CREATE + EDIT)
@@ -90,7 +59,7 @@ def role_form(
     request: Request,
     role_id: int | None = None,
     db: Session = Depends(get_db),
-    current_user = Depends(require_permission_web("users:update"))
+    current_user = Depends(require_permission_web(Resources.ROLES, Actions.UPDATE))
 ):
     """
     Formulario unificado para crear o editar roles.
@@ -104,10 +73,10 @@ def role_form(
     permissions = get_all_permissions(db)
     grouped_permissions = group_permissions(permissions)
 
-    return templates.TemplateResponse(
+    return render(
+        request,
         "roles/roles_form.html",
         {
-            "request": request,
             "role": role,
             "grouped_permissions": grouped_permissions
         }
@@ -126,7 +95,7 @@ def role_save(
     permissions: list[int] = Form([]),
     role_id: int | None = None,
     db: Session = Depends(get_db),
-    current_user = Depends(require_permission_web("users:update"))
+    current_user = Depends(require_permission_web(Resources.ROLES, Actions.UPDATE))
 ):
     """
     Guarda rol:
@@ -160,14 +129,46 @@ def role_save(
 
         permissions_all = get_all_permissions(db)
 
-        return templates.TemplateResponse(
+        return render(
+            request,
             "roles/roles_form.html",
             {
-                "request": request,
                 "role": None,
                 "grouped_permissions": group_permissions(permissions_all)
             }
         )
+
+
+# =========================================================
+# 🔍 DETALLE
+# =========================================================
+@router.get("/{role_id}")
+def role_detail(
+    request: Request,
+    role_id: int,
+    db: Session = Depends(get_db),
+    current_user = Depends(require_permission_web(Resources.ROLES, Actions.READ))
+):
+    """
+    Vista detalle de rol:
+    - Permisos agrupados
+    - Auditoría
+    """
+
+    role = get_role_or_404(db, role_id)
+
+    grouped_permissions = group_permissions(role.permissions)
+    logs = get_role_audit_logs(db, role_id)
+
+    return render(
+        request,
+        "roles/roles_detail.html",
+        {
+            "role": role,
+            "grouped_permissions": grouped_permissions,
+            "logs": logs
+        }
+    )
 
 
 # =========================================================
@@ -178,7 +179,7 @@ def role_delete(
     request: Request,
     role_id: int,
     db: Session = Depends(get_db),
-    current_user = Depends(require_permission_web("users:delete"))
+    current_user = Depends(require_permission_web(Resources.ROLES, Actions.DELETE))
 ):
     """
     Elimina un rol.

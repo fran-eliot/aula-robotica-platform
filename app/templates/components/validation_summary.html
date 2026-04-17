@@ -1,0 +1,28 @@
+{# =========================================================
+🧩 VALIDATION SUMMARY
+========================================================= #}
+
+{% macro validation_summary(errors) %}
+
+{% if errors %}
+<div class="alert alert-danger">
+
+    <h5>
+        <i class="fas fa-exclamation-triangle"></i>
+        Se encontraron errores
+    </h5>
+
+    <ul class="mb-0">
+        {% for field, msgs in errors.items() %}
+            {% for msg in msgs %}
+            <li>
+                <strong>{{ field }}:</strong> {{ msg }}
+            </li>
+            {% endfor %}
+        {% endfor %}
+    </ul>
+
+</div>
+{% endif %}
+
+{% endmacro %}

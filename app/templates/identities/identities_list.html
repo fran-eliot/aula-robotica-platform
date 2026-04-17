@@ -1,73 +1,37 @@
 {% extends "base.html" %}
 
+{% from "components/identity_row.html" import identity_row with context %}
+{% from "components/data_table.html" import data_table  with context %}
+{% from "components/page_header.html" import page_header with context %}
+{% from "components/section_card.html" import section_card %}
+
 {% block content %}
 
-<div class="card">
+{% call section_card() %}
 
-    <div class="card-header d-flex justify-content-between">
-        <h3 class="card-title">
-            <i class="fas fa-id-badge"></i> Identidades
-        </h3>
+    {{ page_header(
+        "Identidades",
+        icon="id-badge",
+        count=identities|length if identities else None,
+        create_url="/identities/form",
+        create_label="Registrar identidad",
+        create_perm="create",
+        resource="identities"
+    ) }}
 
-        <a href="/identities/form" class="btn btn-primary btn-sm">
-            <i class="fas fa-plus"></i> Nueva
-        </a>
-    </div>
+    {{ data_table(
+        items=identities,
+        row_renderer=identity_row,
+        headers=["Email", "Usuario", "Provider", "Acciones"],
 
-    <div class="card-body p-0">
+        empty_title="No hay identidades registradas",
+        empty_icon="id-badge",
+        empty_action_url="/identities/form",
+        empty_action_label="Crear identidad",
+        empty_action_perm="create",
+        empty_resource="identities"
+    ) }}
 
-        {% if identities %}
-
-        <table class="table table-hover">
-
-            <thead>
-                <tr>
-                    <th>Email</th>
-                    <th>Usuario</th>
-                    <th>Rol</th>
-                    <th></th>
-                </tr>
-            </thead>
-
-            <tbody>
-                {% for i in identities %}
-                <tr>
-
-                    <td>{{ i.email }}</td>
-                    <td>{{ i.usuario.nombre if i.usuario else "-" }}</td>
-                    <td>{{ i.rol.nombre if i.rol else "-" }}</td>
-
-                    <td class="text-right">
-
-                        <a href="/identities/{{ i.id }}/edit"
-                           class="btn btn-warning btn-sm">
-                            <i class="fas fa-edit"></i>
-                        </a>
-
-                        <form method="post"
-                              action="/identities/{{ i.id }}/delete"
-                              style="display:inline;">
-                            <button class="btn btn-danger btn-sm">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </form>
-
-                    </td>
-
-                </tr>
-                {% endfor %}
-            </tbody>
-
-        </table>
-
-        {% else %}
-        <div class="p-4 text-center text-muted">
-            No hay identidades
-        </div>
-        {% endif %}
-
-    </div>
-
-</div>
+{% endcall %}
 
 {% endblock %}

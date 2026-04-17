@@ -2,44 +2,61 @@
 
 {% block content %}
 
-<div class="card">
+<div class="card card-primary shadow-sm">
 
+    <!-- ================= HEADER ================= -->
     <div class="card-header">
         <h3 class="card-title">
+            <i class="fas fa-id-badge"></i>
             {{ "Editar identidad" if identity else "Crear identidad" }}
         </h3>
     </div>
 
+    <!-- ================= FORM ================= -->
     <form method="post"
           action="{% if identity %}/identities/{{ identity.id }}/edit{% else %}/identities/form{% endif %}">
 
         <div class="card-body">
 
-            <!-- EMAIL -->
-            <div class="form-group">
-                <label>Email</label>
-                <input type="email"
-                       name="email"
-                       class="form-control"
-                       value="{{ identity.email if identity else '' }}"
-                       required>
+            <div class="row">
+
+                <!-- ================= EMAIL ================= -->
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email"
+                               name="email"
+                               class="form-control"
+                               value="{{ identity.email if identity else '' }}"
+                               required>
+                    </div>
+                </div>
+
+                <!-- ================= PASSWORD ================= -->
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password"
+                               name="password"
+                               class="form-control">
+
+                        {% if identity %}
+                        <small class="text-muted">
+                            Dejar vacío para no cambiar la contraseña
+                        </small>
+                        {% endif %}
+                    </div>
+                </div>
+
             </div>
 
-            <!-- PASSWORD -->
-            <div class="form-group">
-                <label>Password</label>
-                <input type="password"
-                       name="password"
-                       class="form-control">
 
-                {% if identity %}
-                <small class="text-muted">Dejar vacío para no cambiar</small>
-                {% endif %}
-            </div>
+            <!-- ================= USUARIO ================= -->
+            <div class="form-group mt-3">
+                <label>
+                    <i class="fas fa-user"></i> Usuario
+                </label>
 
-            <!-- USER -->
-            <div class="form-group">
-                <label>Usuario</label>
                 <select name="user_id" class="form-control">
 
                     {% for u in users %}
@@ -50,34 +67,26 @@
                     {% endfor %}
 
                 </select>
-            </div>
 
-            <!-- ROLE -->
-            <div class="form-group">
-                <label>Rol</label>
-                <select name="rol_id" class="form-control">
-
-                    {% for r in roles %}
-                    <option value="{{ r.id_rol }}"
-                        {% if identity and identity.rol_id == r.id_rol %}selected{% endif %}>
-                        {{ r.nombre }}
-                    </option>
-                    {% endfor %}
-
-                </select>
+                <small class="form-text text-muted">
+                    Usuario al que pertenece esta identidad.
+                </small>
             </div>
 
         </div>
 
-        <div class="card-footer">
 
-            <button class="btn btn-primary">
-                Guardar
-            </button>
+        <!-- ================= FOOTER ================= -->
+        <div class="card-footer d-flex justify-content-between">
 
             <a href="/identities/" class="btn btn-secondary">
-                Cancelar
+                <i class="fas fa-arrow-left"></i> Cancelar
             </a>
+
+            <button class="btn btn-primary">
+                <i class="fas fa-save"></i>
+                {{ "Actualizar" if identity else "Crear" }}
+            </button>
 
         </div>
 

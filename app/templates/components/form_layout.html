@@ -1,0 +1,31 @@
+{% macro form_card(title, action="#", method="post") %}
+<form method="{{ method }}" action="{{ action }}">
+    <div class="card shadow-sm">
+
+        <div class="card-header">
+            <h3 class="card-title">
+                {{ title }}
+            </h3>
+        </div>
+
+        <div class="card-body">
+            {{ caller() }}
+        </div>
+
+    </div>
+</form>
+{% endmacro %}
+
+
+{% macro form_row() %}
+<div class="form-row">
+    {{ caller() }}
+</div>
+{% endmacro %}
+
+
+{% macro form_col(size=12) %}
+<div class="col-md-{{ size }}">
+    {{ caller() }}
+</div>
+{% endmacro %}

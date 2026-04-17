@@ -1,0 +1,25 @@
+{# =========================================================
+🧩 FIELD WRAPPER
+========================================================= #}
+
+{% macro field_wrapper(name, label, errors=None, help_text=None) %}
+<div class="form-group">
+
+    <label for="{{ name }}">{{ label }}</label>
+
+    {{ caller() }}
+
+    {% if errors %}
+    <div class="invalid-feedback d-block">
+        {{ errors[0] }}
+    </div>
+    {% endif %}
+
+    {% if help_text %}
+    <small class="form-text text-muted">
+        {{ help_text }}
+    </small>
+    {% endif %}
+
+</div>
+{% endmacro %}

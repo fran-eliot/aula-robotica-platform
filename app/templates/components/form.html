@@ -1,12 +1,175 @@
-{% macro input(name, label, value="", type="text", required=False) %}
+{# =========================================================
+🧩 INPUT TEXT / EMAIL / PASSWORD
+========================================================= #}
+{% macro input(name, label, value="", errors=None, type="text", required=False, placeholder="", help_text=None) %}
 <div class="form-group">
-    <label>{{ label }}</label>
+
+    <label for="{{ name }}">{{ label }}</label>
+
     <input
         type="{{ type }}"
         name="{{ name }}"
+        id="{{ name }}"
         value="{{ value }}"
-        class="form-control"
+        placeholder="{{ placeholder }}"
+        class="form-control {% if errors %}is-invalid{% endif %}"
         {% if required %}required{% endif %}
     >
+
+    {% if errors %}
+    <div class="invalid-feedback">
+        {{ errors[0] }}
+    </div>
+    {% endif %}
+
+    {% if help_text %}
+    <small class="form-text text-muted">
+        {{ help_text }}
+    </small>
+    {% endif %}
+
 </div>
 {% endmacro %}
+
+
+{# =========================================================
+🧩 TEXTAREA
+========================================================= #}
+{% macro textarea(name, label, value="", errors=None, rows=3, placeholder="", help_text=None) %}
+<div class="form-group">
+
+    <label for="{{ name }}">{{ label }}</label>
+
+    <textarea
+        name="{{ name }}"
+        id="{{ name }}"
+        rows="{{ rows }}"
+        placeholder="{{ placeholder }}"
+        class="form-control {% if errors %}is-invalid{% endif %}"
+    >{{ value }}</textarea>
+
+    {% if errors %}
+    <div class="invalid-feedback">
+        {{ errors[0] }}
+    </div>
+    {% endif %}
+
+    {% if help_text %}
+    <small class="form-text text-muted">
+        {{ help_text }}
+    </small>
+    {% endif %}
+
+</div>
+{% endmacro %}
+
+
+{# =========================================================
+🧩 CHECKBOX
+========================================================= #}
+{% macro checkbox(name, label, checked=False, help_text=None) %}
+<div class="form-group form-check">
+
+    <input type="checkbox"
+           name="{{ name }}"
+           id="{{ name }}"
+           class="form-check-input"
+           {% if checked %}checked{% endif %}>
+
+    <label class="form-check-label" for="{{ name }}">
+        {{ label }}
+    </label>
+
+    {% if help_text %}
+    <br>
+    <small class="form-text text-muted">
+        {{ help_text }}
+    </small>
+    {% endif %}
+
+</div>
+{% endmacro %}
+
+
+{# =========================================================
+🧩 SELECT
+========================================================= #}
+{% macro select(name, label, options, selected=None, help_text=None) %}
+<div class="form-group">
+
+    <label for="{{ name }}">{{ label }}</label>
+
+    <select name="{{ name }}"
+            id="{{ name }}"
+            class="form-control">
+
+        {% for value, text in options %}
+        <option value="{{ value }}"
+            {% if value == selected %}selected{% endif %}>
+            {{ text }}
+        </option>
+        {% endfor %}
+
+    </select>
+
+    {% if help_text %}
+    <small class="form-text text-muted">
+        {{ help_text }}
+    </small>
+    {% endif %}
+
+</div>
+{% endmacro %}
+
+
+{# =========================================================
+🧩 MULTI-CHECKBOX (🔥 muy útil para roles)
+========================================================= #}
+{% macro multi_checkbox(name, items, selected_ids=[]) %}
+<div class="form-group">
+
+    <div class="row">
+        {% for item in items %}
+        <div class="col-md-3">
+
+            <div class="form-check">
+
+                <input class="form-check-input"
+                       type="checkbox"
+                       name="{{ name }}"
+                       value="{{ item.id }}"
+                       id="{{ name }}_{{ item.id }}"
+                       {% if item.id in selected_ids %}checked{% endif %}>
+
+                <label class="form-check-label" for="{{ name }}_{{ item.id }}">
+                    {{ item.nombre }}
+                </label>
+
+            </div>
+
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+{% endmacro %}
+
+
+{# =========================================================
+🧩 FORM ACTIONS (botones estándar)
+========================================================= #}
+{% macro form_actions(cancel_url, submit_label="Guardar") %}
+<div class="card-footer d-flex justify-content-between">
+
+    <a href="{{ cancel_url }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Cancelar
+    </a>
+
+    <button type="submit" class="btn btn-primary">
+        <i class="fas fa-save"></i> {{ submit_label }}
+    </button>
+
+</div>
+{% endmacro %}
+
+

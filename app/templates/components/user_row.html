@@ -1,0 +1,34 @@
+{% from "components/user_actions.html" import user_actions with context %}
+{% from "components/badges.html" import status %}
+
+{% macro user_row(user) %}
+
+<tr onclick="window.location='/users/{{ user.id_usuario }}'"
+    style="cursor:pointer">
+
+    <!-- ID -->
+    <td style="width:90px" class="text-center align-middle">
+        #{{ user.id_usuario }}
+    </td>
+
+    <!-- Nombre -->
+    <td style="width:auto" class="text-center align-middle">
+        <strong>{{ user.nombre }}</strong>
+    </td>
+
+    <!-- Estado -->
+    <td style="width:160px" class="text-center align-middle">
+        {{ status(user.activo) }}
+    </td>
+
+    <!-- Acciones -->
+    <td style="width:170px" class="text-center align-middle text-nowrap"
+        onclick="event.stopPropagation();">
+
+        {{ user_actions(user) }}
+
+    </td>
+
+</tr>
+
+{% endmacro %}

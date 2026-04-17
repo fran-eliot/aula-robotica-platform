@@ -1,0 +1,12 @@
+{% from "components/identity_actions.html" import identity_actions with context %}
+
+{% macro identity_row(identity) %}
+<tr>
+    <td>{{ identity.email }}</td>
+    <td>{{ identity.usuario.nombre }}</td>
+    <td>{{ identity.provider }}</td>
+    <td class="text-center">
+        {{ identity_actions(identity) }}
+    </td>
+</tr>
+{% endmacro %}

@@ -3,7 +3,6 @@
 
 from fastapi import Request
 
-from app.core.authorization.permissions import has_permission
 from app.core.authorization.roles import has_required_role
 from app.core.authorization.policies import can_user_action
 
@@ -15,7 +14,6 @@ from app.core.services.menu_service import (
 )
 
 from app.core.utils.audit_ui import get_audit_icon, get_audit_color
-from app.db.session import SessionLocal
 from app.utils.flash import get_flash
 
 
@@ -36,7 +34,7 @@ def get_fallback_context():
         "has_role": lambda *args: False,
         "has_perm": lambda *args: False,
         "is_owner": lambda target_user: False,
-        "can": lambda *args, **kwargs: False,
+        "can": lambda action, resource, target=None: False,
         "menu": [],
         "breadcrumbs": [],
         "page_title": "Aula Robótica",
@@ -87,8 +85,13 @@ def get_template_context(request: Request):
         def has_role(*allowed_roles: str) -> bool:
             return has_required_role(roles, list(allowed_roles))
 
-        def has_perm(*required_permissions: str) -> bool:
-            return has_permission(permissions, list(required_permissions))
+        def has_perm(*required_permissions: str, mode: str = "any") -> bool:
+            required = [perm.lower() for perm in required_permissions]
+
+            if mode == "all":
+                return all(p in permissions for p in required)
+            else:            
+                return any(p in permissions for p in required)  
 
         def is_owner(target_user) -> bool:
             return (
@@ -96,8 +99,8 @@ def get_template_context(request: Request):
                 and getattr(target_user, "id_usuario", None) == user_id
             )
 
-        def can(action: str, target=None) -> bool:
-            return can_user_action(action, payload, target)
+        def can(action: str, resource: str, target=None) -> bool:
+            return can_user_action(action, resource, payload, target)
 
         # =========================================================
         # 📋 4. MENÚ DINÁMICO
@@ -112,8 +115,15 @@ def get_template_context(request: Request):
         # =========================================================
         # 🧭 5. BREADCRUMBS
         # =========================================================
-        with SessionLocal() as db:
+
+        db = request.state.db if hasattr(request.state, "db") else None
+
+        request.scope["db"] = db 
+
+        if db:
             breadcrumbs = build_smart_breadcrumbs(menu, request, db)
+        else:
+            breadcrumbs = []
 
         # =========================================================
         # 🏷️ 6. TÍTULOS DINÁMICOS
@@ -159,6 +169,7 @@ def get_template_context(request: Request):
             "get_audit_color": get_audit_color
         }
 
-    except Exception:
+    except Exception as e:
+        print(f"Error construyendo contexto: {e}")
         # ⚠️ Nunca romper el render de plantillas
         return get_fallback_context()

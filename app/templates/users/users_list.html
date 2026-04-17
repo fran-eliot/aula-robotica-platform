@@ -1,206 +1,67 @@
 {% extends "base.html" %}
 
+{% from "components/user_row.html" import user_row with context %}
+{% from "components/data_table.html" import data_table with context %}
+{% from "components/page_header.html" import page_header with context %}
+{% from "components/section_card.html" import section_card %}
+{% from "components/filters_bar.html" import filters_bar %}
+{% from "components/form.html" import input, select %}
+
 {% block content %}
 
-<div class="card">
+{% call section_card() %}
 
-    <!-- HEADER -->
-    <div class="card-header d-flex justify-content-between align-items-center">
+    {% set total_count = users|length if users else None %}
 
-        <h3 class="card-title">
-            <i class="fas fa-users"></i> Usuarios
-            {% if users %}
-                <span class="badge badge-secondary ml-2">{{ users|length }}</span>
-            {% endif %}
-        </h3>
+    {{ page_header(
+        "Usuarios",
+        "users",
+        total_count,
+        "/users/form",
+        "Crear usuario",
+        "create",
+        "users"
+    ) }}
 
-        {% if can("create") %}
-        <a href="/users/form" class="btn btn-primary btn-sm">
-            <i class="fas fa-plus"></i> Nuevo usuario
-        </a>
-        {% endif %}
-
-    </div>
-
-    <!-- FILTROS -->
-    <div class="card-body">
-
-        <form method="get" class="mb-3">
-
-            <div class="row">
-
-                <div class="col-md-4">
-                    <input type="text"
-                           name="search"
-                           value="{{ search }}"
-                           class="form-control"
-                           placeholder="Buscar por nombre...">
-                </div>
-
-                <div class="col-md-3">
-                    <select name="status" class="form-control">
-                        <option value="all" {% if status == "all" %}selected{% endif %}>Todos</option>
-                        <option value="active" {% if status == "active" %}selected{% endif %}>Activos</option>
-                        <option value="inactive" {% if status == "inactive" %}selected{% endif %}>Inactivos</option>
-                    </select>
-                </div>
-
-                <div class="col-md-5 text-right">
-
-                    <button class="btn btn-primary">
-                        <i class="fas fa-search"></i> Buscar
-                    </button>
-
-                    <a href="/users/" class="btn btn-secondary">
-                        Limpiar
-                    </a>
-
-                </div>
-
-            </div>
-
-        </form>
-
-    </div>
-
-    <!-- TABLA -->
-    <div class="card-body p-0">
-
-        {% if users %}
-
-        <table class="table table-hover text-nowrap">
-
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Nombre</th>
-                    <th>Estado</th>
-                    <th class="text-right" style="width: 180px">Acciones</th>
-                </tr>
-            </thead>
-
-            <tbody>
-
-                {% for user in users %}
-                <tr onclick="window.location.href='/users/{{ user.id_usuario }}'"
-                    style="cursor:pointer">
-
-                    <td>{{ user.id_usuario }}</td>
-
-                    <td>
-                        <a href="/users/{{ user.id_usuario }}">
-                            {{ user.nombre }}
-                        </a>
-                    </td>
-
-                    <td>
-                        {% if user.activo %}
-                            <span class="badge badge-success">
-                                <i class="fas fa-check"></i> Activo
-                            </span>
-                        {% else %}
-                            <span class="badge badge-secondary">
-                                <i class="fas fa-ban"></i> Inactivo
-                            </span>
-                        {% endif %}
-                    </td>
-
-                    <td class="text-right" onclick="event.stopPropagation();">
-
-                        {% if can("view", user) %}
-                        <a href="/users/{{ user.id_usuario }}"
-                           class="btn btn-info btn-sm"
-                           title="Ver">
-                            <i class="fas fa-eye"></i>
-                        </a>
-                        {% endif %}
-
-                        {% if can("edit", user) %}
-                        <a href="/users/{{ user.id_usuario }}/edit"
-                           class="btn btn-warning btn-sm"
-                           title="Editar">
-                            <i class="fas fa-edit"></i>
-                        </a>
-                        {% endif %}
-
-                        {% if can("edit", user) %}
-                            {% if user.activo %}
-                            <a href="/users/{{ user.id_usuario }}/deactivate"
-                               class="btn btn-secondary btn-sm"
-                               title="Desactivar">
-                                <i class="fas fa-ban"></i>
-                            </a>
-                            {% else %}
-                            <a href="/users/{{ user.id_usuario }}/activate"
-                               class="btn btn-success btn-sm"
-                               title="Activar">
-                                <i class="fas fa-check"></i>
-                            </a>
-                            {% endif %}
-                        {% endif %}
-
-                        {% if can("delete", user) %}
-                        <form method="post"
-                              action="/users/{{ user.id_usuario }}/delete"
-                              style="display:inline;">
-                            <button class="btn btn-danger btn-sm"
-                                    title="Eliminar"
-                                    onclick="return confirm('¿Eliminar usuario?')">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </form>
-                        {% endif %}
-
-                    </td>
-
-                </tr>
-                {% endfor %}
-
-            </tbody>
-
-        </table>
-
-        {% else %}
-
-        <!-- EMPTY STATE -->
-        <div class="text-center p-4 text-muted">
-
-            <i class="fas fa-search fa-2x mb-2"></i>
-
-            <p>No se encontraron resultados</p>
-
-            {% if can("create") %}
-            <a href="/users/form" class="btn btn-primary btn-sm">
-                Crear usuario
-            </a>
-            {% endif %}
-
+    {# --- FILTROS --- #}
+    {% call filters_bar("/users/") %}
+        <div class="col-md-6 mb-2">
+            {{ input("search", "", search, type="text", placeholder="Buscar por nombre...") }}
         </div>
 
-        {% endif %}
+        <div class="col-md-6 mb-2">
+            {{ select(
+                "status",
+                "",
+                [
+                    ("all", "Todos"),
+                    ("active", "Activos"),
+                    ("inactive", "Inactivos")
+                ],
+                status
+            ) }}
+        </div>
+    {% endcall %}
 
-    </div>
+    {# --- TABLA --- #}
+    {{ data_table(
+        items=users,
+        row_renderer=user_row,
+        headers=["ID", "Nombre", "Estado", "Acciones"],
 
-    <!-- PAGINACIÓN -->
-    {% if total_pages > 1 %}
-    <div class="card-footer clearfix">
+        empty_title="No se encontraron usuarios",
+        empty_icon="users",
+        empty_action_url="/users/form",
+        empty_action_label="Crear usuario",
+        empty_action_perm="create",
+        empty_resource="users",
 
-        <ul class="pagination pagination-sm m-0 float-right">
+        page=page,
+        total_pages=total_pages,
+        search=search,
+        status=status
+    ) }}
 
-            {% for p in range(1, total_pages + 1) %}
-            <li class="page-item {% if p == page %}active{% endif %}">
-                <a class="page-link"
-                   href="?page={{ p }}&search={{ search }}&status={{ status }}">
-                    {{ p }}
-                </a>
-            </li>
-            {% endfor %}
-
-        </ul>
-
-    </div>
-    {% endif %}
-
-</div>
+{% endcall %}
 
 {% endblock %}

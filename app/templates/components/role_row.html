@@ -1,0 +1,36 @@
+{% from "components/role_actions.html" import role_actions with context %}
+{% from "components/badges.html" import status %}
+
+{% macro role_row(role) %}
+
+<tr onclick="window.location='/roles/{{ role.id_rol }}'"
+    style="cursor:pointer">
+
+    <td class="text-center align-middle">
+        <strong>{{ role.nombre }}</strong>
+    </td>
+
+    <td class="align-middle">
+        {{ role.descripcion or "-" }}
+    </td>
+
+    <td class="text-center align-middle">
+        <span class="badge badge-info">
+            {{ role.permissions|length }}
+        </span>
+    </td>
+
+    <td class="text-center align-middle">
+        {{ status(True) }}
+    </td>
+
+    <td class="text-center align-middle text-nowrap"
+        onclick="event.stopPropagation();">
+
+        {{ role_actions(role) }}
+
+    </td>
+
+</tr>
+
+{% endmacro %}

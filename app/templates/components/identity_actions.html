@@ -1,0 +1,17 @@
+{% from "components/actions.html" import action_button %}
+
+{% macro identity_actions(identity) %}
+
+{% if can("read", "identities") %}
+    {{ action_button("/identities/" ~ identity.id, "fa-eye", "info", "Ver") }}
+{% endif %}
+
+{% if can("update", "identities") %}
+    {{ action_button("/identities/" ~ identity.id ~ "/edit", "fa-edit", "warning", "Editar") }}
+{% endif %}
+
+{% if can("delete", "identities") %}
+    {{ action_button("/identities/" ~ identity.id ~ "/delete", "fa-trash", "danger", "Eliminar", method="post") }}
+{% endif %}
+
+{% endmacro %}

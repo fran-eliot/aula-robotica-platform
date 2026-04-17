@@ -1,0 +1,47 @@
+{% macro tabs(items=[], id="tabs") %}
+
+<div>
+
+    <!-- NAV -->
+    <ul class="nav nav-pills mb-3" role="tablist">
+
+        {% for tab in items %}
+        <li class="nav-item">
+
+            <a class="nav-link {% if loop.first %}active{% endif %}"
+               data-toggle="tab"
+               href="#{{ id }}_{{ tab.key }}"
+               role="tab">
+
+                {% if tab.icon %}
+                    <i class="fas fa-{{ tab.icon }}"></i>
+                {% endif %}
+
+                {{ tab.label }}
+
+            </a>
+
+        </li>
+        {% endfor %}
+
+    </ul>
+
+
+    <!-- CONTENT -->
+    <div class="tab-content">
+
+        {% for tab in items %}
+        <div class="tab-pane {% if loop.first %}active{% endif %}"
+             id="{{ id }}_{{ tab.key }}"
+             role="tabpanel">
+
+            {{ caller(tab.key) }}
+
+        </div>
+        {% endfor %}
+
+    </div>
+
+</div>
+
+{% endmacro %}

@@ -1,0 +1,29 @@
+{% macro metric_card(title, value, icon, color, url=None, tooltip=None) %}
+
+<div class="col-lg-3 col-6">
+
+    <div class="small-box bg-{{ color }} shadow-sm"
+         {% if url %}onclick="window.location='{{ url }}'"{% endif %}
+         {% if tooltip %}title="{{ tooltip }}"{% endif %}
+         {% if url %}style="cursor:pointer"{% endif %}>
+
+        <div class="inner">
+            <h3>{{ value }}</h3>
+            <p>{{ title }}</p>
+        </div>
+
+        <div class="icon">
+            <i class="{{ icon }}"></i>
+        </div>
+
+        {% if url %}
+        <a href="{{ url }}" class="small-box-footer">
+            Ver <i class="fas fa-arrow-circle-right"></i>
+        </a>
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endmacro %}

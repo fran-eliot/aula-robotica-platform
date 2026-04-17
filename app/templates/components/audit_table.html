@@ -1,0 +1,88 @@
+{% macro audit_table(logs) %}
+
+{% if logs %}
+
+<table class="table table-sm table-hover mb-0">
+    <thead class="thead-light">
+        <tr>
+            <th style="width:180px">Fecha</th>
+            <th style="width:180px">Usuario</th>
+            <th style="width:180px">Acción</th>
+            <th>Detalle</th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+    {% for log in logs %}
+
+        {# COLOR #}
+        {% set color = {
+            "LOGIN": "badge-success",
+            "LOGOUT": "badge-secondary",
+            "CREATE_USER": "badge-primary",
+            "UPDATE_USER": "badge-warning",
+            "DELETE_USER": "badge-danger",
+            "CREATE_ROLE": "badge-primary",
+            "UPDATE_ROLE": "badge-warning",
+            "DELETE_ROLE": "badge-danger"
+        }[log.action] if log.action in [
+            "LOGIN","LOGOUT",
+            "CREATE_USER","UPDATE_USER","DELETE_USER",
+            "CREATE_ROLE","UPDATE_ROLE","DELETE_ROLE"
+        ] else "badge-dark" %}
+
+        {# ICONO #}
+        {% set icon = {
+            "LOGIN": "fa-sign-in-alt",
+            "LOGOUT": "fa-sign-out-alt",
+            "CREATE_USER": "fa-user-plus",
+            "UPDATE_USER": "fa-user-edit",
+            "DELETE_USER": "fa-user-times",
+            "CREATE_ROLE": "fa-plus-circle",
+            "UPDATE_ROLE": "fa-edit",
+            "DELETE_ROLE": "fa-trash"
+        }[log.action] if log.action in [
+            "LOGIN","LOGOUT",
+            "CREATE_USER","UPDATE_USER","DELETE_USER",
+            "CREATE_ROLE","UPDATE_ROLE","DELETE_ROLE"
+        ] else "fa-history" %}
+
+        <tr>
+
+            <td class="text-muted">
+                {{ log.created_at.strftime("%d/%m/%Y %H:%M") }}
+            </td>
+
+            <td>
+                {{ log.user.nombre if log.user else "Sistema" }}
+            </td>
+
+            <td>
+                <span class="badge {{ color }}">
+                    <i class="fas {{ icon }}"></i>
+                    {{ log.action }}
+                </span>
+            </td>
+
+            <td>
+                {{ log.description or "-" }}
+            </td>
+
+        </tr>
+
+    {% endfor %}
+
+    </tbody>
+</table>
+
+{% else %}
+
+<div class="p-4 text-center text-muted">
+    <i class="fas fa-history fa-2x mb-2"></i>
+    <p class="mb-0">No hay actividad registrada</p>
+</div>
+
+{% endif %}
+
+{% endmacro %}

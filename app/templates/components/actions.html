@@ -1,0 +1,20 @@
+{% macro action_button(url=None, icon="", color="secondary", title="", confirm=None, method="get") %}
+
+{% if method == "post" %}
+<form method="post" action="{{ url }}" class="d-inline">
+    <button type="submit"
+            class="btn btn-{{ color }} btn-sm px-2 mr-1"
+            title="{{ title }}"
+            {% if confirm %}onclick="return confirm('{{ confirm }}')"{% endif %}>
+        <i class="fas {{ icon }}"></i>
+    </button>
+</form>
+{% else %}
+<a href="{{ url }}"
+   class="btn btn-{{ color }} btn-sm px-2 mr-1"
+   title="{{ title }}">
+    <i class="fas {{ icon }}"></i>
+</a>
+{% endif %}
+
+{% endmacro %}

@@ -1,151 +1,65 @@
 {% extends "base.html" %}
 
+{% from "components/form.html" import input, form_actions %}
+{% from "components/form_layout.html" import form_card, form_row, form_col %}
+{% from "components/validation_summary.html" import validation_summary %}
+{% from "components/permission_matrix.html" import permission_matrix %}
+
 {% block content %}
 
-<div class="card">
+{% call form_card(
+    ("Editar rol" if role else "Nuevo rol")
+) %}
 
-    <!-- HEADER -->
-    <div class="card-header">
-        <h3 class="card-title">
-            <i class="fas fa-user-tag"></i>
-            {{ role and "Editar rol" or "Nuevo rol" }}
-        </h3>
-    </div>
+    <!-- ================= VALIDATION ================= -->
+    {{ validation_summary(errors) }}
 
-    <form method="post">
+    <!-- ================= DATOS ================= -->
+    {% call form_row() %}
 
-        <div class="card-body">
+        {% call form_col(6) %}
+            {{ input(
+                "nombre",
+                "Nombre del rol",
+                form_data.nombre if form_data else (role.nombre if role else ""),
+                errors.nombre if errors else None,
+                required=True,
+                placeholder="Ej: admin, profesor..."
+            ) }}
+        {% endcall %}
 
-            <!-- ============================= -->
-            <!-- 📝 DATOS DEL ROL -->
-            <!-- ============================= -->
-            <div class="row">
+        {% call form_col(6) %}
+            {{ input(
+                "descripcion",
+                "Descripción",
+                form_data.descripcion if form_data else (role.descripcion if role else ""),
+                errors.descripcion if errors else None,
+                placeholder="Descripción opcional"
+            ) }}
+        {% endcall %}
 
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label>Nombre del rol</label>
-                        <input type="text"
-                               name="nombre"
-                               class="form-control"
-                               value="{{ role.nombre if role else '' }}"
-                               placeholder="Ej: admin, profesor..."
-                               required>
-                    </div>
-                </div>
+    {% endcall %}
 
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label>Descripción</label>
-                        <input type="text"
-                               name="descripcion"
-                               class="form-control"
-                               value="{{ role.descripcion if role else '' }}"
-                               placeholder="Descripción opcional">
-                    </div>
-                </div>
 
-            </div>
+    <!-- ================= PERMISOS ================= -->
 
-            <!-- ============================= -->
-            <!-- 🔐 PERMISOS AGRUPADOS -->
-            <!-- ============================= -->
-            <div class="form-group mt-4">
+    {% set selected_permissions = [] %}
 
-                <label>
-                    <i class="fas fa-shield-alt"></i>
-                    Permisos
-                </label>
+    {% if form_data and form_data.permissions %}
+        {% set selected_permissions = form_data.permissions %}
+    {% elif role %}
+        {% set selected_permissions = role.permissions | map(attribute='id') | list %}
+    {% endif %}
 
-                {% for module, perms in grouped_permissions.items() %}
-                <div class="card mb-3">
+    {{ permission_matrix(grouped_permissions, selected_permissions) }}
 
-                    <!-- CABECERA DEL MÓDULO -->
-                    <div class="card-header d-flex justify-content-between align-items-center">
 
-                        <strong>
-                            <i class="fas fa-folder"></i>
-                            {{ module | capitalize }}
-                        </strong>
+    <!-- ================= FOOTER ================= -->
+    {{ form_actions(
+        "/roles/",
+        "Actualizar" if role else "Crear"
+    ) }}
 
-                        <!-- seleccionar todo -->
-                        <button type="button"
-                                class="btn btn-sm btn-outline-primary"
-                                onclick="toggleModule('{{ module }}')">
-                            Seleccionar todo
-                        </button>
-
-                    </div>
-
-                    <!-- PERMISOS -->
-                    <div class="card-body">
-
-                        <div class="row">
-
-                            {% for perm in perms %}
-                            <div class="col-md-4 mb-2">
-
-                                <div class="form-check">
-
-                                    <input class="form-check-input perm-{{ module }}"
-                                           type="checkbox"
-                                           name="permissions"
-                                           value="{{ perm.id }}"
-                                           id="perm_{{ perm.id }}"
-                                           {% if role and perm.id in [p.id for p in role.permissions] %}checked{% endif %}>
-
-                                    <label class="form-check-label" for="perm_{{ perm.id }}">
-                                        <span class="badge badge-light">
-                                            {{ perm.action }}
-                                        </span>
-                                    </label>
-
-                                </div>
-
-                            </div>
-                            {% endfor %}
-
-                        </div>
-
-                    </div>
-
-                </div>
-                {% endfor %}
-
-            </div>
-
-        </div>
-
-        <!-- ============================= -->
-        <!-- FOOTER -->
-        <!-- ============================= -->
-        <div class="card-footer d-flex justify-content-between">
-
-            <a href="/roles/" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i> Volver
-            </a>
-
-            <button class="btn btn-primary">
-                <i class="fas fa-save"></i>
-                {{ role and "Actualizar" or "Crear" }}
-            </button>
-
-        </div>
-
-    </form>
-
-</div>
-
-<!-- ============================= -->
-<!-- JS UX -->
-<!-- ============================= -->
-<script>
-function toggleModule(module) {
-    const checkboxes = document.querySelectorAll(".perm-" + module);
-
-    const allChecked = Array.from(checkboxes).every(cb => cb.checked);
-
-    checkboxes.forEach(cb => cb.checked = !allChecked);
-}
-</script>
+{% endcall %}
 
 {% endblock %}

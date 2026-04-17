@@ -1,0 +1,17 @@
+# app/core/render.py
+# Centraliza la lógica de renderizado de plantillas, incluyendo el contexto común para todas las vistas.
+
+from app.core.templates import templates
+from app.web.context import get_template_context
+
+def render(request, template_name, extra=None):
+    context = get_template_context(request)
+
+    print(f"Context Keys for render: {context.keys()}")  # Debug: mostrar claves del contexto
+
+    if extra:
+        context.update(extra)
+
+    context["request"] = request
+
+    return templates.TemplateResponse(template_name, context)

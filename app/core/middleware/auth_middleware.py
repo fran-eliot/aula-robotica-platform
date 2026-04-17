@@ -1,10 +1,12 @@
 # core/middleware/auth_middleware.py
 # 🔐 Middleware de autenticación y refresh automático
 
+from jose import JWTError
 from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi.responses import RedirectResponse
 
 from app.core.security import validate_access_token, validate_refresh_token
+from app.db.session import SessionLocal
 from app.modules.auth.auth_service import refresh_access_token
 
 
@@ -47,7 +49,8 @@ class AuthMiddleware(BaseHTTPMiddleware):
 
             return await call_next(request)
 
-        except:
+        except JWTError as e:
+            print(f"Error al validar el token: {e}")
             # 🔴 4. Intentar refresh automático
             refresh_token = request.cookies.get("refresh_token")
 
@@ -58,16 +61,14 @@ class AuthMiddleware(BaseHTTPMiddleware):
                 # 🔥 validar refresh token
                 refresh_payload = validate_refresh_token(refresh_token)
 
-                # 🔥 generar nuevo access token
-                new_access_token = refresh_access_token(refresh_payload)
+                with SessionLocal() as db:
+                    # 🔒 validar usuario y permisos desde refresh token
+                    new_access_token = refresh_access_token(refresh_payload, db)
 
                 # 🔥 decodificar nuevo access token
                 new_payload = validate_access_token(new_access_token)
 
                 request.state.user = new_payload
-
-                # 👉 inyectar token en request (hack necesario)
-                request.cookies._dict["access_token"] = new_access_token
 
                 response = await call_next(request)
 
@@ -76,10 +77,12 @@ class AuthMiddleware(BaseHTTPMiddleware):
                     value=new_access_token,
                     httponly=True,
                     samesite="lax",
+                    secure=False,  # Cambiar a True en producción
                     path="/"
                 )
 
                 return response
 
-            except:
+            except JWTError as e:
+                print(f"Error al refrescar el token: {e}")
                 return RedirectResponse("/login", status_code=302)

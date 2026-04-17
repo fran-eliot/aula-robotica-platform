@@ -1,0 +1,25 @@
+{% macro status(active) %}
+    {% if active %}
+        <span class="badge badge-success">
+            <i class="fas fa-check"></i> Activo
+        </span>
+    {% else %}
+        <span class="badge badge-secondary">
+            <i class="fas fa-ban"></i> Inactivo
+        </span>
+    {% endif %}
+{% endmacro %}
+
+
+{% macro permission(action) %}
+    {% set colors = {
+        "read": "secondary",
+        "create": "success",
+        "update": "warning",
+        "delete": "danger"
+    } %}
+
+    <span class="badge badge-{{ colors[action] if action in colors else "info" }}">
+        {{ action }}
+    </span>
+{% endmacro %}

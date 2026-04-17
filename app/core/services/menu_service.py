@@ -1,9 +1,14 @@
 # app/core/services/menu_service.py
 # 📋 Servicio de menú dinámico basado en permisos
 
+from functools import lru_cache
 import re
 from app.core.presentation.breadcrumbs import DYNAMIC_BREADCRUMBS
 
+# =========================================================
+# 🗂️ MENÚ BASE (definición global, sin filtrar)
+# =========================================================
+@lru_cache
 def get_menu_structure():
     """
     Definición global del menú (independiente del usuario).
@@ -53,7 +58,9 @@ def get_menu_structure():
         }
     ]
 
-
+# =========================================================
+# 🔐 FILTRADO DE MENÚ POR PERMISOS
+# =========================================================
 def filter_menu_by_permissions(menu, has_perm):
     """
     Filtra el menú según permisos del usuario.
@@ -89,32 +96,35 @@ def filter_menu_by_permissions(menu, has_perm):
 
     return filtered_menu
 
-
+# =========================================================
+# 🧭 MARCAR MENÚ ACTIVO
+# =========================================================
 def mark_active_menu(menu, current_path: str):
-    """
-    Marca el menú activo según la URL actual.
-    """
-
     for item in menu:
-
         item["active"] = False
         item["open"] = False
 
-        # 🔹 caso con hijos
         if "children" in item:
+            any_child_active = False
+
             for child in item["children"]:
                 child["active"] = current_path.startswith(child["url"])
-
                 if child["active"]:
-                    item["open"] = True
-                    item["active"] = True
+                    any_child_active = True
+
+            item["active"] = any_child_active
+
+            # abierto si tiene hijos visibles (mejor UX)
+            item["open"] = len(item["children"]) > 0
 
         else:
             item["active"] = current_path.startswith(item.get("url", ""))
 
     return menu
 
-
+# =========================================================
+# 🧭 CONSTRUCCIÓN DE BREADCRUMBS
+# =========================================================
 def build_breadcrumbs(menu, current_path: str):
     breadcrumbs = []
 
@@ -136,7 +146,9 @@ def build_breadcrumbs(menu, current_path: str):
 
     return breadcrumbs
 
-
+# =========================================================
+# 🧭 BREADCRUMBS INTELIGENTES (con soporte para entidades dinámicas)
+# =========================================================
 def build_smart_breadcrumbs(menu, request, db):
     """
     Breadcrumbs inteligentes con soporte para entidades dinámicas.

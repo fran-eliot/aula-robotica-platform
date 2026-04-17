@@ -1,23 +1,27 @@
-<td>
+{% macro btn(url, label, color="primary", icon=None, size="sm") %}
+<a href="{{ url }}" class="btn btn-{{ color }} btn-{{ size }}">
+    {% if icon %}<i class="fas fa-{{ icon }}"></i>{% endif %}
+    {{ label }}
+</a>
+{% endmacro %}
 
-    {% if can("view", user) %}
-        <a href="/users/{{ user.id_usuario }}" class="btn btn-info btn-sm">
-            Ver
-        </a>
-    {% endif %}
 
-    {% if can("edit", user) %}
-        <a href="/users/{{ user.id_usuario }}/edit" class="btn btn-warning btn-sm">
-            Editar
-        </a>
-    {% endif %}
+{% macro btn_submit(label="Guardar") %}
+<button type="submit" class="btn btn-primary">
+    <i class="fas fa-save"></i> {{ label }}
+</button>
+{% endmacro %}
 
-    {% if can("delete", user) %}
-        <form method="post" action="/users/{{ user.id_usuario }}/delete" style="display:inline;">
-            <button class="btn btn-danger btn-sm">
-                Eliminar
-            </button>
-        </form>
-    {% endif %}
 
-</td>
+{% macro btn_delete(url, confirm_text="¿Seguro que deseas eliminar?") %}
+<form method="post"
+      action="{{ url }}"
+      class="d-inline"
+      onsubmit="return confirm('{{ confirm_text }}')">
+
+    <button type="submit" class="btn btn-danger btn-sm">
+        <i class="fas fa-trash"></i>
+        Eliminar
+    </button>
+</form>
+{% endmacro %}

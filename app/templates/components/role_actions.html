@@ -1,0 +1,24 @@
+{% from "components/actions.html" import action_button %}
+
+{% macro role_actions(role) %}
+
+{% if can("read", "roles") %}
+{{ action_button("/roles/" ~ role.id_rol, "fa-eye", "info", "Ver") }}
+{% endif %}
+
+{% if can("update", "roles") %}
+{{ action_button("/roles/" ~ role.id_rol ~ "/edit", "fa-edit", "warning", "Editar") }}
+{% endif %}
+
+{% if can("delete", "roles") %}
+{{ action_button(
+    "/roles/" ~ role.id_rol ~ "/delete",
+    "fa-trash",
+    "danger",
+    "Eliminar",
+    confirm="¿Eliminar rol?",
+    method="post"
+) }}
+{% endif %}
+
+{% endmacro %}
