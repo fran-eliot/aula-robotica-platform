@@ -163,35 +163,36 @@ def refresh_token(request: Request):
 # =========================================================
 # 🚪 LOGOUT
 # =========================================================
-@router.get("/logout")
+@router.post("/logout")
 def logout(
     request: Request,
-    db: Session = Depends(get_db),
-    current_user = Depends(get_current_user_web)
+    db: Session = Depends(get_db)
 ):
     """
     Cierra sesión:
-    - Registra auditoría
-    - Elimina cookies
+    - Intenta registrar la auditoría si hay usuario logueado
+    - Elimina cookies siempre
     """
 
-    # 🧾 auditoría
-    log_action(
-        db,
-        action=AuditAction.LOGOUT,
-        user_id=current_user.id_usuario,
-        resource_type="user",
-        resource_id=current_user.id_usuario,
-        description="Cierre de sesión",
-        request=request
-    )
+    payload = getattr(request.state, "user", None)
 
-    db.commit()
+    if payload:
+        user_id = int(payload.get("sub"))
 
-    # 🍪 eliminar cookies
+        log_action(
+            db,
+            action=AuditAction.LOGOUT,
+            user_id=user_id,
+            resource_type="user",
+            resource_id=user_id,
+            description="Cierre de sesión",
+            request=request
+        )
+        db.commit()
+
     response = RedirectResponse(
         url="/login",
-        status_code=302
+        status_code=303
     )
 
     response.delete_cookie("access_token", path="/")

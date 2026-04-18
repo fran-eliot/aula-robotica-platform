@@ -40,27 +40,6 @@ def identities_list(
     )
 
 
-@router.get("/{identity_id}")
-def identity_detail(
-    request: Request,
-    identity_id: int,
-    db: Session = Depends(get_db),
-    current_user = Depends(require_permission_web(Resources.IDENTITIES, Actions.READ))
-):
-    identity = db.query(Identity).get(identity_id)
-
-    if not identity:
-        raise HTTPException(status_code=404, detail="Identidad no encontrada")
-
-    return templates.TemplateResponse(
-        "identities/identity_detail.html",
-        {
-            "request": request,
-            "identity": identity
-        }
-    )
-
-
 # =========================================================
 # 📝 FORM (CREATE + EDIT)
 # =========================================================
@@ -150,6 +129,27 @@ def identity_save(
     db.commit()
 
     return RedirectResponse("/identities/", status_code=303)
+
+
+@router.get("/{identity_id}")
+def identity_detail(
+    request: Request,
+    identity_id: int,
+    db: Session = Depends(get_db),
+    current_user = Depends(require_permission_web(Resources.IDENTITIES, Actions.READ))
+):
+    identity = db.query(Identity).get(identity_id)
+
+    if not identity:
+        raise HTTPException(status_code=404, detail="Identidad no encontrada")
+
+    return templates.TemplateResponse(
+        "identities/identity_detail.html",
+        {
+            "request": request,
+            "identity": identity
+        }
+    )
 
 
 # =========================================================
