@@ -14,9 +14,11 @@ PUBLIC_PATHS = [
     "/login",
     "/logout",
     "/refresh",
+    "/favicon.ico",
     "/static",
-    "/favicon.ico"
+    "/auth/saml"
 ]
+
 
 
 class AuthMiddleware(BaseHTTPMiddleware):

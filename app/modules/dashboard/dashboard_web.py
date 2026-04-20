@@ -49,18 +49,18 @@ def dashboard(
     # =========================================================
     try:
         return templates.TemplateResponse(
+            request,    
             "dashboard/dashboard.html",
             {
-                "request": request,
                 **metrics  # expandimos directamente en el contexto
             }
         )
     except Exception as e:
         logger.exception("Error renderizando dashboard: %s", e)
         return templates.TemplateResponse(
+            request,
             "dashboard/dashboard.html",
             {
-                "request": request,
                 "error": "Error al cargar el dashboard"
             }
         )

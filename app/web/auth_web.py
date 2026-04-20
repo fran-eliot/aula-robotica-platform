@@ -30,8 +30,9 @@ def login_page(request: Request):
     Renderiza formulario de login.
     """
     return templates.TemplateResponse(
+        request,
         "auth/login.html",
-        {"request": request,
+        {
          
          }
     )
@@ -60,9 +61,9 @@ def login(
 
     except HTTPException:
         return templates.TemplateResponse(
+            request,
             "auth/login.html",
             {
-                "request": request,
                 "error": "Credenciales incorrectas"
             }
         )

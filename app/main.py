@@ -1,7 +1,12 @@
 # app/main.py
 
+# Este es el punto de entrada principal de la aplicación. 
+# Aquí se configura FastAPI, se incluyen los routers y se monta 
+# el directorio de archivos estáticos.
+
 from fastapi import FastAPI
 from fastapi.openapi.utils import get_openapi
+from app.modules import auth_saml
 from app.modules.dashboard import dashboard_web
 from app.modules.identities import identities_web
 from app.modules.roles import roles_web
@@ -10,10 +15,11 @@ from fastapi.staticfiles import StaticFiles
 from app.core.middleware.auth_middleware import AuthMiddleware
 from app.modules.auth.auth_router import router as auth_router
 from app.modules.users import users_web
+from app.modules.auth_saml import saml_web
 from app.web import (
     auth_web
 )
-from app.core.templates import templates
+
 
 
 def custom_openapi():
@@ -72,6 +78,7 @@ app.include_router(users_router, prefix="/api/users", tags=["Users"])
 
 # 🌐 WEB
 app.include_router(auth_web.router, tags=["Authentication Web"])
+app.include_router(saml_web.router, tags=["SAML Authentication Web"])
 app.include_router(dashboard_web.router, tags=["Dashboard Web"])
 app.include_router(users_web.router, tags=["Users Web"])
 app.include_router(identities_web.router, tags=["Identities Web"])

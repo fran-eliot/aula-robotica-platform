@@ -1,6 +1,6 @@
 # app/modules/users/user_service.py
 
-from datetime import datetime
+from datetime import UTC, datetime
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
@@ -91,7 +91,7 @@ def create_user_with_audit(db, nombre, current_user=None, request=None):
     user = User(
         nombre=nombre,
         activo=True,
-        fecha_creacion=datetime.utcnow()
+        fecha_creacion=datetime.now(UTC)
     )
 
     db.add(user)

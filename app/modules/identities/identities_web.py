@@ -32,9 +32,9 @@ def identities_list(
     identities = db.query(Identity).all()
 
     return templates.TemplateResponse(
+        request,
         "identities/identities_list.html",
         {
-            "request": request,
             "identities": identities
         }
     )
@@ -60,9 +60,9 @@ def identity_form(
     roles = db.query(Role).all()
 
     return templates.TemplateResponse(
+        request,
         "identities/identity_form.html",
         {
-            "request": request,
             "identity": identity,
             "users": users,
             "roles": roles,
@@ -144,9 +144,9 @@ def identity_detail(
         raise HTTPException(status_code=404, detail="Identidad no encontrada")
 
     return templates.TemplateResponse(
+        request,
         "identities/identity_detail.html",
         {
-            "request": request,
             "identity": identity
         }
     )

@@ -146,34 +146,28 @@ def require_owner_or_permission_web(resource: str, action: str):
 # 🚫 PERMISSION + NOT SELF
 # =========================================================
 def require_permission_and_not_self_web(resource: str, action: str):
-    """
-    Permite acción si:
-    - Tiene permiso RBAC
-    - Y NO es sobre sí mismo
-    """
 
     def checker(
         user_id: int,
         db: Session = Depends(get_db),
-        current_user: dict = Depends(get_current_user_web)
+        current_user = Depends(get_current_user_web)
     ):
-
         target_user = get_user_or_404(db, user_id)
 
-        # 🚫 evitar auto-acción peligrosa
-        if target_user.id_usuario == int(current_user.get("sub")):
+        # 🚫 No permitirse borrar a sí mismo
+        if target_user.id_usuario == current_user.id_usuario:
             raise HTTPException(
-                status_code=400,
+                status_code=403,
                 detail="No puedes realizar esta acción sobre ti mismo"
             )
 
-        # 🔐 RBAC
-        if not can_user_action(action, current_user, target_user):
+        # ✅ Validar permiso RBAC real
+        if not can_user_action(action, resource, current_user, target_user):
             raise HTTPException(
                 status_code=403,
                 detail="No autorizado"
             )
 
-        return target_user
+        return current_user
 
     return checker

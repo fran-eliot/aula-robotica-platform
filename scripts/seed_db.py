@@ -27,19 +27,21 @@ def seed():
     # =========================
 
     if db.query(Role).count() > 0:
-        print("⚠️ Ya existen datos en la tabla de roles, abortando seed")
+        print("⚠️ Base ya inicializada. Ejecuta reset antes del seed.")
         return
 
     admin_role = Role(nombre="admin", descripcion="Rol con todos los permisos")
     profesor_role = Role(nombre="profesor", descripcion="Rol para profesores")
     estudiante_role = Role(nombre="estudiante", descripcion="Rol para estudiantes")
+    user_uah_role = Role(nombre="uah_user", descripcion="Acceso inicial mediante SSO UAH (SAML)")
 
-    db.add_all([admin_role, profesor_role, estudiante_role])
+    db.add_all([admin_role, profesor_role, estudiante_role, user_uah_role])
     db.commit()
 
     db.refresh(admin_role)
     db.refresh(profesor_role)
     db.refresh(estudiante_role)
+    db.refresh(user_uah_role)
 
     print("✔ Roles creados")
 
@@ -88,12 +90,21 @@ def seed():
     # Profesor → read + update
     profesor_role.permissions = [
         permissions["users:read"],
-        permissions["users:update"]
+        permissions["users:update"],
+        permissions["dashboard:read"],
+        permissions["students:read"]
     ]
 
     # Estudiante → solo read
     estudiante_role.permissions = [
-        permissions["users:read"]
+        permissions["dashboard:read"],
+        permissions["students:read"]
+    ]
+
+    # Estudiante UAH → solo read
+    user_uah_role.permissions = [
+        permissions["dashboard:read"],
+        permissions["students:read"]
     ]
 
     db.commit()
@@ -125,7 +136,12 @@ def seed():
         for i in range(1, 21)
     ]
 
-    users.extend(admins + profesores + alumnos)
+    # Estudiantes UAH (SAML) (sOLO 1 PARA DEMO)
+    uah_users = [
+        User(nombre=f"User UAH", activo=True)
+    ]
+
+    users.extend(admins + profesores + alumnos + uah_users)
 
     db.add_all(users)
     db.commit()
@@ -148,6 +164,10 @@ def seed():
     for user in alumnos:
         user.roles.append(estudiante_role)
 
+    # Estudiante UAH (SAML)
+    for user in uah_users:
+        user.roles.append(user_uah_role)
+
     db.commit()
 
     # =========================
@@ -159,6 +179,14 @@ def seed():
             email=email,
             provider="local",
             password_hash=hash_password("1234"),
+            user_id=user.id_usuario
+        )
+    
+    def create_saml_identity(user, email):
+        return Identity(
+            email=email,
+            provider="uah_saml",
+            password_hash=None,  # No se almacena contraseña para SAML
             user_id=user.id_usuario
         )
 
@@ -180,6 +208,12 @@ def seed():
             create_identity(alumno, f"alumno{i+1}@uah.es")
         )
 
+    # Estudiante UAH (SAML) (sin password, autenticación externa)
+    identities.append(
+       create_saml_identity(uah_users[0], email="user_uah@uah.es")    
+        )
+    
+
     db.add_all(identities)
     db.commit()
 
@@ -198,7 +232,7 @@ def seed():
 
     logs = []
 
-    all_users = admins + profesores + alumnos
+    all_users = admins + profesores + alumnos + uah_users
 
     for _ in range(50):
         user = random.choice(all_users)

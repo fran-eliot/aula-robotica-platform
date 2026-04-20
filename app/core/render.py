@@ -12,6 +12,4 @@ def render(request, template_name, extra=None):
     if extra:
         context.update(extra)
 
-    context["request"] = request
-
-    return templates.TemplateResponse(template_name, context)
+    return templates.TemplateResponse(request, template_name, context)

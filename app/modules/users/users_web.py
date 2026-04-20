@@ -16,7 +16,7 @@ from app.modules.auth.auth_dependencies_web import (
     get_current_user_web,
     require_permission_web,
     require_permission_and_not_self_web,
-    require_owner_or_permission_web
+    require_owner_or_permission_web,
 )
 
 # 🧠 Services
@@ -47,21 +47,19 @@ router = APIRouter(prefix="/users", tags=["Users Web"])
 
 
 # =========================================================
-# 📋 LISTADO DE USUARIOS
+# 📋 LISTADO
 # =========================================================
 @router.get("/")
 def users_list(
     request: Request,
     search: str = "",
-    status: str = "all",  # all | active | inactive
+    status: str = "all",
     page: int = 1,
     db: Session = Depends(get_db),
-    current_user = Depends(require_permission_web(Resources.USERS, Actions.READ))
+    current_user=Depends(
+        require_permission_web(Resources.USERS, Actions.READ)
+    ),
 ):
-    """
-    Listado de usuarios con búsqueda, filtro y paginación.
-    """
-
     per_page = 10
 
     users, total = search_users(
@@ -69,7 +67,7 @@ def users_list(
         search=search,
         status=status,
         page=page,
-        per_page=per_page
+        per_page=per_page,
     )
 
     total_pages = (total + per_page - 1) // per_page
@@ -82,164 +80,203 @@ def users_list(
             "search": search,
             "status": status,
             "page": page,
-            "total_pages": total_pages
-        }
+            "total_pages": total_pages,
+        },
     )
 
 
 # =========================================================
-# 📝 FORMULARIO (CREATE + EDIT)
+# 📝 FORM CREATE
 # =========================================================
 @router.get("/form", name="user_form_create")
-@router.get("/{user_id}/edit", name="user_form_edit")
-def user_form(
+def user_create_form(
     request: Request,
-    user_id: int | None = None,
     db: Session = Depends(get_db),
-    current_user = Depends(require_permission_web(Resources.USERS, Actions.UPDATE))
+    current_user=Depends(
+        require_permission_web(Resources.USERS, Actions.CREATE)
+    ),
 ):
-    """
-    Formulario reutilizable para crear o editar usuarios.
-    """
-
-    user = None
-
-    if user_id:
-        user = get_user_or_404(db, user_id)
-
-    roles = get_all_roles(db)
-
     return templates.TemplateResponse(
+        request,
         "users/users_form.html",
         {
-            "request": request,
             **get_template_context(request),
-            "user": user,
-            "roles": roles,
+            "user": None,
+            "roles": get_all_roles(db),
             "form_data": None,
-            "errors": None
-        }
+            "errors": None,
+        },
     )
 
 
 # =========================================================
-# 💾 GUARDAR (CREATE + UPDATE)
+# 📝 FORM EDIT
+# =========================================================
+@router.get("/{user_id}/edit", name="user_form_edit")
+def user_edit_form(
+    request: Request,
+    user_id: int,
+    db: Session = Depends(get_db),
+    target_user=Depends(
+        require_owner_or_permission_web(Resources.USERS, Actions.UPDATE)
+    ),
+):
+    return templates.TemplateResponse(
+        request,
+        "users/users_form.html",
+        {
+            **get_template_context(request),
+            "user": target_user,
+            "roles": get_all_roles(db),
+            "form_data": None,
+            "errors": None,
+        },
+    )
+
+
+# =========================================================
+# 💾 CREATE
 # =========================================================
 @router.post("/form")
-@router.post("/{user_id}/edit")
-def user_save(
+def user_create(
     request: Request,
     nombre: str = Form(...),
     activo: bool = Form(False),
-    roles: list[int] = Form([]),
-    user_id: int | None = None,
+    roles: list[int] | None = Form(None),
     db: Session = Depends(get_db),
-    current_user = Depends(require_owner_or_permission_web(Resources.USERS, Actions.UPDATE))
+    current_user=Depends(
+        require_permission_web(Resources.USERS, Actions.CREATE)
+    ),
 ):
-    """
-    Guarda usuario:
-    - CREATE → crea usuario + asigna roles
-    - UPDATE → actualiza usuario + sincroniza roles
-    """
+    roles = roles or []
 
-    user = None
-
-    if user_id:
-        user = get_user_or_404(db, user_id)
-
-    # =========================================================
-    # 🔎 VALIDACIÓN
-    # =========================================================
     try:
         data = UserUpdate(nombre=nombre, activo=activo)
 
     except ValidationError as e:
         return templates.TemplateResponse(
+            request,
             "users/users_form.html",
             {
-                "request": request,
                 **get_template_context(request),
-                "user": user,
-                "roles": get_all_roles(db),  # 🔥 importante
+                "user": None,
+                "roles": get_all_roles(db),
                 "form_data": {
                     "nombre": nombre,
                     "activo": activo,
-                    "roles": roles
+                    "roles": roles,
                 },
-                "errors": format_pydantic_errors(e.errors())
-            }
+                "errors": format_pydantic_errors(e.errors()),
+            },
         )
 
-    # =========================================================
-    # 🔥 UPDATE
-    # =========================================================
-    if user:
+    user = create_user_with_audit(
+        db,
+        data.nombre,
+        current_user,
+        request,
+    )
 
-        update_user_with_audit(
-            db, user, data.nombre, current_user, request
-        )
+    user.activo = data.activo if data.activo is not None else True
 
-        user.activo = (
-            data.activo if data.activo is not None else user.activo
-        )
-
-    # =========================================================
-    # 🔥 CREATE
-    # =========================================================
-    else:
-
-        user = create_user_with_audit(
-            db, data.nombre, current_user, request
-        )
-
-    # =========================================================
-    # 🔐 ROLES (SIEMPRE DESPUÉS)
-    # =========================================================
     sync_user_roles(db, user, roles)
 
-    # =========================================================
-    # 💾 COMMIT FINAL
-    # =========================================================
     db.commit()
 
-    flash_success(
-        request,
-        "Usuario actualizado correctamente" if user_id else "Usuario creado correctamente"
-    )
+    flash_success(request, "Usuario creado correctamente")
 
     return RedirectResponse(
         f"/users/{user.id_usuario}",
-        status_code=303
+        status_code=303,
     )
 
 
 # =========================================================
-# 👤 DETALLE DE USUARIO
+# 💾 UPDATE
+# =========================================================
+@router.post("/{user_id}/edit")
+def user_update(
+    request: Request,
+    user_id: int,
+    nombre: str = Form(...),
+    activo: bool = Form(False),
+    roles: list[int] | None = Form(None),
+    db: Session = Depends(get_db),
+    target_user=Depends(
+        require_owner_or_permission_web(Resources.USERS, Actions.UPDATE)
+    ),
+    current_user=Depends(get_current_user_web),
+):
+    roles = roles or []
+
+    try:
+        data = UserUpdate(nombre=nombre, activo=activo)
+
+    except ValidationError as e:
+        return templates.TemplateResponse(
+            request,
+            "users/users_form.html",
+            {
+                **get_template_context(request),
+                "user": target_user,
+                "roles": get_all_roles(db),
+                "form_data": {
+                    "nombre": nombre,
+                    "activo": activo,
+                    "roles": roles,
+                },
+                "errors": format_pydantic_errors(e.errors()),
+            },
+        )
+
+    update_user_with_audit(
+        db,
+        target_user,
+        data.nombre,
+        current_user,
+        request,
+    )
+
+    target_user.activo = (
+        data.activo
+        if data.activo is not None
+        else target_user.activo
+    )
+
+    sync_user_roles(db, target_user, roles)
+
+    db.commit()
+
+    flash_success(request, "Usuario actualizado correctamente")
+
+    return RedirectResponse(
+        f"/users/{target_user.id_usuario}",
+        status_code=303,
+    )
+
+
+# =========================================================
+# 👤 DETALLE
 # =========================================================
 @router.get("/{user_id}")
 def user_detail(
     request: Request,
     user_id: int,
     db: Session = Depends(get_db),
-    current_user = Depends(require_owner_or_permission_web(Resources.USERS, Actions.READ))
+    target_user=Depends(
+        require_owner_or_permission_web(Resources.USERS, Actions.READ)
+    ),
 ):
-    """
-    Vista completa del usuario:
-    - roles
-    - permisos
-    - auditoría
-    """
-
-    context = build_user_detail_view(db, user_id)
+    context = build_user_detail_view(
+        db,
+        target_user.id_usuario,
+    )
 
     return render(
         request,
         "users/user_detail.html",
-        {
-            **context,
-        }
+        context,
     )
-    
 
 
 # =========================================================
@@ -249,37 +286,34 @@ def user_detail(
 def my_profile(
     request: Request,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user_web)
+    current_user=Depends(get_current_user_web),
 ):
-    """
-    Perfil del usuario autenticado.
-    """
-
-    context = build_user_detail_view(db, current_user.id_usuario)
+    context = build_user_detail_view(
+        db,
+        current_user.id_usuario,
+    )
 
     return render(
         request,
         "users/user_detail.html",
-        {
-            **context
-        }
+        context,
     )
 
 
 # =========================================================
-# 🔐 ROLES DEL USUARIO
+# 🔐 ROLES
 # =========================================================
 @router.post("/{user_id}/roles")
-def update_user_roles(
+def update_user_roles_view(
     request: Request,
     user_id: int,
-    roles: list[int] = Form([]),
+    roles: list[int] | None = Form(None),
     db: Session = Depends(get_db),
-    current_user = Depends(require_permission_web(Resources.USERS, Actions.UPDATE))
+    current_user=Depends(
+        require_permission_web(Resources.USERS, Actions.UPDATE)
+    ),
 ):
-    """
-    Sincroniza los roles del usuario.
-    """
+    roles = roles or []
 
     user = get_user_by_id(db, user_id)
 
@@ -289,72 +323,101 @@ def update_user_roles(
 
     flash_success(request, "Roles actualizados correctamente")
 
-    return RedirectResponse(f"/users/{user_id}", status_code=303)
+    return RedirectResponse(
+        f"/users/{user_id}",
+        status_code=303,
+    )
 
 
 # =========================================================
-# 🗑️ ELIMINAR USUARIO
+# 🗑️ DELETE
 # =========================================================
 @router.post("/{user_id}/delete")
 def delete_user(
     request: Request,
     user_id: int,
     db: Session = Depends(get_db),
-    current_user = Depends(require_permission_and_not_self_web(Resources.USERS, Actions.DELETE))
+    current_user=Depends(
+        require_permission_and_not_self_web(
+            Resources.USERS,
+            Actions.DELETE
+        )
+    ),
 ):
-    """
-    Elimina un usuario (con auditoría).
-    """
-
     user = get_user_or_404(db, user_id)
 
-    delete_user_with_audit(db, user, current_user, request)
+    delete_user_with_audit(
+        db,
+        user,
+        current_user,
+        request,
+    )
 
     db.commit()
 
     flash_success(request, "Usuario eliminado correctamente")
 
-    return RedirectResponse("/users/", status_code=303)
+    return RedirectResponse(
+        "/users/",
+        status_code=303,
+    )
 
 
 # =========================================================
-# 🔄 ACTIVAR / DESACTIVAR
+# 🔄 DEACTIVATE
 # =========================================================
 @router.post("/{user_id}/deactivate")
 def deactivate_user(
     request: Request,
-    user = Depends(require_owner_or_permission_web(Resources.USERS, Actions.UPDATE)),
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user_web)
+    target_user=Depends(
+        require_owner_or_permission_web(Resources.USERS, Actions.UPDATE)
+    ),
+    current_user=Depends(get_current_user_web),
 ):
-    """
-    Desactiva un usuario.
-    """
-
-    set_user_active_with_audit(db, user, False, current_user, request)
+    set_user_active_with_audit(
+        db,
+        target_user,
+        False,
+        current_user,
+        request,
+    )
 
     db.commit()
 
     flash_success(request, "Usuario desactivado")
 
-    return RedirectResponse(f"/users/{user.id_usuario}", status_code=303)
+    return RedirectResponse(
+        f"/users/{target_user.id_usuario}",
+        status_code=303,
+    )
 
 
+# =========================================================
+# 🔄 ACTIVATE
+# =========================================================
 @router.post("/{user_id}/activate")
 def activate_user(
     request: Request,
-    user = Depends(require_owner_or_permission_web(Resources.USERS, Actions.UPDATE)),
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user_web)
+    target_user=Depends(
+        require_owner_or_permission_web(Resources.USERS, Actions.UPDATE)
+    ),
+    current_user=Depends(get_current_user_web),
 ):
-    """
-    Activa un usuario.
-    """
-
-    set_user_active_with_audit(db, user, True, current_user, request)
+    set_user_active_with_audit(
+        db,
+        target_user,
+        True,
+        current_user,
+        request,
+    )
 
     db.commit()
 
     flash_success(request, "Usuario activado")
 
-    return RedirectResponse(f"/users/{user.id_usuario}", status_code=303)
+    return RedirectResponse(
+        f"/users/{target_user.id_usuario}",
+        status_code=303,
+    )
