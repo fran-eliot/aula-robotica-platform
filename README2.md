@@ -1,3 +1,4 @@
+![Tests](https://github.com/fran-eliot/aula-robotica-platform/actions/workflows/tests.yml/badge.svg)
 # Aula Robótica Platform
 
 Plataforma web modular para la gestión de usuarios, identidades, permisos y futuros procesos académicos del **Aula de Robótica de la Escuela Politécnica Superior (Universidad de Alcalá)**.
