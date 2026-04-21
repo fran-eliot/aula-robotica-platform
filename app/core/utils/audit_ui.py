@@ -20,8 +20,8 @@ def get_audit_color(action: str) -> str:
         return "bg-danger"
     if "CREATE" in action:
         return "bg-success"
-    if "ACTIVATE" in action:
-        return "bg-success"
     if "DEACTIVATE" in action:
         return "bg-warning"
+    if "ACTIVATE" in action:
+        return "bg-success"
     return "bg-primary"
