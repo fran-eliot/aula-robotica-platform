@@ -11,21 +11,26 @@ class LoginRequest(BaseModel):
 
     email: EmailStr = Field(
         ...,
-        example="laura_admin@eurobot.es",
-        description="Email del usuario"
+        json_schema_extra={
+            "example": "laura_admin@eurobot.es",
+            "description": "Email del usuario"
+        }
     )
 
     password: str = Field(
         ...,
         min_length=4,
-        example="123456",
-        description="Contraseña del usuario"
+        json_schema_extra={
+            "example": "123456",
+            "description": "Contraseña del usuario"
+        }
     )
 
     # =========================================================
     # 🔎 VALIDACIONES
     # =========================================================
     @field_validator("password")
+    @classmethod
     def validate_password(cls, v):
         if not v.strip():
             raise ValueError("La contraseña no puede estar vacía")

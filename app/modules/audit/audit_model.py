@@ -2,7 +2,7 @@
 
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
-from datetime import datetime
+from datetime import UTC, datetime
 
 from app.db.base import Base
 
@@ -30,6 +30,6 @@ class AuditLog(Base):
     
     user_agent = Column(String(255))
 
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.now(UTC))
 
     user = relationship("User", back_populates="audit_logs")

@@ -3,7 +3,7 @@
 
 from sqlalchemy import Column, Integer, String, Boolean, DateTime
 from sqlalchemy.orm import relationship
-from datetime import datetime
+from datetime import UTC, datetime
 
 from app.db.base import Base
 from app.modules.users.user_role_model import UserRole
@@ -42,7 +42,7 @@ class User(Base):
 
     fecha_creacion = Column(
         DateTime,
-        default=datetime.utcnow,
+        default=datetime.now(UTC),
         nullable=False
     )
 

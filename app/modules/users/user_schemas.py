@@ -1,7 +1,7 @@
 # app/modules/users/user_schemas.py
 # 📦 Schemas para usuarios (validación y serialización)
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 from datetime import datetime
 
 
@@ -15,8 +15,10 @@ class UserBase(BaseModel):
 
     nombre: str = Field(
         ...,
-        example="Laura García",
-        description="Nombre completo del usuario"
+        json_schema_extra={
+            "example": "Laura García",
+            "description": "Nombre completo del usuario"
+        }
     )
 
     @field_validator("nombre")
@@ -54,8 +56,10 @@ class UserUpdate(UserBase):
 
     activo: bool | None = Field(
         default=None,
-        example=True,
-        description="Estado del usuario (activo/inactivo)"
+        json_schema_extra={
+            "example": True,   
+            "description": "Estado del usuario (activo/inactivo)"        
+        }
     )
 
 
@@ -68,22 +72,30 @@ class UserResponse(BaseModel):
     """
 
     id_usuario: int = Field(
-        example=1,
-        description="ID único del usuario"
+        json_schema_extra={
+            "example": 1,
+            "description": "ID único del usuario"
+        }
     )
 
     nombre: str = Field(
-        example="Laura García"
+        json_schema_extra={
+            "example": "Laura García",
+            "description": "Nombre completo del usuario"
+        }
     )
 
     activo: bool = Field(
-        example=True
+        json_schema_extra={
+            "example": True,
+            "description": "Estado del usuario (activo/inactivo)"
+        }
     )
 
     fecha_creacion: datetime = Field(
-        example="2024-01-01T00:00:00Z"
+        json_schema_extra={
+            "example": "2024-01-01T00:00:00Z"
+        }
     )
 
-    class Config:
-        # Permite usar objetos ORM directamente (SQLAlchemy)
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

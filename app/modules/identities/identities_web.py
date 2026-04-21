@@ -54,7 +54,7 @@ def identity_form(
     identity = None
 
     if identity_id:
-        identity = db.query(Identity).get(identity_id)
+        identity = db.get(Identity, identity_id)
 
     users = db.query(User).all()
     roles = db.query(Role).all()
@@ -89,7 +89,7 @@ def identity_save(
     identity = None
 
     if identity_id:
-        identity = db.query(Identity).get(identity_id)
+        identity = db.get(Identity, identity_id)
 
     # =========================================================
     # CREATE
@@ -138,7 +138,7 @@ def identity_detail(
     db: Session = Depends(get_db),
     current_user = Depends(require_permission_web(Resources.IDENTITIES, Actions.READ))
 ):
-    identity = db.query(Identity).get(identity_id)
+    identity = db.get(Identity, identity_id)
 
     if not identity:
         raise HTTPException(status_code=404, detail="Identidad no encontrada")
@@ -161,7 +161,7 @@ def identity_delete(
     db: Session = Depends(get_db),
     current_user = Depends(require_permission_web(Resources.IDENTITIES, Actions.DELETE))
 ):
-    identity = db.query(Identity).get(identity_id)
+    identity = db.get(Identity, identity_id)
 
     if identity:
         db.delete(identity)

@@ -1,6 +1,6 @@
 # app/core/config.py
 
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     DATABASE_URL: str
@@ -16,7 +16,9 @@ class Settings(BaseSettings):
     saml_acs_url: str | None = None
     saml_metadata_url: str | None = None
 
-    class Config:
-        env_file = ".env"
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        extra="ignore"
+    )
 
 settings = Settings()
