@@ -3,7 +3,7 @@
 # la creación, edición y eliminación de usuarios, así como la visualización de la lista de usuarios. Para realizar estas
 # pruebas, se utiliza un cliente de prueba de FastAPI para simular solicitudes a la aplicación y verificar las respuestas.
 
-from tests.utils import login_admin
+from tests.test_utils import login_admin
 
 
 def test_users_list(client):

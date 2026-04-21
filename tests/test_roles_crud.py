@@ -1,4 +1,4 @@
-from tests.utils import login_admin
+from tests.test_utils import login_admin
 
 
 def test_roles_list(client):
