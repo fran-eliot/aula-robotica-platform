@@ -4,6 +4,7 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 
+from app.modules.identities.identity_model import Identity
 from app.modules.roles.role_model import Role
 from app.modules.users.user_model import User
 from app.modules.audit.audit_model import AuditLog
@@ -40,6 +41,17 @@ def get_dashboard_metrics(db: Session) -> dict:
 
     total_roles = db.query(func.count(Role.id_rol)).scalar() or 0
 
+    # ================= IDENTITIES METRICS =================
+    identities_stats = db.query(
+        func.count(Identity.id).label("total"),
+        func.sum(Identity.provider == "local").label("local"),
+        func.sum(Identity.provider != "local").label("external")
+    ).one()
+
+    total_identities = identities_stats.total or 0
+    local_identities = identities_stats.local or 0
+    external_identities = identities_stats.external or 0
+
     # =========================================================
     # 🧾 LOGS RECIENTES
     # =========================================================
@@ -60,5 +72,8 @@ def get_dashboard_metrics(db: Session) -> dict:
         "active_users": active_users,
         "inactive_users": inactive_users,
         "total_roles": total_roles,
+        "total_identities": total_identities,
+        "local_identities": local_identities,
+        "external_identities": external_identities,
         "recent_logs": recent_logs
     }

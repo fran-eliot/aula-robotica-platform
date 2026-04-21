@@ -1,35 +1,85 @@
 {% extends "base.html" %}
 
 {% from "components/identity_row.html" import identity_row with context %}
-{% from "components/data_table.html" import data_table  with context %}
+{% from "components/data_table.html" import data_table with context %}
 {% from "components/page_header.html" import page_header with context %}
 {% from "components/section_card.html" import section_card %}
+{% from "components/filters_bar.html" import filters_bar %}
+{% from "components/form.html" import input, select %}
 
 {% block content %}
 
 {% call section_card() %}
 
+    {% set total_count = identities|length if identities else None %}
+
     {{ page_header(
         "Identidades",
         icon="id-badge",
-        count=identities|length if identities else None,
+        count=total_count,
         create_url="/identities/form",
-        create_label="Registrar identidad",
+        create_label="Nueva identidad",
         create_perm="create",
         resource="identities"
     ) }}
 
+    <!-- INFO -->
+    <div class="alert alert-light border mb-4">
+        <i class="fas fa-info-circle text-primary"></i>
+        Las identidades permiten autenticar usuarios mediante proveedor local o SSO.
+    </div>
+
+    <!-- ================= FILTROS ================= -->
+    {% call filters_bar("/identities/") %}
+
+        <!-- BUSQUEDA -->
+        <div class="col-md-6 mb-2">
+            {{ input(
+                "search",
+                "",
+                search,
+                type="text",
+                placeholder="Buscar por email..."
+            ) }}
+        </div>
+
+        <!-- PROVIDER -->
+        <div class="col-md-6 mb-2">
+            {{ select(
+                "provider",
+                "",
+                [
+                    ("all", "Todos"),
+                    ("local", "Local"),
+                    ("google", "Google"),
+                    ("github", "GitHub"),
+                    ("microsoft", "Microsoft")
+                ],
+                provider
+            ) }}
+        </div>
+
+    {% endcall %}
+
+
+    <!-- ================= TABLA ================= -->
     {{ data_table(
         items=identities,
         row_renderer=identity_row,
-        headers=["Email", "Usuario", "Provider", "Acciones"],
+        headers=["Email", "Usuario", "Proveedor", "Acciones"],
 
         empty_title="No hay identidades registradas",
+        empty_message="Crea una identidad para permitir acceso al sistema.",
         empty_icon="id-badge",
         empty_action_url="/identities/form",
         empty_action_label="Crear identidad",
         empty_action_perm="create",
-        empty_resource="identities"
+        empty_resource="identities",
+
+        page=page,
+        total_pages=total_pages,
+        search=search,
+        provider=provider
     ) }}
 
 {% endcall %}

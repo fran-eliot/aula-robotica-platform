@@ -2,33 +2,37 @@
 
 {% macro user_actions(user) %}
 
-{% if can("read", "users") %}
-    {{ action_button(
-        "/users/" ~ user.id_usuario,
-        "fa-eye",
-        "info",
-        "Ver"
-    ) }}
-{% endif %}
+<div class="d-inline-flex align-items-center gap-actions">
 
-{% if can("update", "users") %}
-    {{ action_button(
-        "/users/" ~ user.id_usuario ~ "/edit",
-        "fa-edit",
-        "warning",
-        "Editar"
-    ) }}
-{% endif %}
+    {% if can("read", "users") %}
+        {{ action_button(
+            "/users/" ~ user.id_usuario,
+            "fa-eye",
+            "info",
+            "Ver"
+        ) }}
+    {% endif %}
 
-{% if can("delete", "users") %}
-    {{ action_button(
-        "/users/" ~ user.id_usuario ~ "/delete",
-        "fa-trash",
-        "danger",
-        "Eliminar",
-        confirm="¿Eliminar usuario?",
-        method="post"
-    ) }}
-{% endif %}
+    {% if can("update", "users") %}
+        {{ action_button(
+            "/users/" ~ user.id_usuario ~ "/edit",
+            "fa-edit",
+            "warning",
+            "Editar"
+        ) }}
+    {% endif %}
+
+    {% if can("delete", "users") %}
+        {{ action_button(
+            "/users/" ~ user.id_usuario ~ "/delete",
+            "fa-trash",
+            "danger",
+            "Eliminar",
+            confirm="¿Eliminar usuario?",
+            method="post"
+        ) }}
+    {% endif %}
+
+</div>
 
 {% endmacro %}

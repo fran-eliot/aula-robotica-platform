@@ -1,10 +1,10 @@
 {% from "components/empty_state.html" import empty_state %}
 
-{# Tabla genérica reutilizable #}
 {% macro data_table(
     items,
     row_renderer,
     headers=None,
+
     empty_title="Sin datos",
     empty_message=None,
     empty_icon="inbox",
@@ -12,23 +12,29 @@
     empty_action_label="Crear",
     empty_action_perm=None,
     empty_resource=None,
+
     page=None,
     total_pages=None,
+
     search=None,
-    status=None
+    status=None,
+    provider=None,
+    role=None,
+    module=None
 ) %}
 
 {% if items %}
 
 <div class="table-responsive">
 
-    <table class="table table-sm table-hover align-middle text-center w-100" style="table-layout:fixed">
+    <table class="table table-sm table-hover align-middle text-center w-100"
+           style="table-layout:fixed">
 
         {% if headers %}
         <thead class="thead-light">
             <tr>
                 {% for h in headers %}
-                <th class="text-center">{{ h }}</th>
+                    <th class="text-center">{{ h }}</th>
                 {% endfor %}
             </tr>
         </thead>
@@ -44,6 +50,7 @@
 
 </div>
 
+
 {% if total_pages and total_pages > 1 %}
 <div class="mt-3 px-3 pb-2">
 
@@ -52,7 +59,12 @@
         {% for p in range(1, total_pages + 1) %}
         <li class="page-item {% if p == page %}active{% endif %}">
             <a class="page-link"
-               href="?page={{ p }}{% if search %}&search={{ search }}{% endif %}{% if status %}&status={{ status }}{% endif %}">
+               href="?page={{ p }}
+               {% if search %}&search={{ search }}{% endif %}
+               {% if status %}&status={{ status }}{% endif %}
+               {% if provider and provider != 'all' %}&provider={{ provider }}{% endif %}
+               {% if role and role != 'all' %}&role={{ role }}{% endif %}
+               {% if module and module != 'all' %}&module={{ module }}{% endif %}">
                 {{ p }}
             </a>
         </li>
@@ -62,6 +74,7 @@
 
 </div>
 {% endif %}
+
 
 {% else %}
 

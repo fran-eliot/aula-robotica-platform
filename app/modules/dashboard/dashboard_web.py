@@ -43,6 +43,7 @@ def dashboard(
     # 📊 OBTENER MÉTRICAS
     # =========================================================
     metrics = get_dashboard_metrics(db)
+    print(metrics)  # Debug: imprimir métricas obtenidas
 
     # =========================================================
     # 🎨 RENDER TEMPLATE

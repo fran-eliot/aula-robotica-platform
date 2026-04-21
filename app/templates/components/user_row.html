@@ -3,26 +3,44 @@
 
 {% macro user_row(user) %}
 
-<tr onclick="window.location='/users/{{ user.id_usuario }}'"
-    style="cursor:pointer">
+<tr class="user-row"
+    onclick="window.location='/users/{{ user.id_usuario }}'">
 
     <!-- ID -->
-    <td style="width:90px" class="text-center align-middle">
+    <td class="align-middle text-muted text-center user-id">
         #{{ user.id_usuario }}
     </td>
 
-    <!-- Nombre -->
-    <td style="width:auto" class="text-center align-middle">
-        <strong>{{ user.nombre }}</strong>
+    <!-- USUARIO -->
+    <td class="align-middle">
+
+        <div class="d-flex align-items-center">
+
+            <div class="user-avatar mr-3">
+                <i class="fas fa-user"></i>
+            </div>
+
+            <div>
+                <div class="user-name">
+                    {{ user.nombre }}
+                </div>
+
+                <small class="text-muted">
+                    Usuario del sistema
+                </small>
+            </div>
+
+        </div>
+
     </td>
 
-    <!-- Estado -->
-    <td style="width:160px" class="text-center align-middle">
+    <!-- ESTADO -->
+    <td class="align-middle text-center">
         {{ status(user.activo) }}
     </td>
 
-    <!-- Acciones -->
-    <td style="width:170px" class="text-center align-middle text-nowrap"
+    <!-- ACCIONES -->
+    <td class="align-middle text-center text-nowrap"
         onclick="event.stopPropagation();">
 
         {{ user_actions(user) }}

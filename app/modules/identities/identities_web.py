@@ -2,10 +2,11 @@
 
 from fastapi import APIRouter, HTTPException, Request, Depends, Form
 from fastapi.responses import RedirectResponse
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.core.constants.actions import Actions
 from app.core.constants.resources import Resources
+from app.core.render import render
 from app.db.session import get_db
 from app.core.templates import templates
 
@@ -23,19 +24,60 @@ router = APIRouter(prefix="/identities", tags=["Identities Web"])
 # =========================================================
 # 📋 LISTADO
 # =========================================================
+from math import ceil
+from fastapi import Request, Depends
+from sqlalchemy.orm import Session
+from sqlalchemy import or_
+
 @router.get("/")
 def identities_list(
     request: Request,
-    db: Session = Depends(get_db),
-    current_user = Depends(require_permission_web(Resources.IDENTITIES, Actions.READ))
+    db: Session = Depends(get_db)
 ):
-    identities = db.query(Identity).all()
+    # ================= QUERY PARAMS =================
+    search = request.query_params.get("search", "").strip()
+    provider = request.query_params.get("provider", "all")
+    page = int(request.query_params.get("page", 1))
+    per_page = 10
 
-    return templates.TemplateResponse(
+    # ================= BASE QUERY =================
+    query = db.query(Identity).options(
+        joinedload(Identity.usuario)
+    )
+
+    # ================= SEARCH =================
+    if search:
+        query = query.filter(
+            Identity.email.ilike(f"%{search}%")
+        )
+
+    # ================= FILTER PROVIDER =================
+    if provider != "all":
+        query = query.filter(
+            Identity.provider == provider
+        )
+
+    # ================= PAGINATION =================
+    total = query.count()
+    total_pages = ceil(total / per_page) if total else 1
+
+    identities = (
+        query
+        .offset((page - 1) * per_page)
+        .limit(per_page)
+        .all()
+    )
+
+    # ================= RENDER =================
+    return render(
         request,
         "identities/identities_list.html",
         {
-            "identities": identities
+            "identities": identities,
+            "search": search,
+            "provider": provider,
+            "page": page,
+            "total_pages": total_pages
         }
     )
 

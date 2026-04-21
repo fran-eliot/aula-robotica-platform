@@ -7,18 +7,43 @@
 
 {% block content %}
 
+<!-- ===================== HERO ===================== -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body d-flex justify-content-between align-items-center flex-wrap">
+
+        <div>
+            <h2 class="mb-1 font-weight-bold">
+                Gestión de roles
+            </h2>
+
+            <p class="text-muted mb-0">
+                Define permisos y controla el acceso al sistema
+            </p>
+        </div>
+
+        <div class="hero-icon bg-primary-soft">
+            <i class="fas fa-user-shield text-primary"></i>
+        </div>
+
+    </div>
+</div>
+
+
 {% call section_card() %}
+
+    {% set total_count = roles|length if roles else None %}
 
     {{ page_header(
         "Roles",
         icon="user-shield",
-        count=roles|length if roles else None,
+        count=total_count,
         create_url="/roles/form",
         create_label="Crear rol",
         create_perm="create",
         resource="roles"
     ) }}
 
+    <!-- ===================== TABLA ===================== -->
     {{ data_table(
         items=roles,
         row_renderer=role_row,

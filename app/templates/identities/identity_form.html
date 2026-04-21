@@ -1,97 +1,86 @@
 {% extends "base.html" %}
 
+{% from "components/form.html" import input, form_actions %}
+{% from "components/form_layout.html" import form_card, form_row, form_col %}
+{% from "components/validation_summary.html" import validation_summary %}
+
 {% block content %}
 
-<div class="card card-primary shadow-sm">
+{% call form_card(
+    ("Editar identidad" if identity else "Nueva identidad"),
+    action=('/identities/' ~ identity.id ~ '/edit' if identity else '/identities/form')
+) %}
 
-    <!-- ================= HEADER ================= -->
-    <div class="card-header">
-        <h3 class="card-title">
-            <i class="fas fa-id-badge"></i>
-            {{ "Editar identidad" if identity else "Crear identidad" }}
-        </h3>
+    {{ validation_summary(errors) }}
+
+    <!-- DATOS -->
+    {% call form_row() %}
+
+        {% call form_col(6) %}
+            {{ input(
+                "email",
+                "Correo electrónico",
+                identity.email if identity else "",
+                errors.email if errors else None,
+                type="email",
+                required=True,
+                placeholder="usuario@dominio.com"
+            ) }}
+        {% endcall %}
+
+        {% call form_col(6) %}
+            {{ input(
+                "password",
+                "Contraseña",
+                "",
+                errors.password if errors else None,
+                type="password",
+                required=(False if identity else True),
+                placeholder="••••••••"
+            ) }}
+
+            {% if identity %}
+                <small class="text-muted">
+                    Dejar vacío para mantener la contraseña actual.
+                </small>
+            {% endif %}
+
+        {% endcall %}
+
+    {% endcall %}
+
+
+    <!-- USUARIO -->
+    <div class="mt-4">
+
+        <label class="font-weight-bold">
+            <i class="fas fa-user"></i>
+            Usuario asociado
+        </label>
+
+        <select name="user_id" class="form-control mt-2">
+
+            {% for u in users %}
+            <option value="{{ u.id_usuario }}"
+                {% if identity and identity.user_id == u.id_usuario %}selected{% endif %}>
+                {{ u.nombre }}
+            </option>
+            {% endfor %}
+
+        </select>
+
+        <small class="form-text text-muted">
+            Esta identidad permitirá autenticarse al usuario seleccionado.
+        </small>
+
     </div>
 
-    <!-- ================= FORM ================= -->
-    <form method="post"
-          action="{% if identity %}/identities/{{ identity.id }}/edit{% else %}/identities/form{% endif %}">
 
-        <div class="card-body">
+    {{ form_actions(
+        "/identities/",
+        "Actualizar" if identity else "Crear identidad"
+    ) }}
 
-            <div class="row">
-
-                <!-- ================= EMAIL ================= -->
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label>Email</label>
-                        <input type="email"
-                               name="email"
-                               class="form-control"
-                               value="{{ identity.email if identity else '' }}"
-                               required>
-                    </div>
-                </div>
-
-                <!-- ================= PASSWORD ================= -->
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label>Password</label>
-                        <input type="password"
-                               name="password"
-                               class="form-control">
-
-                        {% if identity %}
-                        <small class="text-muted">
-                            Dejar vacío para no cambiar la contraseña
-                        </small>
-                        {% endif %}
-                    </div>
-                </div>
-
-            </div>
-
-
-            <!-- ================= USUARIO ================= -->
-            <div class="form-group mt-3">
-                <label>
-                    <i class="fas fa-user"></i> Usuario
-                </label>
-
-                <select name="user_id" class="form-control">
-
-                    {% for u in users %}
-                    <option value="{{ u.id_usuario }}"
-                        {% if identity and identity.user_id == u.id_usuario %}selected{% endif %}>
-                        {{ u.nombre }}
-                    </option>
-                    {% endfor %}
-
-                </select>
-
-                <small class="form-text text-muted">
-                    Usuario al que pertenece esta identidad.
-                </small>
-            </div>
-
-        </div>
-
-
-        <!-- ================= FOOTER ================= -->
-        <div class="card-footer d-flex justify-content-between">
-
-            <a href="/identities/" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i> Cancelar
-            </a>
-
-            <button class="btn btn-primary">
-                <i class="fas fa-save"></i>
-                {{ "Actualizar" if identity else "Crear" }}
-            </button>
-
-        </div>
-
-    </form>
-
-</div>
+{% endcall %}
 
 {% endblock %}

@@ -1,62 +1,97 @@
-{# =========================================================
-   roles/role_detail.html
-   ========================================================= #}
 {% extends "base.html" %}
 
 {% from "components/buttons.html" import btn, btn_delete %}
 {% from "components/badges.html" import status %}
-{% from "components/audit_table.html" import audit_table %}
-{% from "components/tabs.html" import tabs %}
-{% from "components/detail_layout.html" import detail_layout %}
+{% from "components/audit_table.html" import audit_table with context %}
+{% from "components/tabs.html" import tabs with context %}
+{% from "components/detail_layout.html" import detail_layout with context %}
 {% from "components/permission_matrix.html" import permission_matrix %}
 
 {% block content %}
 
-{% call(side) detail_layout("Rol", "user-shield") %}
+<!-- ===================== HERO ===================== -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body d-flex justify-content-between align-items-center flex-wrap">
 
+        <div>
+            <h2 class="mb-1 font-weight-bold">
+                {{ role.nombre | capitalize }}
+            </h2>
+
+            <p class="text-muted mb-0">
+                Gestión de permisos y configuración del rol
+            </p>
+        </div>
+
+        <div class="hero-icon bg-primary-soft">
+            <i class="fas fa-user-shield text-primary"></i>
+        </div>
+
+    </div>
+</div>
+
+
+{% call(side) detail_layout(None, None) %}
+
+    {# =====================================================
+       LEFT
+       ===================================================== #}
     {% if side == "left" %}
-        <div class="card card-primary card-outline shadow-sm">
 
-            <div class="card-header">
-                <h3 class="card-title">
+        <div class="card border-0 shadow-sm role-profile-card">
+
+            <div class="card-body text-center">
+
+                <div class="profile-avatar mb-3">
                     <i class="fas fa-user-shield"></i>
+                </div>
+
+                <h3 class="mb-1 font-weight-bold">
                     {{ role.nombre | capitalize }}
                 </h3>
+
+                <p class="text-muted mb-3">
+                    Rol del sistema
+                </p>
+
+                <div class="mb-3">
+                    <span class="badge badge-pill badge-info px-3 py-2">
+                        <i class="fas fa-key mr-1"></i>
+                        {{ role.permissions | length }} permisos
+                    </span>
+                </div>
+
+                <hr>
+
+                <div class="text-left small">
+
+                    <div class="mb-2">
+                        <strong>Descripción:</strong><br>
+                        <span class="text-muted">
+                            {{ role.descripcion or "Sin descripción" }}
+                        </span>
+                    </div>
+
+                    <div class="mb-2">
+                        <strong>Estado:</strong><br>
+
+                        {% if role.permissions %}
+                            <span class="badge badge-success">
+                                Configurado
+                            </span>
+                        {% else %}
+                            <span class="badge badge-danger">
+                                Sin permisos
+                            </span>
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
             </div>
 
-            <div class="card-body">
-
-                <p>
-                    <strong>Descripción</strong><br>
-                    <span class="text-muted">
-                        {{ role.descripcion or "Sin descripción" }}
-                    </span>
-                </p>
-
-                <p>
-                    <strong>Permisos</strong><br>
-                    <span class="badge badge-info">
-                        {{ role.permissions | length }}
-                    </span>
-                </p>
-
-                <p>
-                    <strong>Estado</strong><br>
-
-                    {% if role.permissions %}
-                        <span class="badge badge-success">
-                            Configurado
-                        </span>
-                    {% else %}
-                        <span class="badge badge-danger">
-                            Sin permisos
-                        </span>
-                    {% endif %}
-                </p>
-
-            </div>
-
-            <div class="card-footer d-flex justify-content-between">
+            <div class="card-footer bg-white border-0 d-flex justify-content-between">
 
                 {{ btn("/roles/", "Volver", "secondary", "arrow-left") }}
 
@@ -73,11 +108,17 @@
             </div>
 
         </div>
+
     {% endif %}
 
 
+    {# =====================================================
+       RIGHT
+       ===================================================== #}
     {% if side == "right" %}
-        <div class="card shadow-sm">
+
+        <div class="card border-0 shadow-sm">
+
             <div class="card-body">
 
                 {% call(tab) tabs([
@@ -85,9 +126,17 @@
                     {"key":"audit","label":"Auditoría","icon":"history"}
                 ], id="role_detail_tabs") %}
 
+
+                    {# ================= PERMISSIONS ================= #}
                     {% if tab == "permissions" %}
 
+                        <h5 class="section-title">
+                            <i class="fas fa-shield-alt text-primary mr-2"></i>
+                            Permisos asignados
+                        </h5>
+
                         {% if role.permissions %}
+
                             {% set selected_permissions = role.permissions | map(attribute='id') | list %}
 
                             {{ permission_matrix(
@@ -97,22 +146,35 @@
                             ) }}
 
                         {% else %}
-                            <div class="text-muted">
-                                Este rol no tiene permisos asignados
+
+                            <div class="empty-state py-4 text-center text-muted">
+                                <i class="fas fa-lock fa-2x mb-2"></i>
+                                <p class="mb-0">Este rol no tiene permisos asignados</p>
                             </div>
+
                         {% endif %}
 
                     {% endif %}
 
 
+                    {# ================= AUDIT ================= #}
                     {% if tab == "audit" %}
-                        {{ audit_table(logs) }}
+
+                        <h5 class="section-title">
+                            <i class="fas fa-history text-info mr-2"></i>
+                            Historial del rol
+                        </h5>
+
+                        {{ audit_table(logs, get_audit_color, get_audit_icon) }}
+
                     {% endif %}
 
                 {% endcall %}
 
             </div>
+
         </div>
+
     {% endif %}
 
 {% endcall %}

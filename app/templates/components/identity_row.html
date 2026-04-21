@@ -1,12 +1,53 @@
 {% from "components/identity_actions.html" import identity_actions with context %}
 
 {% macro identity_row(identity) %}
-<tr>
-    <td>{{ identity.email }}</td>
-    <td>{{ identity.usuario.nombre }}</td>
-    <td>{{ identity.provider }}</td>
-    <td class="text-center">
-        {{ identity_actions(identity) }}
+
+<tr onclick="window.location='/identities/{{ identity.id }}'"
+    style="cursor:pointer">
+
+    <!-- EMAIL -->
+    <td class="align-middle">
+        <strong>{{ identity.email }}</strong>
     </td>
+
+    <!-- USUARIO -->
+    <td class="align-middle">
+        {% if identity.usuario %}
+            <a href="/users/{{ identity.usuario.id_usuario }}"
+               onclick="event.stopPropagation();">
+                {{ identity.usuario.nombre }}
+            </a>
+        {% else %}
+            <span class="text-muted">Sin usuario</span>
+        {% endif %}
+    </td>
+
+    <!-- PROVIDER -->
+    <td class="align-middle text-center">
+
+        {% set provider = identity.provider or "local" %}
+
+        {% set color = {
+            "local": "secondary",
+            "google": "danger",
+            "github": "dark",
+            "microsoft": "primary"
+        }[provider] if provider in ["local","google","github","microsoft"] else "info" %}
+
+        <span class="badge badge-{{ color }}">
+            {{ provider }}
+        </span>
+
+    </td>
+
+    <!-- ACCIONES -->
+    <td class="align-middle text-center text-nowrap"
+        onclick="event.stopPropagation();">
+
+        {{ identity_actions(identity) }}
+
+    </td>
+
 </tr>
+
 {% endmacro %}

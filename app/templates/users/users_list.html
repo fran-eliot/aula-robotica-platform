@@ -7,60 +7,110 @@
 {% from "components/filters_bar.html" import filters_bar %}
 {% from "components/form.html" import input, select %}
 
+{% block extra_css %}
+<style>
+.users-toolbar {
+    background: linear-gradient(135deg, #ffffff, #f8fafc);
+    border-radius: 14px;
+    padding: 1rem;
+    border: 1px solid #eef1f4;
+}
+
+.users-table-wrap {
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+.filters-pro .form-control,
+.filters-pro .custom-select {
+    height: 44px;
+    border-radius: 10px;
+}
+
+.filters-pro .btn {
+    border-radius: 10px;
+    height: 44px;
+}
+
+.section-soft {
+    border-radius: 16px;
+}
+</style>
+{% endblock %}
+
 {% block content %}
 
 {% call section_card() %}
 
-    {% set total_count = users|length if users else None %}
+    {% set total_count = users|length if users else 0 %}
 
-    {{ page_header(
-        "Usuarios",
-        "users",
-        total_count,
-        "/users/form",
-        "Crear usuario",
-        "create",
-        "users"
-    ) }}
+    <!-- HEADER -->
+    <div class="mb-4">
+        {{ page_header(
+            "Usuarios",
+            "users",
+            total_count,
+            "/users/form",
+            "Crear usuario",
+            "create",
+            "users"
+        ) }}
+    </div>
 
-    {# --- FILTROS --- #}
-    {% call filters_bar("/users/") %}
-        <div class="col-md-6 mb-2">
-            {{ input("search", "", search, type="text", placeholder="Buscar por nombre...") }}
-        </div>
+    <!-- FILTROS -->
+    <div class="users-toolbar mb-4">
 
-        <div class="col-md-6 mb-2">
-            {{ select(
-                "status",
-                "",
-                [
-                    ("all", "Todos"),
-                    ("active", "Activos"),
-                    ("inactive", "Inactivos")
-                ],
-                status
-            ) }}
-        </div>
-    {% endcall %}
+        {% call filters_bar("/users/", "filters-pro") %}
 
-    {# --- TABLA --- #}
-    {{ data_table(
-        items=users,
-        row_renderer=user_row,
-        headers=["ID", "Nombre", "Estado", "Acciones"],
+            <div class="col-md-6 mb-2">
+                {{ input(
+                    "search",
+                    "",
+                    search,
+                    type="text",
+                    placeholder="Buscar por nombre..."
+                ) }}
+            </div>
 
-        empty_title="No se encontraron usuarios",
-        empty_icon="users",
-        empty_action_url="/users/form",
-        empty_action_label="Crear usuario",
-        empty_action_perm="create",
-        empty_resource="users",
+            <div class="col-md-6 mb-2">
+                {{ select(
+                    "status",
+                    "",
+                    [
+                        ("all", "Todos"),
+                        ("active", "Activos"),
+                        ("inactive", "Inactivos")
+                    ],
+                    status
+                ) }}
+            </div>
 
-        page=page,
-        total_pages=total_pages,
-        search=search,
-        status=status
-    ) }}
+        {% endcall %}
+
+    </div>
+
+    <!-- TABLA -->
+    <div class="users-table-wrap bg-white shadow-sm">
+
+        {{ data_table(
+            items=users,
+            row_renderer=user_row,
+            headers=["ID", "Nombre", "Estado", "Acciones"],
+
+            empty_title="No se encontraron usuarios",
+            empty_icon="users",
+            empty_action_url="/users/form",
+            empty_action_label="Crear usuario",
+            empty_action_perm="create",
+            empty_resource="users",
+
+            page=page,
+            total_pages=total_pages,
+            search=search,
+            status=status
+        ) }}
+
+    </div>
 
 {% endcall %}
 

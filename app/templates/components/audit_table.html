@@ -1,13 +1,16 @@
-{% macro audit_table(logs) %}
+{% macro audit_table(logs, get_audit_color, get_audit_icon) %}
 
 {% if logs %}
 
-<table class="table table-sm table-hover mb-0">
-    <thead class="thead-light">
+<div class="table-responsive">
+
+<table class="table table-modern align-middle mb-0">
+
+    <thead>
         <tr>
-            <th style="width:180px">Fecha</th>
-            <th style="width:180px">Usuario</th>
-            <th style="width:180px">Acción</th>
+            <th>Fecha</th>
+            <th>Usuario</th>
+            <th>Acción</th>
             <th>Detalle</th>
         </tr>
     </thead>
@@ -16,56 +19,35 @@
 
     {% for log in logs %}
 
-        {# COLOR #}
-        {% set color = {
-            "LOGIN": "badge-success",
-            "LOGOUT": "badge-secondary",
-            "CREATE_USER": "badge-primary",
-            "UPDATE_USER": "badge-warning",
-            "DELETE_USER": "badge-danger",
-            "CREATE_ROLE": "badge-primary",
-            "UPDATE_ROLE": "badge-warning",
-            "DELETE_ROLE": "badge-danger"
-        }[log.action] if log.action in [
-            "LOGIN","LOGOUT",
-            "CREATE_USER","UPDATE_USER","DELETE_USER",
-            "CREATE_ROLE","UPDATE_ROLE","DELETE_ROLE"
-        ] else "badge-dark" %}
-
-        {# ICONO #}
-        {% set icon = {
-            "LOGIN": "fa-sign-in-alt",
-            "LOGOUT": "fa-sign-out-alt",
-            "CREATE_USER": "fa-user-plus",
-            "UPDATE_USER": "fa-user-edit",
-            "DELETE_USER": "fa-user-times",
-            "CREATE_ROLE": "fa-plus-circle",
-            "UPDATE_ROLE": "fa-edit",
-            "DELETE_ROLE": "fa-trash"
-        }[log.action] if log.action in [
-            "LOGIN","LOGOUT",
-            "CREATE_USER","UPDATE_USER","DELETE_USER",
-            "CREATE_ROLE","UPDATE_ROLE","DELETE_ROLE"
-        ] else "fa-history" %}
+        {% set color = get_audit_color(log.action) %}
+        {% set icon = get_audit_icon(log.action) %}
 
         <tr>
 
-            <td class="text-muted">
-                {{ log.created_at.strftime("%d/%m/%Y %H:%M") }}
+            <!-- FECHA -->
+            <td class="audit-date">
+                <div>{{ log.created_at.strftime("%d/%m/%Y") }}</div>
+                <small>{{ log.created_at.strftime("%H:%M") }}</small>
             </td>
 
+            <!-- USUARIO -->
             <td>
-                {{ log.user.nombre if log.user else "Sistema" }}
+                <div class="audit-user">
+                    <i class="fas fa-user-circle text-muted mr-1"></i>
+                    {{ log.user.nombre if log.user else "Sistema" }}
+                </div>
             </td>
 
+            <!-- ACCION -->
             <td>
-                <span class="badge {{ color }}">
-                    <i class="fas {{ icon }}"></i>
-                    {{ log.action }}
+                <span class="badge badge-pill audit-badge {{ color }}">
+                    <i class="fas {{ icon }} mr-1"></i>
+                    {{ log.action.replace("_", " ") }}
                 </span>
             </td>
 
-            <td>
+            <!-- DESCRIPCION -->
+            <td class="audit-description">
                 {{ log.description or "-" }}
             </td>
 
@@ -74,13 +56,27 @@
     {% endfor %}
 
     </tbody>
+
 </table>
+
+</div>
 
 {% else %}
 
-<div class="p-4 text-center text-muted">
-    <i class="fas fa-history fa-2x mb-2"></i>
-    <p class="mb-0">No hay actividad registrada</p>
+<div class="empty-state text-center py-5">
+
+    <div class="mb-3">
+        <i class="fas fa-history fa-3x text-muted opacity-50"></i>
+    </div>
+
+    <h5 class="mb-1 font-weight-bold">
+        Sin actividad reciente
+    </h5>
+
+    <p class="text-muted mb-0">
+        No hay eventos registrados todavía.
+    </p>
+
 </div>
 
 {% endif %}

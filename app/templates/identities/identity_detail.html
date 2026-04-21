@@ -1,10 +1,7 @@
-{# =========================================================
-   identities/identity_detail.html
-   ========================================================= #}
 {% extends "base.html" %}
 
 {% from "components/buttons.html" import btn, btn_delete %}
-{% from "components/audit_table.html" import audit_table %}
+{% from "components/audit_table.html" import audit_table with context %}
 {% from "components/tabs.html" import tabs %}
 {% from "components/detail_layout.html" import detail_layout %}
 
@@ -12,89 +9,141 @@
 
 {% call(side) detail_layout("Identidad", "id-badge") %}
 
-    {% if side=="left" %}
-        <div class="card card-primary card-outline shadow-sm">
+{# ================= LEFT ================= #}
+{% if side=="left" %}
 
-            <div class="card-body text-center">
+{% set provider = identity.provider or "local" %}
+{% set color = {
+    "local": "secondary",
+    "google": "danger",
+    "github": "dark",
+    "microsoft": "primary"
+}[provider] if provider in ["local","google","github","microsoft"] else "info" %}
 
-                <i class="fas fa-id-badge fa-3x text-primary mb-2"></i>
+<div class="card border-0 shadow-sm">
 
-                <h4>{{ identity.email }}</h4>
+    <div class="card-body text-center py-4">
 
-                <p class="text-muted mb-1">
-                    ID #{{ identity.id }}
-                </p>
+        <div class="mb-3">
+            <i class="fas fa-id-badge fa-3x text-primary"></i>
+        </div>
 
-                <span class="badge badge-info">
-                    {{ identity.provider or "local" }}
+        <h4 class="mb-1">{{ identity.email }}</h4>
+
+        <p class="text-muted mb-2">
+            Identidad #{{ identity.id }}
+        </p>
+
+        <span class="badge badge-{{ color }} px-3 py-2">
+            {{ provider }}
+        </span>
+
+        <div class="mt-3">
+
+            {% if identity.usuario %}
+                <small class="text-muted d-block">
+                    Vinculado a
+                </small>
+
+                <a href="/users/{{ identity.usuario.id_usuario }}">
+                    <i class="fas fa-user text-primary"></i>
+                    {{ identity.usuario.nombre }}
+                </a>
+            {% else %}
+                <span class="text-muted">
+                    Sin usuario vinculado
                 </span>
-
-            </div>
-
-            <div class="card-footer text-center">
-
-                {% if can("update", "identities") %}
-                    {{ btn("/identities/" ~ identity.id ~ "/edit", "Editar", "warning", "edit") }}
-                {% endif %}
-
-                {% if can("delete", "identities") %}
-                    {{ btn_delete("/identities/" ~ identity.id ~ "/delete", "¿Eliminar identidad?") }}
-                {% endif %}
-
-            </div>
+            {% endif %}
 
         </div>
-    {% endif %}
 
+    </div>
 
-    {% if side=="right" %}
-        <div class="card shadow-sm">
-            <div class="card-body">
+    <div class="card-footer d-flex justify-content-between bg-white">
 
-                {% call(tab) tabs([
-                    {"key":"data","label":"Datos","icon":"info-circle"},
-                    {"key":"audit","label":"Auditoría","icon":"history"}
-                ], id="identity_detail_tabs") %}
+        {{ btn("/identities/", "Volver", "secondary", "arrow-left") }}
 
-                    {% if tab == "data" %}
+        <div>
+            {% if can("update", "identities") %}
+                {{ btn("/identities/" ~ identity.id ~ "/edit", "", "warning", "edit") }}
+            {% endif %}
 
-                        <table class="table table-sm">
-                            <tr>
-                                <th>Email</th>
-                                <td>{{ identity.email }}</td>
-                            </tr>
-
-                            <tr>
-                                <th>Proveedor</th>
-                                <td>{{ identity.provider or "local" }}</td>
-                            </tr>
-
-                            <tr>
-                                <th>Usuario</th>
-                                <td>
-                                    {% if identity.usuario %}
-                                        <a href="/users/{{ identity.usuario.id_usuario }}">
-                                            {{ identity.usuario.nombre }}
-                                        </a>
-                                    {% else %}
-                                        -
-                                    {% endif %}
-                                </td>
-                            </tr>
-                        </table>
-
-                    {% endif %}
-
-
-                    {% if tab == "audit" %}
-                        {{ audit_table(logs) }}
-                    {% endif %}
-
-                {% endcall %}
-
-            </div>
+            {% if can("delete", "identities") %}
+                {{ btn_delete("/identities/" ~ identity.id ~ "/delete", "¿Eliminar identidad?") }}
+            {% endif %}
         </div>
-    {% endif %}
+
+    </div>
+
+</div>
+
+{% endif %}
+
+
+{# ================= RIGHT ================= #}
+{% if side=="right" %}
+
+<div class="card border-0 shadow-sm">
+<div class="card-body">
+
+{% call(tab) tabs([
+    {"key":"data","label":"Datos","icon":"info-circle"},
+    {"key":"audit","label":"Auditoría","icon":"history"}
+], id="identity_tabs") %}
+
+
+{# ================= DATA ================= #}
+{% if tab == "data" %}
+
+<table class="table table-modern">
+
+    <tr>
+        <th style="width:180px;">Email</th>
+        <td>
+            <i class="fas fa-envelope text-muted mr-1"></i>
+            {{ identity.email }}
+        </td>
+    </tr>
+
+    <tr>
+        <th>Proveedor</th>
+        <td>
+            <span class="badge badge-{{ color }}">
+                {{ provider }}
+            </span>
+        </td>
+    </tr>
+
+    <tr>
+        <th>Usuario vinculado</th>
+        <td>
+            {% if identity.usuario %}
+                <a href="/users/{{ identity.usuario.id_usuario }}">
+                    <i class="fas fa-user text-primary"></i>
+                    {{ identity.usuario.nombre }}
+                </a>
+            {% else %}
+                <span class="text-muted">Sin vincular</span>
+            {% endif %}
+        </td>
+    </tr>
+
+</table>
+
+{% endif %}
+
+
+{# ================= AUDIT ================= #}
+{% if tab == "audit" %}
+    {{ audit_table(logs, get_audit_color, get_audit_icon) }}
+{% endif %}
+
+{% endcall %}
+
+</div>
+</div>
+
+{% endif %}
 
 {% endcall %}
 

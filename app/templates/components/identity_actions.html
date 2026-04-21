@@ -3,15 +3,32 @@
 {% macro identity_actions(identity) %}
 
 {% if can("read", "identities") %}
-    {{ action_button("/identities/" ~ identity.id, "fa-eye", "info", "Ver") }}
+    {{ action_button(
+        "/identities/" ~ identity.id,
+        "fa-eye",
+        "info",
+        "Ver"
+    ) }}
 {% endif %}
 
 {% if can("update", "identities") %}
-    {{ action_button("/identities/" ~ identity.id ~ "/edit", "fa-edit", "warning", "Editar") }}
+    {{ action_button(
+        "/identities/" ~ identity.id ~ "/edit",
+        "fa-edit",
+        "warning",
+        "Editar"
+    ) }}
 {% endif %}
 
 {% if can("delete", "identities") %}
-    {{ action_button("/identities/" ~ identity.id ~ "/delete", "fa-trash", "danger", "Eliminar", method="post") }}
+    {{ action_button(
+        "/identities/" ~ identity.id ~ "/delete",
+        "fa-trash",
+        "danger",
+        "Eliminar",
+        confirm="¿Eliminar identidad?",
+        method="post"
+    ) }}
 {% endif %}
 
 {% endmacro %}

@@ -1,38 +1,88 @@
 {# =========================================================
-   users/user_detail.html
+   users/user_detail.html  · PRO
    ========================================================= #}
 {% extends "base.html" %}
 
 {% from "components/buttons.html" import btn, btn_delete %}
 {% from "components/badges.html" import status, permission %}
-{% from "components/audit_table.html" import audit_table %}
-{% from "components/tabs.html" import tabs %}
-{% from "components/detail_layout.html" import detail_layout %}
+{% from "components/audit_table.html" import audit_table with context %}
+{% from "components/tabs.html" import tabs with context %}
+{% from "components/detail_layout.html" import detail_layout with context %}
 
 {% block content %}
 
-{% call(side) detail_layout("Usuario", "user-circle") %}
+<!-- ===================== HERO ===================== -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body d-flex justify-content-between align-items-center flex-wrap">
 
+        <div>
+            <h2 class="mb-1 font-weight-bold">
+                {{ user.nombre }}
+            </h2>
+
+            <p class="text-muted mb-0">
+                Ficha completa de usuario y permisos asignados
+            </p>
+        </div>
+
+        <div class="hero-avatar">
+            <i class="fas fa-user-circle"></i>
+        </div>
+
+    </div>
+</div>
+
+
+{% call(side) detail_layout(None, None) %}
+
+    {# =====================================================
+       LEFT COLUMN
+       ===================================================== #}
     {% if side == "left" %}
-        <div class="card card-primary card-outline shadow-sm">
 
-            <div class="card-body box-profile text-center">
+        <div class="card border-0 shadow-sm user-profile-card">
 
-                <i class="fas fa-user-circle fa-3x text-primary mb-2"></i>
+            <div class="card-body text-center">
 
-                <h3 class="profile-username">
+                <div class="profile-avatar mb-3">
+                    <i class="fas fa-user"></i>
+                </div>
+
+                <h3 class="mb-1 font-weight-bold">
                     {{ user.nombre }}
                 </h3>
 
-                <p class="text-muted mb-2">
+                <p class="text-muted mb-3">
                     Usuario #{{ user.id_usuario }}
                 </p>
 
-                {{ status(user.activo) }}
+                <div class="mb-3">
+                    {{ status(user.activo) }}
+                </div>
+
+                <hr>
+
+                <div class="text-left small">
+
+                    <div class="mb-2">
+                        <strong>ID:</strong> {{ user.id_usuario }}
+                    </div>
+
+                    <div class="mb-2">
+                        <strong>Roles:</strong>
+                        {{ user.roles|length if user.roles else 0 }}
+                    </div>
+
+                    <div class="mb-2">
+                        <strong>Permisos:</strong>
+                        {{ permissions_with_origin|length if permissions_with_origin else 0 }}
+                    </div>
+
+                </div>
 
             </div>
 
-            <div class="card-footer text-center">
+            <div class="card-footer bg-white border-0 text-center pb-4">
 
                 {% if can("update", "users", user) %}
                     {{ btn("/users/" ~ user.id_usuario ~ "/edit", "Editar", "warning", "edit") }}
@@ -45,10 +95,17 @@
             </div>
 
         </div>
+
     {% endif %}
 
+
+    {# =====================================================
+       RIGHT COLUMN
+       ===================================================== #}
     {% if side == "right" %}
-        <div class="card shadow-sm">
+
+        <div class="card border-0 shadow-sm">
+
             <div class="card-body">
 
                 {% call(tab) tabs([
@@ -57,22 +114,35 @@
                     {"key":"audit","label":"Auditoría","icon":"history"}
                 ], id="user_detail_tabs") %}
 
+
                     {# ================= ROLES ================= #}
                     {% if tab == "roles" %}
 
+                        <h5 class="section-title">
+                            <i class="fas fa-user-tag text-primary mr-2"></i>
+                            Roles asignados
+                        </h5>
+
                         {% if user.roles %}
+
                             <div class="d-flex flex-wrap">
+
                                 {% for role in user.roles %}
-                                    <span class="badge badge-primary mr-1 mb-1 p-2">
-                                        <i class="fas fa-user-tag"></i>
+                                    <span class="badge badge-pill badge-primary px-3 py-2 mr-2 mb-2">
+                                        <i class="fas fa-user-shield mr-1"></i>
                                         {{ role.nombre }}
                                     </span>
                                 {% endfor %}
+
                             </div>
+
                         {% else %}
-                            <div class="text-muted">
-                                Sin roles asignados
+
+                            <div class="empty-state py-4 text-center text-muted">
+                                <i class="fas fa-user-slash fa-2x mb-2"></i>
+                                <p class="mb-0">Sin roles asignados</p>
                             </div>
+
                         {% endif %}
 
                     {% endif %}
@@ -81,46 +151,62 @@
                     {# ================= PERMISSIONS ================= #}
                     {% if tab == "permissions" %}
 
+                        <h5 class="section-title">
+                            <i class="fas fa-key text-warning mr-2"></i>
+                            Permisos efectivos
+                        </h5>
+
                         {% if permissions_with_origin %}
 
-                            <table class="table table-sm table-hover">
-                                <thead class="thead-light">
-                                    <tr>
-                                        <th>Módulo</th>
-                                        <th>Acción</th>
-                                        <th>Origen</th>
-                                    </tr>
-                                </thead>
+                            <div class="table-responsive">
+                                <table class="table table-modern align-middle">
 
-                                <tbody>
-                                    {% for perm in permissions_with_origin %}
-                                    <tr>
-                                        <td>
-                                            <span class="badge badge-dark">
-                                                {{ perm.module }}
-                                            </span>
-                                        </td>
+                                    <thead>
+                                        <tr>
+                                            <th>Módulo</th>
+                                            <th>Acción</th>
+                                            <th>Origen</th>
+                                        </tr>
+                                    </thead>
 
-                                        <td>
-                                            {{ permission(perm.action) }}
-                                        </td>
+                                    <tbody>
 
-                                        <td>
-                                            {% for role in perm.roles %}
-                                                <span class="badge badge-light mr-1">
-                                                    {{ role }}
+                                        {% for perm in permissions_with_origin %}
+                                        <tr>
+
+                                            <td>
+                                                <span class="badge badge-dark px-3 py-2">
+                                                    {{ perm.module }}
                                                 </span>
-                                            {% endfor %}
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
+                                            </td>
+
+                                            <td>
+                                                {{ permission(perm.action) }}
+                                            </td>
+
+                                            <td>
+                                                {% for role in perm.roles %}
+                                                    <span class="badge badge-light border mr-1 mb-1">
+                                                        {{ role }}
+                                                    </span>
+                                                {% endfor %}
+                                            </td>
+
+                                        </tr>
+                                        {% endfor %}
+
+                                    </tbody>
+
+                                </table>
+                            </div>
 
                         {% else %}
-                            <div class="text-muted">
-                                Sin permisos asignados
+
+                            <div class="empty-state py-4 text-center text-muted">
+                                <i class="fas fa-lock fa-2x mb-2"></i>
+                                <p class="mb-0">Sin permisos asignados</p>
                             </div>
+
                         {% endif %}
 
                     {% endif %}
@@ -128,13 +214,22 @@
 
                     {# ================= AUDIT ================= #}
                     {% if tab == "audit" %}
-                        {{ audit_table(audit_logs) }}
+
+                        <h5 class="section-title">
+                            <i class="fas fa-history text-info mr-2"></i>
+                            Historial de actividad
+                        </h5>
+
+                        {{ audit_table(audit_logs, get_audit_color, get_audit_icon) }}
+
                     {% endif %}
 
                 {% endcall %}
 
             </div>
+
         </div>
+
     {% endif %}
 
 {% endcall %}

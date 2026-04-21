@@ -6,8 +6,36 @@
 
 {% block content %}
 
+<!-- ===================== HERO ===================== -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body d-flex justify-content-between align-items-center flex-wrap">
+
+        <div>
+            <h2 class="mb-1 font-weight-bold">
+                {% if user %}
+                    Editar usuario
+                {% else %}
+                    Crear nuevo usuario
+                {% endif %}
+            </h2>
+
+            <p class="text-muted mb-0">
+                Gestiona los datos principales y los roles asignados.
+            </p>
+        </div>
+
+        <div class="mt-3 mt-md-0">
+            <div class="hero-icon bg-primary-soft">
+                <i class="fas fa-user-cog text-primary"></i>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
 {% call form_card(
-    ("Editar usuario" if user else "Crear usuario"),
+    None,
     action=('/users/' ~ user.id_usuario ~ '/edit' if user else '/users/form')
 ) %}
 
@@ -15,52 +43,71 @@
     {{ validation_summary(errors) }}
 
     <!-- ================= DATOS ================= -->
-    {% call form_row() %}
+    <div class="mb-4">
+        <h5 class="section-title">
+            <i class="fas fa-id-card text-primary mr-2"></i>
+            Información general
+        </h5>
 
-        {% call form_col(6) %}
-            {{ input(
-                "nombre",
-                "Nombre completo",
-                form_data.nombre if form_data else (user.nombre if user else ""),
-                errors.nombre if errors else None,
-                required=True,
-                placeholder="Ej: Juan Pérez"
-            ) }}
+        {% call form_row() %}
+            {% call form_col(6) %}
+                {{ input(
+                    "nombre",
+                    "Nombre completo",
+                    form_data.nombre if form_data else (user.nombre if user else ""),
+                    errors.nombre if errors else None,
+                    required=True,
+                    placeholder="Ej: Juan Pérez"
+                ) }}
+            {% endcall %}
         {% endcall %}
-
-    {% endcall %}
+    </div>
 
 
     <!-- ================= ESTADO ================= -->
-    <div class="mt-3">
-        {{ checkbox(
-            "activo",
-            "Usuario activo",
-            form_data.activo if form_data else (user.activo if user else True),
-            help_text="Los usuarios inactivos no podrán acceder al sistema."
-        ) }}
+    <div class="mb-4">
+        <h5 class="section-title">
+            <i class="fas fa-toggle-on text-success mr-2"></i>
+            Estado
+        </h5>
+
+        <div class="card bg-light border-0">
+            <div class="card-body py-3">
+                {{ checkbox(
+                    "activo",
+                    "Usuario activo",
+                    form_data.activo if form_data else (user.activo if user else True),
+                    help_text="Los usuarios inactivos no podrán acceder al sistema."
+                ) }}
+            </div>
+        </div>
     </div>
 
 
     <!-- ================= ROLES ================= -->
-    <div class="mt-4">
+    <div class="mb-4">
+        <h5 class="section-title">
+            <i class="fas fa-user-shield text-warning mr-2"></i>
+            Roles y permisos
+        </h5>
 
-        <label class="font-weight-bold">
-            <i class="fas fa-user-shield"></i> Roles
-        </label>
+        <div class="card border roles-card">
+            <div class="card-body">
 
-        {{ multi_checkbox(
-            "roles",
-            roles,
-            form_data.roles if form_data else (
-                (user.roles | map(attribute='id_rol') | list) if user else []
-            )
-        ) }}
+                {{ multi_checkbox(
+                    "roles",
+                    roles,
+                    form_data.roles if form_data else (
+                        (user.roles | map(attribute='id_rol') | list) if user else []
+                    )
+                ) }}
 
-        <small class="form-text text-muted">
-            Puedes asignar múltiples roles. Los permisos se heredarán automáticamente.
-        </small>
+                <small class="form-text text-muted mt-2">
+                    Puedes asignar múltiples roles. Los permisos se heredarán automáticamente.
+                </small>
 
+            </div>
+        </div>
     </div>
 
 

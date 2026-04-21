@@ -1,91 +1,145 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="utf-8">
-    <title>Login | Aula Robótica</title>
+<meta charset="utf-8">
+<title>Login | Aula Robótica</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="/static/adminlte/css/adminlte.min.css">
+<link rel="stylesheet" href="/static/adminlte/plugins/fontawesome-free/css/all.min.css">
 
-    <!-- AdminLTE -->
-    <link rel="stylesheet" href="/static/adminlte/css/adminlte.min.css">
+<!-- Favicon -->
+<link rel="icon" type="image/x-icon" href="/static/icons/favicon.ico">
 
-    <!-- FontAwesome -->
-    <link rel="stylesheet" href="/static/adminlte/plugins/fontawesome-free/css/all.min.css">
+<style>
+body.login-page {
+    background: linear-gradient(135deg, #0d6efd, #1e3a8a);
+    min-height: 100vh;
+    font-family: inherit;
+}
 
-    <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="/static/icons/favicon.ico">
-    <link rel="icon" type="image/png" sizes="16x16" href="/static/icons/favicon-16x16.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/static/icons/favicon-32x32.png">
-    <link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="/static/icons/android-chrome-192x192.png">
-    <link rel="icon" type="image/png" sizes="512x512" href="/static/icons/android-chrome-512x512.png">
-    <link rel="manifest" href="/static/icons/site.webmanifest">
-    
-    <style>
-        .login-logo b {
-            font-weight: 600;
-        }
+/* WRAPPER */
+.login-box {
+    width: 420px;
+}
 
-        .login-card-body {
-            border-radius: 10px;
-        }
+/* CARD */
+.login-card {
+    border: none;
+    border-radius: 18px;
+    backdrop-filter: blur(14px);
+    background: rgba(255,255,255,.96);
+    box-shadow: 0 20px 40px rgba(0,0,0,.18);
+    overflow: hidden;
+}
 
-        .input-group-text {
-            background-color: #f4f6f9;
-        }
+/* HEADER */
+.login-brand {
+    text-align: center;
+    padding-top: 1.6rem;
+}
 
-        .btn-primary {
-            border-radius: 6px;
-        }
+.login-brand img {
+    width: 78px;
+    filter: drop-shadow(0 8px 14px rgba(0,0,0,.15));
+}
 
-        .login-footer {
-            font-size: 0.85rem;
-            color: #6c757d;
-            text-align: center;
-            margin-top: 10px;
-        }
-    </style>
+.login-brand h1 {
+    font-size: 1.45rem;
+    font-weight: 700;
+    margin-top: .6rem;
+    color: #111827;
+}
+
+.login-brand p {
+    color: #6b7280;
+    margin-bottom: 0;
+    font-size: .92rem;
+}
+
+/* BODY */
+.login-card-body {
+    padding: 2rem;
+}
+
+/* INPUTS */
+.input-group-text {
+    background: #f8fafc;
+    border-right: none;
+}
+
+.form-control {
+    border-left: none;
+    height: 46px;
+}
+
+.form-control:focus {
+    box-shadow: none;
+    border-color: #0d6efd;
+}
+
+/* BUTTONS */
+.btn-login {
+    height: 46px;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+.btn-saml {
+    border-radius: 10px;
+    height: 46px;
+    font-weight: 600;
+}
+
+/* FOOTER */
+.login-footer {
+    text-align: center;
+    color: #6b7280;
+    font-size: .85rem;
+    margin-top: 1rem;
+}
+
+/* MOBILE */
+@media (max-width: 576px) {
+    .login-box {
+        width: 95%;
+    }
+}
+</style>
 </head>
 
 <body class="hold-transition login-page">
 
 <div class="login-box">
 
-    <!-- LOGO -->
-    <div class="login-logo">
-        <b>Aula Robótica</b>
-    </div>
+    <div class="card login-card">
 
-    <div class="card shadow-sm">
+        <!-- HEADER -->
+        <div class="login-brand">
+            <img src="/static/img/alcabot-logo.png" alt="Robot">
+            <h1>Aula Robótica</h1>
+            <p>Acceso seguro a la plataforma</p>
+        </div>
 
         <div class="card-body login-card-body">
 
-            <!-- TITULO -->
-            <p class="login-box-msg">
-                Accede a tu cuenta
-            </p>
-
-            <!-- ERROR -->
             {% if error %}
             <div class="alert alert-danger">
-                <i class="fas fa-exclamation-circle"></i>
+                <i class="fas fa-exclamation-circle mr-1"></i>
                 {{ error }}
             </div>
             {% endif %}
 
-            <!-- FORM -->
+            <!-- LOGIN FORM -->
             <form action="/login" method="post">
 
-                <!-- EMAIL -->
                 <div class="input-group mb-3">
-                    <input
-                        type="email"
-                        name="email"
-                        class="form-control"
-                        placeholder="Email"
-                        required
-                        autofocus
-                    >
+                    <input type="email"
+                           name="email"
+                           class="form-control"
+                           placeholder="Correo electrónico"
+                           required autofocus>
+
                     <div class="input-group-append">
                         <div class="input-group-text">
                             <span class="fas fa-envelope"></span>
@@ -93,16 +147,14 @@
                     </div>
                 </div>
 
-                <!-- PASSWORD -->
-                <div class="input-group mb-3">
-                    <input
-                        type="password"
-                        name="password"
-                        id="password"
-                        class="form-control"
-                        placeholder="Contraseña"
-                        required
-                    >
+                <div class="input-group mb-4">
+                    <input type="password"
+                           name="password"
+                           id="password"
+                           class="form-control"
+                           placeholder="Contraseña"
+                           required>
+
                     <div class="input-group-append">
                         <div class="input-group-text"
                              style="cursor:pointer"
@@ -112,43 +164,23 @@
                     </div>
                 </div>
 
-                <!-- ACTIONS -->
-                <div class="row">
-
-                    <!-- remember futuro -->
-                    <div class="col-6 d-flex align-items-center">
-                        <small class="text-muted">
-                            Acceso seguro
-                        </small>
-                    </div>
-
-                    <div class="col-6">
-                        <button
-                            type="submit"
-                            class="btn btn-primary btn-block"
-                        >
-                            <i class="fas fa-sign-in-alt"></i> Entrar
-                        </button>
-                    </div>
-
-                </div>
+                <button type="submit"
+                        class="btn btn-primary btn-block btn-login mb-3">
+                    <i class="fas fa-sign-in-alt mr-1"></i>
+                    Entrar
+                </button>
 
             </form>
 
-            <hr>
-
-            <a href="/auth/saml/mock" class="btn btn-danger btn-block mb-2">
-                <i class="fas fa-university"></i>
-                Acceder con Universidad de Alcalá
+            <!-- SAML -->
+            <a href="/auth/saml/mock"
+               class="btn btn-danger btn-block btn-saml">
+                <i class="fas fa-university mr-1"></i>
+                Universidad de Alcalá
             </a>
 
-            <small class="text-muted d-block text-center">
-                Inicio de sesión con credenciales institucionales
-            </small>
-
-            <!-- FOOTER -->
             <div class="login-footer">
-                Aula de Robótica · Plataforma educativa
+                Aula de Robótica · EPS-UAH
             </div>
 
         </div>
@@ -157,10 +189,8 @@
 
 </div>
 
-<!-- JS -->
 <script src="/static/adminlte/plugins/jquery/jquery.min.js"></script>
 <script src="/static/adminlte/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-<script src="/static/adminlte/js/adminlte.min.js"></script>
 
 <script>
 function togglePassword() {
@@ -169,12 +199,10 @@ function togglePassword() {
 
     if (input.type === "password") {
         input.type = "text";
-        icon.classList.remove("fa-eye");
-        icon.classList.add("fa-eye-slash");
+        icon.classList.replace("fa-eye", "fa-eye-slash");
     } else {
         input.type = "password";
-        icon.classList.remove("fa-eye-slash");
-        icon.classList.add("fa-eye");
+        icon.classList.replace("fa-eye-slash", "fa-eye");
     }
 }
 </script>
