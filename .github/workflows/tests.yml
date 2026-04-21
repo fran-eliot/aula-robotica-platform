@@ -1,21 +1,15 @@
 name: Run Tests
 
-on:
-  push:
-    branches: [ main, master, develop ]
-  pull_request:
-    branches: [ main, master, develop ]
+on: [push, pull_request]
 
 jobs:
   test:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.13"
 
@@ -25,11 +19,18 @@ jobs:
       - name: Sync dependencies
         run: uv sync
 
-      - name: Create .env
+      - name: Create env
         run: |
-          echo "DATABASE_URL=sqlite:///./test.db" >> .env
-          echo "SECRET_KEY=testsecretkey" >> .env
-          echo "ACCESS_TOKEN_EXPIRE_MINUTES=60" >> .env
+          cat > .env <<EOF
+          DATABASE_URL=sqlite:///./test.db
+          SECRET_KEY=supersecretkey
+          ACCESS_TOKEN_EXPIRE_MINUTES=60
+          DEBUG=true
+          APP_BASE_URL=http://localhost:8000
+          SAML_ENTITY_ID=http://localhost:8000
+          SAML_ACS_URL=http://localhost:8000/auth/saml/acs
+          SAML_METADATA_URL=http://localhost:8000/auth/saml/metadata
+          EOF
 
       - name: Run tests
         run: uv run pytest -v
