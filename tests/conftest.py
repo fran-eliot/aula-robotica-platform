@@ -112,7 +112,8 @@ def seed_data():
     # ===============================
     perms = [
         "users:read", "users:create", "users:update", "users:delete",
-        "roles:read",
+        "roles:read", "roles:create", "roles:update", "roles:delete",
+        "identities:read", "identities:create", "identities:update", "identities:delete",
         "dashboard:read"
     ]
 
