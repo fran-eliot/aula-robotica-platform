@@ -55,7 +55,7 @@ def refresh_access_token(payload: dict, db: Session) -> str:
         )
 
     user_id = int(payload.get("sub"))
-    user = db.query(User).get(user_id)
+    user = db.get(User, user_id)
 
     if not user or not user.activo:
         raise HTTPException(
