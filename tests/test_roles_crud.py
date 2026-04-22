@@ -1,3 +1,6 @@
+# tests/test_roles_crud.py
+# Este archivo contiene pruebas para las operaciones CRUD de roles a través de la 
+# interfaz web. 
 from tests.test_utils import login_admin
 
 
