@@ -4,118 +4,11 @@
 {% from "components/audit_table.html" import audit_table with context %}
 
 {% block extra_css %}
-<style>
-/* =====================================================
-   ENTERPRISE DASHBOARD
-===================================================== */
-
-/* HERO */
-.dashboard-hero{
-    background: linear-gradient(135deg,#007bff,#0056b3);
-    color:#fff;
-    border-radius:16px;
-    overflow:hidden;
-}
-
-.dashboard-hero img{
-    width:82px;
-    opacity:.95;
-    filter:drop-shadow(0 10px 18px rgba(0,0,0,.22));
-}
-
-/* GLOBAL CARDS */
-.soft-card{
-    border-radius:14px;
-}
-
-.section-title{
-    font-size:1rem;
-    font-weight:700;
-    margin-bottom:.75rem;
-}
-
-.dashboard-subtitle{
-    opacity:.92;
-    font-size:.95rem;
-}
-
-/* KPI */
-.kpi-card{
-    background:#fff;
-    border:0;
-    border-radius:14px;
-    box-shadow:0 6px 18px rgba(0,0,0,.05);
-    padding:1rem;
-    height:100%;
-    transition:all .18s ease;
-}
-
-.kpi-card:hover{
-    transform:translateY(-3px);
-    box-shadow:0 10px 24px rgba(0,0,0,.08);
-}
-
-.kpi-title{
-    font-size:.78rem;
-    text-transform:uppercase;
-    color:#6c757d;
-    letter-spacing:.04rem;
-    margin-bottom:.35rem;
-}
-
-.kpi-value{
-    font-size:1.9rem;
-    font-weight:700;
-    line-height:1.1;
-}
-
-.kpi-icon{
-    width:44px;
-    height:44px;
-    border-radius:12px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background:#f8f9fa;
-    font-size:1.15rem;
-}
-
-/* INSIGHTS */
-.insight-card{
-    border-left:4px solid #ffc107;
-}
-
-/* QUICK LINKS */
-.quick-card{
-    transition:all .18s ease;
-    border-radius:14px;
-}
-
-.quick-card:hover{
-    transform:translateY(-4px);
-    box-shadow:0 10px 22px rgba(0,0,0,.08);
-}
-
-/* MINI STATS */
-.mini-stat{
-    background:#f8f9fa;
-    border-radius:10px;
-    padding:.8rem .9rem;
-    font-size:.95rem;
-}
-
-/* TABLE HEADER FIX */
-.card-title{
-    font-weight:600;
-}
-</style>
+<link rel="stylesheet" href="/static/css/dashboard.css">
 {% endblock %}
 
 {% block content %}
 
-<!-- =====================================================
-     HERO
-===================================================== -->
 <div class="card dashboard-hero border-0 shadow-sm mb-4">
     <div class="card-body d-flex justify-content-between align-items-center flex-wrap p-4">
 
@@ -142,9 +35,6 @@
 </div>
 
 
-<!-- =====================================================
-     KPI CARDS
-===================================================== -->
 <div class="row mb-4">
 
     {% if can("read", "users") %}
@@ -155,9 +45,7 @@
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
                         <div class="kpi-title">Usuarios</div>
-                        <div class="kpi-value">
-                            {{ total_users|default(0) }}
-                        </div>
+                        <div class="kpi-value">{{ total_users|default(0) }}</div>
                     </div>
 
                     <div class="kpi-icon text-primary">
@@ -183,9 +71,7 @@
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
                         <div class="kpi-title">Identidades</div>
-                        <div class="kpi-value">
-                            {{ total_identities|default(0) }}
-                        </div>
+                        <div class="kpi-value">{{ total_identities|default(0) }}</div>
                     </div>
 
                     <div class="kpi-icon text-info">
@@ -212,9 +98,7 @@
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
                         <div class="kpi-title">Roles</div>
-                        <div class="kpi-value">
-                            {{ total_roles|default(0) }}
-                        </div>
+                        <div class="kpi-value">{{ total_roles|default(0) }}</div>
                     </div>
 
                     <div class="kpi-icon text-success">
@@ -238,9 +122,7 @@
             <div class="d-flex justify-content-between align-items-start">
                 <div>
                     <div class="kpi-title">Sistema</div>
-                    <div class="kpi-value text-success">
-                        OK
-                    </div>
+                    <div class="kpi-value text-success">OK</div>
                 </div>
 
                 <div class="kpi-icon text-success">
@@ -258,9 +140,6 @@
 </div>
 
 
-<!-- =====================================================
-     INSIGHTS
-===================================================== -->
 <div class="row mb-4">
     <div class="col-12">
 
@@ -275,37 +154,23 @@
                 <ul class="mb-0 pl-3">
 
                     {% if total_identities|default(0) < total_users|default(0) %}
-                    <li class="mb-1">
-                        Existen usuarios sin identidad vinculada.
-                    </li>
+                    <li class="mb-1">Existen usuarios sin identidad vinculada.</li>
                     {% endif %}
 
                     {% if total_identities|default(0) > total_users|default(0) %}
-                    <li class="mb-1">
-                        Hay usuarios con múltiples accesos.
-                    </li>
+                    <li class="mb-1">Hay usuarios con múltiples accesos.</li>
                     {% endif %}
 
                     {% if inactive_users|default(0) > 0 %}
-                    <li class="mb-1">
-                        {{ inactive_users }} usuarios inactivos registrados.
-                    </li>
+                    <li class="mb-1">{{ inactive_users }} usuarios inactivos registrados.</li>
                     {% endif %}
 
                     {% if total_roles|default(0) == 0 %}
-                    <li class="mb-1">
-                        No hay roles configurados.
-                    </li>
+                    <li class="mb-1">No hay roles configurados.</li>
                     {% endif %}
 
-                    {% if
-                        total_roles|default(0) > 0
-                        and total_users|default(0) > 0
-                        and inactive_users|default(0) == 0
-                    %}
-                    <li class="mb-1">
-                        Sistema correctamente configurado.
-                    </li>
+                    {% if total_roles|default(0) > 0 and total_users|default(0) > 0 and inactive_users|default(0) == 0 %}
+                    <li class="mb-1">Sistema correctamente configurado.</li>
                     {% endif %}
 
                 </ul>
@@ -317,15 +182,10 @@
 </div>
 
 
-<!-- =====================================================
-     MAIN GRID
-===================================================== -->
 <div class="row mb-4">
 
-    <!-- LEFT COLUMN -->
     <div class="col-lg-8 mb-4 mb-lg-0">
 
-        <!-- ACTIVITY -->
         <div class="card soft-card shadow-sm border-0 h-100">
 
             <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center py-3">
@@ -348,10 +208,8 @@
     </div>
 
 
-    <!-- RIGHT COLUMN -->
     <div class="col-lg-4">
 
-        <!-- ACCESS SUMMARY -->
         <div class="card soft-card shadow-sm border-0 mb-4">
 
             <div class="card-header bg-white border-0">
@@ -362,23 +220,18 @@
             </div>
 
             <div class="card-body">
-
                 <div class="mini-stat mb-2">
-                    <strong>Locales:</strong>
-                    {{ local_identities|default(0) }}
+                    <strong>Locales:</strong> {{ local_identities|default(0) }}
                 </div>
 
                 <div class="mini-stat">
-                    <strong>SSO / externas:</strong>
-                    {{ external_identities|default(0) }}
+                    <strong>SSO / externas:</strong> {{ external_identities|default(0) }}
                 </div>
-
             </div>
 
         </div>
 
 
-        <!-- USERS SUMMARY -->
         <div class="card soft-card shadow-sm border-0">
 
             <div class="card-header bg-white border-0">
@@ -389,17 +242,13 @@
             </div>
 
             <div class="card-body">
-
                 <div class="mini-stat mb-2">
-                    <strong>Activos:</strong>
-                    {{ active_users|default(0) }}
+                    <strong>Activos:</strong> {{ active_users|default(0) }}
                 </div>
 
                 <div class="mini-stat">
-                    <strong>Inactivos:</strong>
-                    {{ inactive_users|default(0) }}
+                    <strong>Inactivos:</strong> {{ inactive_users|default(0) }}
                 </div>
-
             </div>
 
         </div>
@@ -409,9 +258,6 @@
 </div>
 
 
-<!-- =====================================================
-     QUICK LINKS
-===================================================== -->
 <div class="mb-3">
     <h5 class="section-title">
         <i class="fas fa-bolt text-warning mr-1"></i>
@@ -425,72 +271,45 @@
         <a href="/users/" class="text-decoration-none">
             <div class="card quick-card soft-card h-100 border-0 shadow-sm">
                 <div class="card-body text-center">
-
                     <i class="fas fa-users fa-2x text-primary mb-3"></i>
-
                     <h5 class="mb-1">Usuarios</h5>
-
-                    <small class="text-muted d-block">
-                        Gestión completa
-                    </small>
-
+                    <small class="text-muted d-block">Gestión completa</small>
                 </div>
             </div>
         </a>
     </div>
-
 
     <div class="col-md-6 col-lg-3 mb-3">
         <a href="/roles/" class="text-decoration-none">
             <div class="card quick-card soft-card h-100 border-0 shadow-sm">
                 <div class="card-body text-center">
-
                     <i class="fas fa-user-shield fa-2x text-success mb-3"></i>
-
                     <h5 class="mb-1">Roles</h5>
-
-                    <small class="text-muted d-block">
-                        Permisos y seguridad
-                    </small>
-
+                    <small class="text-muted d-block">Permisos y seguridad</small>
                 </div>
             </div>
         </a>
     </div>
-
 
     <div class="col-md-6 col-lg-3 mb-3">
         <a href="/identities/" class="text-decoration-none">
             <div class="card quick-card soft-card h-100 border-0 shadow-sm">
                 <div class="card-body text-center">
-
                     <i class="fas fa-id-card fa-2x text-info mb-3"></i>
-
                     <h5 class="mb-1">Identidades</h5>
-
-                    <small class="text-muted d-block">
-                        Accesos vinculados
-                    </small>
-
+                    <small class="text-muted d-block">Accesos vinculados</small>
                 </div>
             </div>
         </a>
     </div>
 
-
     <div class="col-md-6 col-lg-3 mb-3">
         <a href="/users/me" class="text-decoration-none">
             <div class="card quick-card soft-card h-100 border-0 shadow-sm">
                 <div class="card-body text-center">
-
                     <i class="fas fa-user-circle fa-2x text-warning mb-3"></i>
-
                     <h5 class="mb-1">Mi perfil</h5>
-
-                    <small class="text-muted d-block">
-                        Datos personales
-                    </small>
-
+                    <small class="text-muted d-block">Datos personales</small>
                 </div>
             </div>
         </a>

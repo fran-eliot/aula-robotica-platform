@@ -1,0 +1,68 @@
+.metric-card{
+    border-radius:16px;
+    transition:.18s ease;
+    overflow:hidden;
+}
+
+.metric-card:hover{
+    transform:translateY(-4px);
+    box-shadow:0 14px 28px rgba(0,0,0,.08);
+}
+
+.metric-title{
+    font-size:.78rem;
+    font-weight:600;
+    letter-spacing:.04rem;
+}
+
+.metric-value{
+    font-size:2rem;
+    font-weight:700;
+    line-height:1.1;
+}
+
+.metric-icon{
+    width:56px;
+    height:56px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#fff;
+    font-size:1.3rem;
+}
+
+.metric-link{
+    font-weight:600;
+    color:#007bff;
+}
+
+.metric-clickable{
+    cursor:pointer;
+}
+
+.roles-card{
+    border-radius:14px;
+    border:1px solid #eef1f4;
+}
+
+.empty-state{
+    background:#fff;
+    color:#6c757d;
+}
+
+.badge-pill{
+    border-radius:999px;
+}
+
+.table-fixed{
+    table-layout:fixed;
+}
+
+.row-clickable{
+    cursor:pointer;
+}
+
+.th-fixed{
+    width:180px;
+}

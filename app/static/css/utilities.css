@@ -1,0 +1,36 @@
+.font-weight-semibold{
+    font-weight:600;
+}
+
+.section-title{
+    font-size:1rem;
+    font-weight:700;
+    margin-bottom:1rem;
+}
+
+.bg-primary-soft{
+    background:rgba(0,123,255,.12);
+}
+
+.hero-icon{
+    width:64px;
+    height:64px;
+    border-radius:18px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:1.6rem;
+}
+
+.mini-icon{
+    width:42px;
+    height:42px;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.gap-actions > *{
+    margin:0 .18rem;
+}

@@ -11,101 +11,7 @@
 <!-- Favicon -->
 <link rel="icon" type="image/x-icon" href="/static/icons/favicon.ico">
 
-<style>
-body.login-page {
-    background: linear-gradient(135deg, #0d6efd, #1e3a8a);
-    min-height: 100vh;
-    font-family: inherit;
-}
-
-/* WRAPPER */
-.login-box {
-    width: 420px;
-}
-
-/* CARD */
-.login-card {
-    border: none;
-    border-radius: 18px;
-    backdrop-filter: blur(14px);
-    background: rgba(255,255,255,.96);
-    box-shadow: 0 20px 40px rgba(0,0,0,.18);
-    overflow: hidden;
-}
-
-/* HEADER */
-.login-brand {
-    text-align: center;
-    padding-top: 1.6rem;
-}
-
-.login-brand img {
-    width: 78px;
-    filter: drop-shadow(0 8px 14px rgba(0,0,0,.15));
-}
-
-.login-brand h1 {
-    font-size: 1.45rem;
-    font-weight: 700;
-    margin-top: .6rem;
-    color: #111827;
-}
-
-.login-brand p {
-    color: #6b7280;
-    margin-bottom: 0;
-    font-size: .92rem;
-}
-
-/* BODY */
-.login-card-body {
-    padding: 2rem;
-}
-
-/* INPUTS */
-.input-group-text {
-    background: #f8fafc;
-    border-right: none;
-}
-
-.form-control {
-    border-left: none;
-    height: 46px;
-}
-
-.form-control:focus {
-    box-shadow: none;
-    border-color: #0d6efd;
-}
-
-/* BUTTONS */
-.btn-login {
-    height: 46px;
-    border-radius: 10px;
-    font-weight: 600;
-}
-
-.btn-saml {
-    border-radius: 10px;
-    height: 46px;
-    font-weight: 600;
-}
-
-/* FOOTER */
-.login-footer {
-    text-align: center;
-    color: #6b7280;
-    font-size: .85rem;
-    margin-top: 1rem;
-}
-
-/* MOBILE */
-@media (max-width: 576px) {
-    .login-box {
-        width: 95%;
-    }
-}
-</style>
+<link rel="stylesheet" href="/static/css/login.css">
 </head>
 
 <body class="hold-transition login-page">
@@ -156,8 +62,7 @@ body.login-page {
                            required>
 
                     <div class="input-group-append">
-                        <div class="input-group-text"
-                             style="cursor:pointer"
+                        <div class="input-group-text login-eye"
                              onclick="togglePassword()">
                             <span id="eyeIcon" class="fas fa-eye"></span>
                         </div>

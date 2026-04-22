@@ -2,142 +2,170 @@
 
 <div class="permission-matrix mt-4">
 
+    <!-- ===================================================== -->
     <!-- HEADER GLOBAL -->
+    <!-- ===================================================== -->
     <div class="card border-0 shadow-sm mb-4">
-
         <div class="card-body d-flex flex-wrap justify-content-between align-items-center">
 
             <div class="mb-2 mb-md-0">
                 <h5 class="mb-1">
-                    <i class="fas fa-shield-alt text-primary"></i>
+                    <i class="fas fa-shield-alt text-primary mr-1"></i>
                     Permisos del sistema
                 </h5>
                 <small class="text-muted">
-                    Gestiona permisos por módulo
+                    Gestión visual de permisos por módulo
                 </small>
             </div>
 
             {% if not readonly %}
-            <div class="d-flex flex-wrap">
+            <div class="d-flex flex-wrap align-items-center">
 
                 <button type="button"
                         class="btn btn-sm btn-outline-success mr-2 mb-2"
                         onclick="checkAllPermissions(true)">
-                    <i class="fas fa-check-circle"></i> Todo
+                    <i class="fas fa-check-circle mr-1"></i>
+                    Todo
                 </button>
 
                 <button type="button"
                         class="btn btn-sm btn-outline-danger mr-2 mb-2"
                         onclick="checkAllPermissions(false)">
-                    <i class="fas fa-times-circle"></i> Limpiar
+                    <i class="fas fa-times-circle mr-1"></i>
+                    Limpiar
                 </button>
 
                 <input type="text"
-                       class="form-control form-control-sm mb-2"
-                       style="width:220px"
+                       class="form-control form-control-sm mb-2 permission-search"
                        placeholder="Buscar permiso..."
                        onkeyup="filterPermissions(this.value)">
             </div>
             {% endif %}
 
         </div>
-
     </div>
 
 
+    <!-- ===================================================== -->
+    <!-- MODULOS -->
+    <!-- ===================================================== -->
     {% for module, perms in grouped_permissions.items() %}
 
-    {% set module_perms = perms | selectattr("id", "in", selected_permissions) | list %}
+        {% if readonly %}
+            {% set module_perms = [] %}
+            {% for p in perms %}
+                {% if p["id"] in selected_permissions %}
+                    {% set _ = module_perms.append(p) %}
+                {% endif %}
+            {% endfor %}
+        {% else %}
+            {% set module_perms = perms %}
+        {% endif %}
 
-    {% if module_perms %}
+        {% if module_perms %}
 
-    <div class="card permission-card shadow-sm border-0 mb-3 permission-module"
-         data-module="{{ module|lower }}">
+        <div class="card permission-card shadow-sm border-0 mb-3 permission-module"
+             data-module="{{ module|lower }}">
 
-        <!-- HEADER -->
-        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <!-- HEADER MODULO -->
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
 
-            <div class="d-flex align-items-center">
+                <div class="d-flex align-items-center">
 
-                <button class="btn btn-xs btn-light mr-2"
-                        type="button"
-                        onclick="toggleCollapse('{{ module }}')">
-                    <i id="icon-{{ module }}" class="fas fa-chevron-down"></i>
-                </button>
+                    <button type="button"
+                            class="btn btn-xs btn-light mr-2"
+                            onclick="toggleCollapse('{{ module }}')">
+                        <i id="icon-{{ module }}" class="fas fa-chevron-down"></i>
+                    </button>
 
-                <strong>
-                    <i class="fas fa-folder text-secondary"></i>
-                    {{ module|capitalize }}
-                </strong>
+                    <strong class="text-capitalize">
+                        <i class="fas fa-folder text-secondary mr-1"></i>
+                        {{ module }}
+                    </strong>
 
-                <span class="badge badge-light ml-2">
-                    {{ module_perms|length }}
-                </span>
-
-            </div>
-
-            {% if not readonly %}
-            <button type="button"
-                    class="btn btn-xs btn-outline-primary"
-                    onclick="toggleModule('{{ module }}')">
-                Todo módulo
-            </button>
-            {% endif %}
-
-        </div>
-
-        <!-- BODY -->
-        <div class="card-body module-body" id="body-{{ module }}">
-
-            <div class="d-flex flex-wrap">
-
-                {% for perm in module_perms %}
-
-                {% set action = perm.nombre.split(':')[1] if ':' in perm.nombre else perm.nombre %}
-
-                {% set color = {
-                    "read":"secondary",
-                    "create":"success",
-                    "update":"warning",
-                    "delete":"danger"
-                }[action] if action in ["read","create","update","delete"] else "dark" %}
-
-                {% if readonly %}
-
-                    <span class="badge badge-pill badge-{{ color }} px-3 py-2 mr-2 mb-2 permission-item"
-                          data-name="{{ module }} {{ action }}">
-                        <i class="fas fa-check mr-1"></i>
-                        {{ action }}
+                    <span class="badge badge-light ml-2">
+                        {{ module_perms|length }}
                     </span>
 
-                {% else %}
+                </div>
 
-                    <label class="perm-item badge badge-light px-3 py-2 mr-2 mb-2 permission-item"
-                           data-name="{{ module }} {{ action }}">
-
-                        <input type="checkbox"
-                               class="d-none perm-{{ module }}"
-                               name="permissions"
-                               value="{{ perm.id }}"
-                               {% if perm.id in selected_permissions %}checked{% endif %}>
-
-                        <span class="badge badge-{{ color }} mr-1">
-                            {{ action }}
-                        </span>
-
-                    </label>
-
+                {% if not readonly %}
+                <button type="button"
+                        class="btn btn-xs btn-outline-primary"
+                        onclick="toggleModule('{{ module }}')">
+                    Todo módulo
+                </button>
                 {% endif %}
 
-                {% endfor %}
+            </div>
+
+
+            <!-- BODY MODULO -->
+            <div class="card-body module-body" id="body-{{ module }}">
+
+                <div class="d-flex flex-wrap">
+
+                    {% for perm in module_perms %}
+
+                        {% set perm_id = perm["id"] %}
+                        {% set perm_name = perm["name"] %}
+                        {% set action = perm["action"] %}
+
+                        {% set color = {
+                            "read":"secondary",
+                            "create":"success",
+                            "update":"warning",
+                            "delete":"danger"
+                        }[action] if action in ["read","create","update","delete"] else "dark" %}
+
+                        {% set icon = {
+                            "read":"fa-eye",
+                            "create":"fa-plus-circle",
+                            "update":"fa-edit",
+                            "delete":"fa-trash"
+                        }[action] if action in ["read","create","update","delete"] else "fa-key" %}
+
+                        {% if readonly %}
+
+                            <span class="badge badge-pill badge-{{ color }} px-3 py-2 mr-2 mb-2 permission-item"
+                                  title="{{ perm_name }}"
+                                  data-name="{{ module }} {{ action }}">
+
+                                <i class="fas {{ icon }} mr-1"></i>
+                                {{ action|capitalize }}
+
+                            </span>
+
+                        {% else %}
+
+                            <label class="perm-item permission-item mr-2 mb-2"
+                                   title="{{ perm_name }}"
+                                   data-name="{{ module }} {{ action }}">
+
+                                <input type="checkbox"
+                                       class="d-none perm-{{ module }}"
+                                       name="permissions"
+                                       value="{{ perm_id }}"
+                                       {% if perm_id in selected_permissions %}checked{% endif %}>
+
+                                <span class="badge badge-{{ color }} px-3 py-2">
+                                    <i class="fas {{ icon }} mr-1"></i>
+                                    {{ action|capitalize }}
+                                </span>
+
+                            </label>
+
+                        {% endif %}
+
+                    {% endfor %}
+
+                </div>
 
             </div>
 
         </div>
 
-    </div>
-
-    {% endif %}
+        {% endif %}
     {% endfor %}
 
 </div>
@@ -149,6 +177,7 @@
 function toggleModule(module){
     const checks = document.querySelectorAll(".perm-" + module);
     const allChecked = Array.from(checks).every(cb => cb.checked);
+
     checks.forEach(cb => cb.checked = !allChecked);
 }
 
@@ -162,12 +191,12 @@ function filterPermissions(text){
 
     document.querySelectorAll('.permission-item').forEach(item => {
         const name = item.dataset.name.toLowerCase();
-        item.style.display = name.includes(text) ? '' : 'none';
+        item.classList.toggle("is-hidden", !name.includes(text));
     });
 
     document.querySelectorAll('.permission-module').forEach(card => {
-        const visible = card.querySelectorAll('.permission-item:not([style*="display: none"])').length;
-        card.style.display = visible ? '' : 'none';
+        const visible = card.querySelectorAll('.permission-item:not(.is-hidden)').length;
+        card.classList.toggle("is-hidden", visible === 0);
     });
 }
 
@@ -175,47 +204,14 @@ function toggleCollapse(module){
     const body = document.getElementById("body-" + module);
     const icon = document.getElementById("icon-" + module);
 
-    if(body.style.display === "none"){
-        body.style.display = "";
-        icon.className = "fas fa-chevron-down";
-    } else {
-        body.style.display = "none";
-        icon.className = "fas fa-chevron-right";
-    }
+    const hidden = body.classList.toggle("is-hidden");
+
+    icon.className = hidden
+        ? "fas fa-chevron-right"
+        : "fas fa-chevron-down";
 }
 
 </script>
-
-<style>
-
-.permission-card{
-    border-radius:12px;
-}
-
-.perm-item{
-    cursor:pointer;
-    transition:all .15s ease;
-}
-
-.perm-item:hover{
-    background:#f4f6f9;
-    transform:translateY(-1px);
-}
-
-.perm-item input:checked + span{
-    box-shadow:0 0 0 2px rgba(0,123,255,.25);
-}
-
-.btn-xs{
-    padding:2px 8px;
-    font-size:.75rem;
-}
-
-.module-body{
-    transition:all .2s ease;
-}
-
-</style>
 {% endif %}
 
 {% endmacro %}

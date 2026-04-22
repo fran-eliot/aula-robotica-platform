@@ -1,0 +1,125 @@
+/* NAVBAR */
+.navbar-pro{
+    background:#fff;
+    border-bottom:1px solid #eef1f4;
+    box-shadow:0 2px 8px rgba(0,0,0,.03);
+    padding:.55rem 1rem;
+}
+
+.nav-title{
+    font-weight:600;
+    color:#374151;
+    font-size:.95rem;
+    margin-left:.35rem;
+}
+
+.nav-toggle{
+    font-size:1.1rem;
+    color:#374151 !important;
+}
+
+/* USER NAVBAR */
+.navbar-user{
+    display:flex;
+    align-items:center;
+    gap:.65rem;
+}
+
+.navbar-user__avatar{
+    width:38px;
+    height:38px;
+    border-radius:50%;
+    background:#eef2ff;
+    color:#0d6efd;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.navbar-user__name{
+    font-size:.92rem;
+    font-weight:600;
+    color:#111827;
+}
+
+.navbar-user__role{
+    color:#6b7280;
+    font-size:.76rem;
+}
+
+/* SIDEBAR */
+.sidebar-pro{
+    background:linear-gradient(180deg,#1e293b,#111827);
+}
+
+.brand-link{
+    padding:1rem .8rem;
+}
+
+.brand-image-pro{
+    width:38px;
+    height:38px;
+    object-fit:contain;
+    margin-right:.45rem;
+}
+
+.brand-text{
+    font-size:1rem;
+    color:#fff !important;
+    font-weight:700 !important;
+}
+
+.user-panel-pro{
+    display:flex;
+    align-items:center;
+    gap:.75rem;
+    padding:1rem;
+    margin:.5rem;
+    border-radius:12px;
+    background:rgba(255,255,255,.04);
+}
+
+.user-avatar{
+    width:42px;
+    height:42px;
+    border-radius:50%;
+    background:rgba(255,255,255,.08);
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.sidebar-username{
+    color:#fff !important;
+    font-weight:600;
+}
+
+.user-role{
+    color:rgba(255,255,255,.65);
+}
+
+/* MENU */
+.sidebar-pro .nav-link{
+    border-radius:10px;
+    margin:2px 8px;
+    padding:.7rem .9rem;
+    transition:.15s ease;
+    color:rgba(255,255,255,.88);
+}
+
+.sidebar-pro .nav-link:hover{
+    background:rgba(255,255,255,.06);
+    color:#fff;
+}
+
+.sidebar-pro .nav-link.active{
+    background:#0d6efd !important;
+    color:#fff !important;
+    box-shadow:0 8px 18px rgba(13,110,253,.25);
+}
+
+.sidebar-pro .nav-treeview .nav-link{
+    margin-left:18px;
+    font-size:.92rem;
+}

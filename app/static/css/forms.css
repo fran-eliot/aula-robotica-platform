@@ -1,0 +1,16 @@
+.form-control{
+    border-radius:10px;
+}
+
+.btn{
+    border-radius:10px;
+}
+
+.nav-logout-btn{
+    font-weight:600;
+    padding:.45rem .8rem;
+}
+
+.nav-logout-btn:hover{
+    transform:translateY(-1px);
+}

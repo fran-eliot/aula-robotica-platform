@@ -1,0 +1,26 @@
+.users-toolbar{
+    background:linear-gradient(135deg,#ffffff,#f8fafc);
+    border-radius:14px;
+    padding:1rem;
+    border:1px solid #eef1f4;
+}
+
+.users-table-wrap{
+    border-radius:14px;
+    overflow:hidden;
+}
+
+.filters-pro .form-control,
+.filters-pro .custom-select{
+    height:44px;
+    border-radius:10px;
+}
+
+.filters-pro .btn{
+    height:44px;
+    border-radius:10px;
+}
+
+.section-soft{
+    border-radius:16px;
+}

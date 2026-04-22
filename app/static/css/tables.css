@@ -1,0 +1,37 @@
+.table-modern{
+    margin:0;
+}
+
+.table-modern thead th{
+    border-top:none;
+    border-bottom:1px solid #eef1f4;
+    font-size:.78rem;
+    text-transform:uppercase;
+    letter-spacing:.04rem;
+    color:#6c757d;
+    font-weight:700;
+    background:#fafbfc;
+    padding:1rem;
+}
+
+.table-modern tbody td{
+    padding:1rem;
+    vertical-align:middle;
+    border-color:#f1f3f5;
+}
+
+.table-modern tbody tr{
+    transition:background .15s ease;
+}
+
+.table-modern tbody tr:hover{
+    background:#f8f9fa;
+}
+
+.table-row-click{
+    cursor:pointer;
+}
+
+.table-row-click:hover{
+    background:#f8f9fc;
+}
