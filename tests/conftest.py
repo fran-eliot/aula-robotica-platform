@@ -1,30 +1,29 @@
 # conftest.py
-# Este archivo se utiliza para definir fixtures de pytest que pueden ser utilizadas en múltiples archivos de prueba. En este caso, se define una fixture para crear un cliente de prueba de FastAPI que se puede usar en las pruebas para realizar solicitudes a la aplicación.
-import sys
+# Este archivo se utiliza para definir fixtures de pytest que pueden ser utilizadas
+# en múltiples archivos de prueba. En este caso, se define una fixture para crear 
+# un cliente de prueba de FastAPI que se puede usar en las pruebas para realizar 
+# solicitudes a la aplicación.
+
 import os
+import sys
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+import bcrypt
 import pytest
-
+from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from fastapi.testclient import TestClient
-
-from app.main import app
 from app.db.base import Base
 from app.db.session import get_db
+from app.main import app
+from app.modules.identities.identity_model import Identity
+from app.modules.roles.role_model import Permission, Role
 
 # Importar modelos para registrar metadata
 from app.modules.users.user_model import User
-from app.modules.roles.role_model import Role, Permission, RolePermission
-from app.modules.users.user_role_model import UserRole
-from app.modules.identities.identity_model import Identity
-
-import bcrypt
-
-
 
 # =====================================================
 # TEST DATABASE (SQLite en memoria)
@@ -113,7 +112,8 @@ def seed_data():
     perms = [
         "users:read", "users:create", "users:update", "users:delete",
         "roles:read", "roles:create", "roles:update", "roles:delete",
-        "identities:read", "identities:create", "identities:update", "identities:delete",
+        "identities:read", "identities:create", "identities:update", 
+        "identities:delete",
         "dashboard:read"
     ]
 

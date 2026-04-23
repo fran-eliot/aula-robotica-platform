@@ -1,8 +1,9 @@
 # app/modules/users/user_schemas.py
 # 📦 Schemas para usuarios (validación y serialización)
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
 from datetime import datetime
+
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 # =========================================================

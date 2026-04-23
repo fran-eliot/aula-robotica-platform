@@ -5,15 +5,15 @@
 import pytest
 from fastapi import HTTPException
 
+from app.core.security import hash_password
 from app.modules.auth.auth_service import (
-    build_auth_payload,
     authenticate_user,
+    build_auth_payload,
     refresh_access_token,
 )
-from app.modules.users.user_model import User
-from app.modules.roles.role_model import Role
 from app.modules.identities.identity_model import Identity
-from app.core.security import hash_password
+from app.modules.roles.role_model import Role
+from app.modules.users.user_model import User
 
 
 def test_build_auth_payload(db):

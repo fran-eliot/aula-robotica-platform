@@ -1,17 +1,17 @@
 # tests/test_menu_service.py
 # Este archivo contiene pruebas para el servicio de menú dinámico basado en permisos.   
-# Se prueban casos como la generación de la estructura del menú, el filtrado por permisos,
-# la marcación de elementos activos y la construcción de breadcrumbs.
+# Se prueban casos como la generación de la estructura del menú, el filtrado por 
+# permisos, la marcación de elementos activos y la construcción de breadcrumbs.
 
 
 from types import SimpleNamespace
 
 from app.core.services.menu_service import (
-    get_menu_structure,
-    filter_menu_by_permissions,
-    mark_active_menu,
     build_breadcrumbs,
     build_smart_breadcrumbs,
+    filter_menu_by_permissions,
+    get_menu_structure,
+    mark_active_menu,
 )
 
 

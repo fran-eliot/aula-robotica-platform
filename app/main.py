@@ -6,20 +6,17 @@
 
 from fastapi import FastAPI
 from fastapi.openapi.utils import get_openapi
-from app.modules import auth_saml
+from fastapi.staticfiles import StaticFiles
+
+from app.core.middleware.auth_middleware import AuthMiddleware
+from app.modules.auth.auth_router import router as auth_router
+from app.modules.auth_saml import saml_web
 from app.modules.dashboard import dashboard_web
 from app.modules.identities import identities_web
 from app.modules.roles import roles_web
-from app.modules.users.user_router import router as users_router
-from fastapi.staticfiles import StaticFiles
-from app.core.middleware.auth_middleware import AuthMiddleware
-from app.modules.auth.auth_router import router as auth_router
 from app.modules.users import users_web
-from app.modules.auth_saml import saml_web
-from app.web import (
-    auth_web
-)
-
+from app.modules.users.user_router import router as users_router
+from app.web import auth_web
 
 
 def custom_openapi():

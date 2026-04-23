@@ -3,17 +3,15 @@
 
 from fastapi import Request
 
-from app.core.authorization.roles import has_required_role
 from app.core.authorization.policies import can_user_action
-
+from app.core.authorization.roles import has_required_role
 from app.core.services.menu_service import (
-    get_menu_structure,
+    build_smart_breadcrumbs,
     filter_menu_by_permissions,
+    get_menu_structure,
     mark_active_menu,
-    build_smart_breadcrumbs
 )
-
-from app.core.utils.audit_ui import get_audit_icon, get_audit_color
+from app.core.utils.audit_ui import get_audit_color, get_audit_icon
 from app.utils.flash import get_flash
 
 

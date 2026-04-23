@@ -1,9 +1,9 @@
 # tests/test_auth_web.py
 # Este archivo contiene pruebas para la funcionalidad de autenticación web.
-# Se definen pruebas para verificar que las rutas de autenticación funcionan correctamente,
-# incluyendo el inicio de sesión, la actualización de tokens y el cierre de sesión.
+# Se definen pruebas para verificar que las rutas de autenticación funcionan 
+# correctamente, incluyendo el inicio de sesión, la actualización de tokens y 
+# el cierre de sesión.
 
-import pytest
 from fastapi import HTTPException
 
 

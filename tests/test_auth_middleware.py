@@ -46,7 +46,6 @@ def test_private_without_token():
 
 
 def test_private_invalid_token(monkeypatch):
-    from app.core import middleware
 
     def fake_validate(token):
         raise JWTError("bad token")

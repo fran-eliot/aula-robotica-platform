@@ -1,7 +1,12 @@
 # tests/test_audit_ui.py
-# Este archivo contiene pruebas para las funciones de utilidad relacionadas con la interfaz de auditoría. Se verifica que las funciones `get_audit_icon` y `get_audit_color` devuelvan los valores correctos para acciones conocidas como "create", "update", "delete", "login" y "logout". También se comprueba que para acciones desconocidas, se devuelvan los valores por defecto ("fa-info-circle" para el icono y "bg-primary" para el color).
+# Este archivo contiene pruebas para las funciones de utilidad relacionadas con
+# la interfaz de auditoría. Se verifica que las funciones `get_audit_icon` y 
+# `get_audit_color` devuelvan los valores correctos para acciones conocidas 
+# como "create", "update", "delete", "login" y "logout". También se comprueba que 
+# para acciones desconocidas, se devuelvan los valores por defecto 
+# ("fa-info-circle" para el icono y "bg-primary" para el color).
 
-from app.core.utils.audit_ui import get_audit_icon, get_audit_color
+from app.core.utils.audit_ui import get_audit_color, get_audit_icon
 
 
 def test_get_audit_icon_returns_string():

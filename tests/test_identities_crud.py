@@ -1,6 +1,6 @@
 # tests/test_identities_crud.py
 
-from tests.test_utils import login_student, login_admin
+from tests.test_utils import login_admin, login_student
 
 
 def test_identities_list(client):

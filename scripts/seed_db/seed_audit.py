@@ -1,6 +1,7 @@
-from app.modules.audit.audit_model import AuditLog
-from datetime import datetime, UTC
 import random
+from datetime import UTC, datetime
+
+from app.modules.audit.audit_model import AuditLog
 
 
 def seed_audit(db, users):

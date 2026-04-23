@@ -1,19 +1,24 @@
 # tests/test_auth_dependencies_web_extra.py
-# Este archivo contiene pruebas para las dependencias de autenticación y autorización específicas de la interfaz web. Se prueban casos como la obtención del usuario actual desde el token, la verificación de roles y permisos, y las combinaciones de propietario/permiso para acciones sensibles. Se utilizan técnicas de monkeypatching para simular comportamientos y estados específicos en las pruebas.
+# Este archivo contiene pruebas para las dependencias de autenticación y 
+# autorización específicas de la interfaz web. Se prueban casos como la 
+# obtención del usuario actual desde el token, la verificación de roles y 
+# permisos, y las combinaciones de propietario/permiso para acciones sensibles.
+# Se utilizan técnicas de monkeypatching para simular comportamientos y estados 
+# específicos en las pruebas.
 
 from types import SimpleNamespace
+
 import pytest
 from fastapi import HTTPException
 
 from app.modules.auth.auth_dependencies_web import (
     get_current_user_web,
-    require_roles_web,
-    require_permission_web,
     require_owner_or_permission_web,
     require_permission_and_not_self_web,
+    require_permission_web,
+    require_roles_web,
 )
 from app.modules.users.user_model import User
-
 
 # =========================================================
 # HELPERS

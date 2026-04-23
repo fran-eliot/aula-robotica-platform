@@ -1,22 +1,17 @@
 # app/web/auth_web.py
 # 🌐 Rutas web de autenticación
 
-from fastapi import APIRouter, HTTPException, Request, Form, Depends
+from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
-from app.db.session import get_db
-from app.core.templates import templates
 from app.core.config import settings
 from app.core.constants.audit_actions import AuditAction
 from app.core.security import validate_refresh_token
-
-from app.modules.auth.auth_service import (
-    authenticate_user,
-    refresh_access_token
-)
-from app.modules.auth.auth_dependencies_web import get_current_user_web
+from app.core.templates import templates
+from app.db.session import get_db
 from app.modules.audit.audit_service import log_action
+from app.modules.auth.auth_service import authenticate_user, refresh_access_token
 
 router = APIRouter()
 

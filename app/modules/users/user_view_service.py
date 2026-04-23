@@ -1,7 +1,14 @@
 # app/modules/users/user_view_service.py
 
 from app.modules.roles.role_service import get_all_roles
-from app.modules.users.user_service import explain_user_permission, get_user_audit_logs, get_user_or_404, get_user_permissions, get_user_permissions_by_role, get_user_permissions_with_origin
+from app.modules.users.user_service import (
+    explain_user_permission,
+    get_user_audit_logs,
+    get_user_or_404,
+    get_user_permissions,
+    get_user_permissions_by_role,
+    get_user_permissions_with_origin,
+)
 
 
 def build_user_detail_view(db, user_id):

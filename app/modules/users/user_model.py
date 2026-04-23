@@ -1,9 +1,10 @@
 # app/modules/users/user_model.py
 # 👤 Modelo de Usuario (núcleo del sistema)
 
-from sqlalchemy import Column, Integer, String, Boolean, DateTime
-from sqlalchemy.orm import relationship
 from datetime import UTC, datetime
+
+from sqlalchemy import Boolean, Column, DateTime, Integer, String
+from sqlalchemy.orm import relationship
 
 from app.db.base import Base
 from app.modules.users.user_role_model import UserRole

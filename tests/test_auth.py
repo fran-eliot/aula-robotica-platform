@@ -15,7 +15,9 @@ def test_login_success(client):
             },
             follow_redirects=False
     )
-    assert response.status_code in (302, 303)  # Redirección después del inicio de sesión exitoso
+    # Redirección después del inicio de sesión exitoso
+    assert response.status_code in (302, 303)  
+    
 
 def test_login_fail(client):
     response = client.post(
@@ -25,9 +27,11 @@ def test_login_fail(client):
             "password": "wrongpassword"
             },
     )
-    assert response.status_code == 200  # Sin redirección, se muestra la página de inicio de sesión nuevamente  
+    # Sin redirección, se muestra la página de inicio de sesión nuevamente  
+    assert response.status_code == 200  
 
 def test_mock_login(client):
     response = client.get("/auth/saml/mock", follow_redirects=False)
-    assert response.status_code == 302  # Redirección después del inicio de sesión exitoso
+    # Redirección después del inicio de sesión exitoso
+    assert response.status_code == 302  
 

@@ -1,9 +1,11 @@
 # app/core/services/menu_service.py
 # 📋 Servicio de menú dinámico basado en permisos
 
-from functools import lru_cache
 import re
+from functools import lru_cache
+
 from app.core.presentation.breadcrumbs import DYNAMIC_BREADCRUMBS
+
 
 # =========================================================
 # 🗂️ MENÚ BASE (definición global, sin filtrar)

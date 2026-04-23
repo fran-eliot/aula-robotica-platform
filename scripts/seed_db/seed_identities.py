@@ -1,5 +1,5 @@
-from app.modules.identities.identity_model import Identity
 from app.core.security import hash_password
+from app.modules.identities.identity_model import Identity
 
 
 def local_identity(user, email):

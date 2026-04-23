@@ -6,10 +6,10 @@
 from types import SimpleNamespace
 
 from app.core.authorization.permissions import (
+    can_access_resource,
+    get_permissions_from_roles,
     has_permission,
     has_permission_from_roles,
-    get_permissions_from_roles,
-    can_access_resource,
 )
 from app.core.authorization.role_permissions import ROLE_PERMISSIONS
 

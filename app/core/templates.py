@@ -3,6 +3,7 @@
 
 from fastapi.templating import Jinja2Templates
 from jinja2 import pass_context
+
 from app.web.context import get_template_context
 
 templates = Jinja2Templates(directory="app/templates")

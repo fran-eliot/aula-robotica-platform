@@ -5,21 +5,17 @@
 # de usuarios, y la explicación de permisos de usuario.
 
 
-import pytest
-
+from app.modules.roles.role_model import Permission, Role
+from app.modules.users.user_model import User
 from app.modules.users.user_service import (
-    get_user_roles,
     can_access_user,
     delete_user_with_audit,
+    explain_user_permission,
     get_user_audit_logs,
     get_user_permissions_by_role,
     get_user_permissions_with_origin,
-    explain_user_permission,
+    get_user_roles,
 )
-
-from app.modules.users.user_model import User
-from app.modules.roles.role_model import Role, Permission
-from app.modules.audit.audit_model import AuditLog
 
 
 class DummyRequest:

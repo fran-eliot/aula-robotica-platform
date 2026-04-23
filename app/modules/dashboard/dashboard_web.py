@@ -3,17 +3,17 @@
 
 import logging
 
-from app.core.constants.actions import Actions
-from app.core.constants.resources import Resources
-logger = logging.getLogger(__name__)
-
-from fastapi import APIRouter, Request, Depends
+from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 
-from app.db.session import get_db
-from app.modules.dashboard.dashboard_service import get_dashboard_metrics
-from app.modules.auth.auth_dependencies_web import require_permission_web
+from app.core.constants.actions import Actions
+from app.core.constants.resources import Resources
 from app.core.templates import templates
+from app.db.session import get_db
+from app.modules.auth.auth_dependencies_web import require_permission_web
+from app.modules.dashboard.dashboard_service import get_dashboard_metrics
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -36,8 +36,8 @@ def dashboard(
     """
 
     logger.info("Entrando al dashboard con usuario: %s", current_user.nombre)
-
-    request.scope["db"] = db  # Inyectamos db en el scope para acceso global en templates
+     # Inyectamos db en el scope para acceso global en templates
+    request.scope["db"] = db 
 
     # =========================================================
     # 📊 OBTENER MÉTRICAS

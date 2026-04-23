@@ -1,18 +1,17 @@
 # scripts/seed_data.py
 # Script para poblar la base de datos con datos de ejemplo para desarrollo y pruebas.
 
-from app.db.session import SessionLocal
-from app.modules.users.user_model import User
-from app.modules.roles.role_model import Role, Permission
-from app.modules.identities.identity_model import Identity
-from app.modules.audit.audit_model import AuditLog
-
-from datetime import datetime, UTC
-import random
-from app.core.security import hash_password
-
-import sys
 import os
+import random
+import sys
+from datetime import UTC, datetime
+
+from app.core.security import hash_password
+from app.db.session import SessionLocal
+from app.modules.audit.audit_model import AuditLog
+from app.modules.identities.identity_model import Identity
+from app.modules.roles.role_model import Permission, Role
+from app.modules.users.user_model import User
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -33,7 +32,8 @@ def seed():
     admin_role = Role(nombre="admin", descripcion="Rol con todos los permisos")
     profesor_role = Role(nombre="profesor", descripcion="Rol para profesores")
     estudiante_role = Role(nombre="estudiante", descripcion="Rol para estudiantes")
-    user_uah_role = Role(nombre="uah_user", descripcion="Acceso inicial mediante SSO UAH (SAML)")
+    user_uah_role = Role(nombre="uah_user", 
+                         descripcion="Acceso inicial mediante SSO UAH (SAML)")
 
     db.add_all([admin_role, profesor_role, estudiante_role, user_uah_role])
     db.commit()
@@ -138,7 +138,7 @@ def seed():
 
     # Estudiantes UAH (SAML) (sOLO 1 PARA DEMO)
     uah_users = [
-        User(nombre=f"User UAH", activo=True)
+        User(nombre="User UAH", activo=True)
     ]
 
     users.extend(admins + profesores + alumnos + uah_users)

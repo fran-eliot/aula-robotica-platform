@@ -8,19 +8,18 @@
 
 from fastapi import HTTPException
 
-from app.modules.users.user_service import (
-    get_user_or_404,
-    create_user_with_audit,
-    update_user_with_audit,
-    set_user_active_with_audit,
-    search_users,
-    sync_user_roles,
-    get_user_permissions,
-    explain_user_permission,
-)
-
+from app.modules.roles.role_model import Permission, Role
 from app.modules.users.user_model import User
-from app.modules.roles.role_model import Role, Permission
+from app.modules.users.user_service import (
+    create_user_with_audit,
+    explain_user_permission,
+    get_user_or_404,
+    get_user_permissions,
+    search_users,
+    set_user_active_with_audit,
+    sync_user_roles,
+    update_user_with_audit,
+)
 
 
 def test_get_user_or_404_ok(db):

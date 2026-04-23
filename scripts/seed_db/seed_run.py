@@ -1,9 +1,8 @@
 from app.db.session import SessionLocal
-
+from scripts.seed_db.seed_audit import seed_audit
+from scripts.seed_db.seed_identities import seed_identities
 from scripts.seed_db.seed_roles import seed_roles
 from scripts.seed_db.seed_users import seed_users
-from scripts.seed_db.seed_identities import seed_identities
-from scripts.seed_db.seed_audit import seed_audit
 
 
 def run():

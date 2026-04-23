@@ -1,8 +1,7 @@
 # tests/test_users_web_extra.py
-# Este archivo contiene pruebas adicionales para la funcionalidad de gestión de usuarios 
-# en la interfaz web.    
+# Este archivo contiene pruebas adicionales para la funcionalidad de gestión de 
+# usuarios en la interfaz web.    
 
-from app.core.middleware.auth_middleware import validate_access_token
 
 
 def fake_payload():
@@ -30,7 +29,10 @@ def test_update_user_roles_view(client, monkeypatch):
     patch_auth(monkeypatch)
     login_client(client)
 
-    response = client.post("/users/1/roles", data={"roles": [1]}, follow_redirects=False)
+    response = client.post(
+        "/users/1/roles", 
+        data={"roles": [1]}, 
+        follow_redirects=False)
     assert response.status_code == 303
 
 

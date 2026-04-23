@@ -1,13 +1,12 @@
 from types import SimpleNamespace
 
 from app.core.services.menu_service import (
-    get_menu_structure,
-    filter_menu_by_permissions,
-    mark_active_menu,
     build_breadcrumbs,
     build_smart_breadcrumbs,
+    filter_menu_by_permissions,
+    get_menu_structure,
+    mark_active_menu,
 )
-
 
 # =========================================================
 # 🔐 FILTER MENU - CASOS NO CUBIERTOS

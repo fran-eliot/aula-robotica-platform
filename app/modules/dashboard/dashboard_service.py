@@ -1,13 +1,13 @@
 # app/modules/dashboard/dashboard_service.py
 # 📊 Servicio de métricas para el dashboard
 
-from sqlalchemy.orm import Session
 from sqlalchemy import func
+from sqlalchemy.orm import Session
 
+from app.modules.audit.audit_model import AuditLog
 from app.modules.identities.identity_model import Identity
 from app.modules.roles.role_model import Role
 from app.modules.users.user_model import User
-from app.modules.audit.audit_model import AuditLog
 
 
 def get_dashboard_metrics(db: Session) -> dict:
@@ -27,8 +27,8 @@ def get_dashboard_metrics(db: Session) -> dict:
     # 🔥 Mejor práctica: usar agregaciones en una sola query
     user_stats = db.query(
         func.count(User.id_usuario).label("total"),
-        func.sum(User.activo == True).label("active"),
-        func.sum(User.activo == False).label("inactive")
+        func.sum(User.activo.is_(True)).label("active"),
+        func.sum(User.activo.is_(False)).label("inactive")
     ).one()
 
     total_users = user_stats.total or 0

@@ -1,4 +1,4 @@
-from app.modules.roles.role_model import Role, Permission
+from app.modules.roles.role_model import Permission, Role
 
 
 def seed_roles(db):

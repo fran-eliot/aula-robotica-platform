@@ -1,12 +1,12 @@
 # app/core/security.py
 
 from datetime import UTC, datetime, timedelta
-from jose import jwt, JWTError
+
+from fastapi import HTTPException, status
+from jose import JWTError, jwt
 from passlib.context import CryptContext
 
 from app.core.config import settings
-
-from fastapi import HTTPException, status
 
 # Configuración hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

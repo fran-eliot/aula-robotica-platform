@@ -1,8 +1,10 @@
 # app/modules/audit/audit_service.py
 
+from datetime import UTC, datetime
+
 from fastapi import Request
 from sqlalchemy.orm import Session
-from datetime import datetime, UTC
+
 from app.modules.audit.audit_model import AuditLog
 
 

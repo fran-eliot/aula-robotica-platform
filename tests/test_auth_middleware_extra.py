@@ -1,6 +1,7 @@
 # tests/test_auth_middleware_extra.py
-# Este archivo contiene pruebas adicionales para la funcionalidad del middleware de autenticación.
-# Se verifica que si tanto el token de acceso como el de refresh son inválidos, el usuario sea redirigido a la página de login. 
+# Este archivo contiene pruebas adicionales para la funcionalidad del middleware de
+# autenticación. Se verifica que si tanto el token de acceso como el de refresh son 
+# inválidos, el usuario sea redirigido a la página de login. 
 
 from jose import JWTError
 

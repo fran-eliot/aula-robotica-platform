@@ -1,19 +1,16 @@
 # app/modules/auth/auth_service.py
 # 🔐 Servicio de autenticación
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
+from app.core.security import create_access_token, create_refresh_token, verify_password
 from app.modules.identities.identity_model import Identity
-from app.core.security import (
-    create_access_token,
-    create_refresh_token,
-    verify_password
-)
 from app.modules.users.user_model import User
 from app.modules.users.user_service import get_user_permissions
+
 
 # =========================================================
 # 🪪 BUILD AUTH PAYLOAD (RBAC)
@@ -35,7 +32,7 @@ def build_auth_payload(user):
         "roles": roles,
         "permissions": permissions,
         "username": user.nombre,
-        "iat": datetime.now(timezone.utc).timestamp()
+        "iat": datetime.now(UTC).timestamp()
     }
 
 

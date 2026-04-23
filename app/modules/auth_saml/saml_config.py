@@ -3,8 +3,9 @@
 # Este módulo define la configuración SAML para el proveedor de identidad (IdP) y/o 
 # proveedor de servicio (SP).
 
-from app.core.config import settings
 import os
+
+from app.core.config import settings
 
 BASE_URL = settings.app_base_url
 

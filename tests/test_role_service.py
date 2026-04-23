@@ -7,16 +7,15 @@
 
 from fastapi import HTTPException
 
+from app.modules.roles.role_model import Permission, Role
 from app.modules.roles.role_service import (
-    get_role_or_404,
     create_role,
-    update_role,
     delete_role,
-    sync_role_permissions,
+    get_role_or_404,
     group_permissions,
+    sync_role_permissions,
+    update_role,
 )
-
-from app.modules.roles.role_model import Role, Permission
 
 
 def test_get_role_or_404_ok(db):

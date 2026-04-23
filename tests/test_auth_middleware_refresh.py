@@ -1,12 +1,13 @@
 # tests/test_auth_middleware_refresh.py
-# Este archivo contiene pruebas para la funcionalidad de refresco de tokens en el middleware
-#  de autenticación de la aplicación. Se verifica que el middleware pueda manejar correctamente 
-# el caso en el que el token de acceso es inválido pero el token de refresco es válido, 
-# y que se genere un nuevo token de acceso y se permita el acceso a la ruta protegida.
+# Este archivo contiene pruebas para la funcionalidad de refresco de tokens en el 
+# middleware de autenticación de la aplicación. Se verifica que el middleware pueda
+# manejar correctamente el caso en el que el token de acceso es inválido pero el 
+# token de refresco es válido, y que se genere un nuevo token de acceso y se permita
+# el acceso a la ruta protegida.
 
-from jose import JWTError
 from fastapi import FastAPI
 from fastapi.responses import PlainTextResponse
+from jose import JWTError
 from starlette.testclient import TestClient
 
 from app.core.middleware.auth_middleware import AuthMiddleware

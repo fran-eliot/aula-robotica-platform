@@ -1,13 +1,17 @@
 # tests/test_web_context.py
-# Este archivo contiene pruebas para el contexto global de las plantillas Jinja en la aplicación. Se verifica que el contexto se construya correctamente tanto en situaciones normales como en casos de error o ausencia de usuario. Se utilizan técnicas de monkeypatching para simular diferentes escenarios y validar que el contexto se comporte como se espera, incluyendo la generación de breadcrumbs y la gestión de mensajes flash.
+# Este archivo contiene pruebas para el contexto global de las plantillas Jinja en 
+# la aplicación. Se verifica que el contexto se construya correctamente tanto en 
+# situaciones normales como en casos de error o ausencia de usuario. Se utilizan 
+# técnicas de monkeypatching para simular diferentes escenarios y validar que el 
+# contexto se comporte como se espera, incluyendo la generación de breadcrumbs y 
+# la gestión de mensajes flash.
 
 from types import SimpleNamespace
 
 from app.web.context import (
-    get_template_context,
     get_fallback_context,
+    get_template_context,
 )
-
 
 # =====================================================
 # Helpers

@@ -1,7 +1,7 @@
 # app/modules/roles/roles_web.py
 # 🔐 Rutas web para gestión de Roles y Permisos (RBAC)
 
-from fastapi import APIRouter, Request, Depends, Form, HTTPException
+from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
@@ -9,20 +9,19 @@ from app.core.constants.actions import Actions
 from app.core.constants.resources import Resources
 from app.core.render import render
 from app.db.session import get_db
-from app.utils.flash import flash_success, flash_error
-
 from app.modules.auth.auth_dependencies_web import require_permission_web
 from app.modules.roles.role_service import (
-    get_all_roles,
-    get_role_or_404,
     create_role,
-    update_role,
     delete_role,
     get_all_permissions,
-    sync_role_permissions,
+    get_all_roles,
+    get_role_audit_logs,
+    get_role_or_404,
     group_permissions,
-    get_role_audit_logs
+    sync_role_permissions,
+    update_role,
 )
+from app.utils.flash import flash_error, flash_success
 
 router = APIRouter(prefix="/roles", tags=["Roles Web"])
 

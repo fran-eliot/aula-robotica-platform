@@ -1,22 +1,22 @@
 # app/modules/identities/identities_web.py
 
-from fastapi import APIRouter, HTTPException, Request, Depends, Form
+from math import ceil
+
+from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session, joinedload
 
 from app.core.constants.actions import Actions
 from app.core.constants.resources import Resources
 from app.core.render import render
-from app.db.session import get_db
+from app.core.security import hash_password
 from app.core.templates import templates
-
+from app.db.session import get_db
 from app.modules.auth.auth_dependencies_web import require_permission_web
 from app.modules.identities.identity_model import Identity
-from app.modules.users.user_model import User
 from app.modules.roles.role_model import Role
-
-from app.core.security import hash_password
-from app.utils.flash import flash_success, flash_error
+from app.modules.users.user_model import User
+from app.utils.flash import flash_error, flash_success
 
 router = APIRouter(prefix="/identities", tags=["Identities Web"])
 
@@ -24,11 +24,6 @@ router = APIRouter(prefix="/identities", tags=["Identities Web"])
 # =========================================================
 # 📋 LISTADO
 # =========================================================
-from math import ceil
-from fastapi import Request, Depends
-from sqlalchemy.orm import Session
-from sqlalchemy import or_
-
 @router.get("/")
 def identities_list(
     request: Request,

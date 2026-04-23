@@ -6,7 +6,6 @@ from sqlalchemy.orm import Session
 
 from app.core.security import hash_password
 from app.modules.identities.identity_model import Identity
-from app.modules.users.user_model import User
 
 
 # =========================================================

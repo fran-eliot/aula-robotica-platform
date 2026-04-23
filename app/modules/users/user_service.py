@@ -1,6 +1,7 @@
 # app/modules/users/user_service.py
 
 from datetime import UTC, datetime
+
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 

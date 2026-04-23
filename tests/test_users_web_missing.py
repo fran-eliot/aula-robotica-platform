@@ -1,7 +1,7 @@
 # tests/test_users_web_missing.py
-# Este archivo contiene pruebas para la funcionalidad de gestión de usuarios en la interfaz web.    
+# Este archivo contiene pruebas para la funcionalidad de gestión de usuarios en la 
+# interfaz web.    
 
-from app.main import app
 
 
 def fake_payload():

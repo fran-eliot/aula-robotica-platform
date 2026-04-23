@@ -5,11 +5,10 @@ from fastapi import Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 
 from app.core.authorization.policies import can_user_action
+from app.core.authorization.roles import has_required_role
 from app.db.session import get_db
 from app.modules.users.user_model import User
-from app.modules.users.user_service import can_access_user, get_user_or_404
-from app.core.authorization.permissions import has_permission
-from app.core.authorization.roles import has_required_role
+from app.modules.users.user_service import get_user_or_404
 
 
 # =========================================================

@@ -1,6 +1,7 @@
 # test/test_permissions.py
-# Este archivo contiene pruebas para verificar que los permisos de acceso a las rutas de la aplicación funcionan
-# correctamente. Se prueban diferentes escenarios de acceso para usuarios con distintos roles y permisos.
+# Este archivo contiene pruebas para verificar que los permisos de acceso a las rutas 
+# de la aplicación funcionan correctamente. Se prueban diferentes escenarios de 
+# acceso para usuarios con distintos roles y permisos.
 
 def login(client, email, password):
     return client.post(
@@ -35,7 +36,7 @@ def test_student_cannot_access_roles(client):
 
 
 def test_uah_user_can_access_dashboard(client):
-    response = client.get(
+    client.get(
         "/auth/saml/mock",
         follow_redirects=False
     )

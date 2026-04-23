@@ -1,7 +1,8 @@
 # app/modules/users/user_role_model.py
 # 🔗 Tabla intermedia User ↔ Role (many-to-many)
 
-from sqlalchemy import Column, Integer, ForeignKey
+from sqlalchemy import Column, ForeignKey, Integer
+
 from app.db.base import Base
 
 

@@ -1,9 +1,9 @@
+from app.modules.users.identity_model import Identity
+from app.modules.users.role_model import Role
+
+from app.core.security import hash_password
 from app.db.session import SessionLocal
 from app.modules.users.user_model import User
-from app.modules.users.role_model import Role
-from app.modules.users.identity_model import Identity
-from app.modules.users.user_role_model import UserRole
-from app.core.security import hash_password
 
 db = SessionLocal()
 
@@ -60,7 +60,8 @@ try:
     print("Roles globales:", [r.nombre for r in user_db.roles])
 
     for ident in user_db.identidades:
-        print("Identidad:", ident.email, "Rol contextual:", ident.rol.nombre if ident.rol else None)
+        print("Identidad:", ident.email, 
+              "Rol contextual:", ident.rol.nombre if ident.rol else None)
 
 finally:
     db.close()

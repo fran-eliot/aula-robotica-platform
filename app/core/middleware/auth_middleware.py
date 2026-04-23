@@ -1,14 +1,13 @@
 # core/middleware/auth_middleware.py
 # 🔐 Middleware de autenticación y refresh automático
 
+from fastapi.responses import RedirectResponse
 from jose import JWTError
 from starlette.middleware.base import BaseHTTPMiddleware
-from fastapi.responses import RedirectResponse
 
 from app.core.security import validate_access_token, validate_refresh_token
 from app.db.session import SessionLocal
 from app.modules.auth.auth_service import refresh_access_token
-
 
 PUBLIC_PATHS = [
     "/login",

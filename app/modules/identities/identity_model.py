@@ -1,7 +1,7 @@
 # app/modules/identities/identity_model.py
 # 🔐 Modelo de identidad (credenciales de autenticación)
 
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
 from app.db.base import Base

@@ -1,6 +1,6 @@
 # app/modules/users/users_web.py
 
-from fastapi import APIRouter, Request, Depends, Form
+from fastapi import APIRouter, Depends, Form, Request
 from fastapi.responses import RedirectResponse
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
@@ -8,40 +8,38 @@ from sqlalchemy.orm import Session
 from app.core.constants.actions import Actions
 from app.core.constants.resources import Resources
 from app.core.render import render
-from app.db.session import get_db
 from app.core.templates import templates
+
+# 🧰 Utils
+from app.core.utils.validation import format_pydantic_errors
+from app.db.session import get_db
 
 # 🔐 Auth / permisos
 from app.modules.auth.auth_dependencies_web import (
     get_current_user_web,
-    require_permission_web,
-    require_permission_and_not_self_web,
     require_owner_or_permission_web,
+    require_permission_and_not_self_web,
+    require_permission_web,
 )
-
-# 🧠 Services
-from app.modules.users.user_service import (
-    get_user_or_404,
-    get_user_by_id,
-    search_users,
-    create_user_with_audit,
-    update_user_with_audit,
-    delete_user_with_audit,
-    set_user_active_with_audit,
-    sync_user_roles,
-)
-
 from app.modules.roles.role_service import get_all_roles
-from app.modules.users.user_view_service import build_user_detail_view
 
 # 📦 Schemas
 from app.modules.users.user_schemas import UserUpdate
 
-# 🧰 Utils
-from app.core.utils.validation import format_pydantic_errors
+# 🧠 Services
+from app.modules.users.user_service import (
+    create_user_with_audit,
+    delete_user_with_audit,
+    get_user_by_id,
+    get_user_or_404,
+    search_users,
+    set_user_active_with_audit,
+    sync_user_roles,
+    update_user_with_audit,
+)
+from app.modules.users.user_view_service import build_user_detail_view
 from app.utils.flash import flash_success
 from app.web.context import get_template_context
-
 
 router = APIRouter(prefix="/users", tags=["Users Web"])
 
