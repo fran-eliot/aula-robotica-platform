@@ -73,8 +73,7 @@ select = [
     "F",   # pyflakes
     "I",   # imports
     "UP",  # pyupgrade
-    "B",   # bugbear
-    "SIM", # simplificaciones
+
 ]
 ignore = []
 
