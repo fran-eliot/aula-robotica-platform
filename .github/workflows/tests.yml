@@ -32,5 +32,5 @@ jobs:
           SAML_METADATA_URL=http://localhost:8000/auth/saml/metadata
           EOF
 
-      - name: Run tests
-        run: uv run pytest -v
+      - name: Run tests with coverage gate
+        run: uv run pytest --cov=app --cov-report=term-missing --cov-fail-under=90 -v
