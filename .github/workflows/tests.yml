@@ -9,46 +9,30 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # =========================
-      # 📥 Checkout repo
-      # =========================
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # =========================
-      # 🐍 Setup Python
-      # =========================
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.13"
 
-      # =========================
-      # ⚡ Install uv
-      # =========================
       - name: Install uv
-        run: pip install uv
+        run: python -m pip install --upgrade pip uv
 
-      # =========================
-      # 📦 Cache dependencies (uv)
-      # =========================
-      - name: Cache uv dependencies
+      - name: Cache dependencies
         uses: actions/cache@v4
         with:
-          path: ~/.cache/uv
+          path: |
+            ~/.cache/uv
+            .venv
           key: uv-${{ runner.os }}-${{ hashFiles('uv.lock') }}
           restore-keys: |
             uv-${{ runner.os }}-
 
-      # =========================
-      # 📦 Install dependencies
-      # =========================
-      - name: Sync dependencies
-        run: uv sync
+      - name: Install dependencies
+        run: uv sync --dev
 
-      # =========================
-      # ⚙️ Create .env
-      # =========================
       - name: Create env
         run: |
           cat > .env <<EOF
@@ -62,28 +46,20 @@ jobs:
           SAML_METADATA_URL=http://localhost:8000/auth/saml/metadata
           EOF
 
-      # =========================
-      # 🧹 LINT (Ruff)
-      # =========================
-      - name: Run linter (Ruff)
+      - name: Run linter
         run: uv run ruff check app tests
 
-      # =========================
-      # 🧪 TESTS + COVERAGE GATE
-      # =========================
+      # Gate temporal. Luego subir a 90+
       - name: Run tests with coverage
         run: |
           uv run pytest \
-          --cov=app \
-          --cov-report=term-missing \
-          --cov-report=xml \
-          --cov-fail-under=85 \
-          -v
+            --cov=app \
+            --cov-report=term-missing \
+            --cov-report=xml \
+            --cov-fail-under=85 \
+            -v
 
-      # =========================
-      # 📊 Upload coverage artifact
-      # =========================
-      - name: Upload coverage report
+      - name: Upload coverage artifact
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report

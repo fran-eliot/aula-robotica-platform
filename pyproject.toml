@@ -34,7 +34,7 @@ dev = [
 [tool.pytest.ini_options]
 pythonpath = ["."]
 testpaths = ["tests"]
-addopts = "-v --tb=short --strict-markers --disable-warnings"
+addopts = "-v --tb=short --strict-markers --disable-warnings --maxfail=1"
 filterwarnings = [
     "ignore::DeprecationWarning"
 ]
@@ -47,6 +47,7 @@ source = ["app"]
 omit = [
     "tests/*",
     "scripts/*",
+    "migrations/*",
 ]
 
 [tool.coverage.report]
@@ -72,6 +73,8 @@ select = [
     "F",   # pyflakes
     "I",   # imports
     "UP",  # pyupgrade
+    "B",   # bugbear
+    "SIM", # simplificaciones
 ]
 ignore = []
 
