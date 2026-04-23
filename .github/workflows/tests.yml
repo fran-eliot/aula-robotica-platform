@@ -33,4 +33,4 @@ jobs:
           EOF
 
       - name: Run tests with coverage gate
-        run: uv run pytest --cov=app --cov-report=term-missing --cov-fail-under=90 -v
+        run: uv run pytest --cov=app --cov-report=term-missing --cov-report=xml --cov-fail-under=90 -v
