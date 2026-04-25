@@ -31,6 +31,6 @@ class AuditLog(Base):
     
     user_agent = Column(String(255))
 
-    created_at = Column(DateTime, default=datetime.now(UTC))
+    created_at = Column(DateTime, default=lambda: datetime.now(UTC))
 
     user = relationship("User", back_populates="audit_logs")

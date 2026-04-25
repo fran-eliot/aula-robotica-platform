@@ -366,6 +366,7 @@ def delete_user(
 # =========================================================
 @router.post("/{user_id}/deactivate")
 def deactivate_user(
+    user_id: int,
     request: Request,
     db: Session = Depends(get_db),
     target_user=Depends(
@@ -396,6 +397,7 @@ def deactivate_user(
 # =========================================================
 @router.post("/{user_id}/activate")
 def activate_user(
+    user_id: int,
     request: Request,
     db: Session = Depends(get_db),
     target_user=Depends(

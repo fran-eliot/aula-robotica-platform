@@ -88,7 +88,7 @@ def test_refresh_ok(client, monkeypatch):
 
     monkeypatch.setattr(
         "app.web.auth_web.refresh_access_token",
-        lambda payload: "new_access"
+        lambda payload,request: "new_access"
     )
 
     response = client.get("/refresh", follow_redirects=False)

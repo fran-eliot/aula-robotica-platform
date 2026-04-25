@@ -43,7 +43,7 @@ class User(Base):
 
     fecha_creacion = Column(
         DateTime,
-        default=datetime.now(UTC),
+        default=lambda: datetime.now(UTC),
         nullable=False
     )
 

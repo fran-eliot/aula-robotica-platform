@@ -134,7 +134,7 @@ def refresh_token(request: Request):
         payload = validate_refresh_token(refresh_token)
 
         # 🔁 generar nuevo access
-        new_access_token = refresh_access_token(payload)
+        new_access_token = refresh_access_token(payload, request)
 
         response = RedirectResponse("/dashboard")
 
