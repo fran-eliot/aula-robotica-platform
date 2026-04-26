@@ -9,15 +9,18 @@ from fastapi.openapi.utils import get_openapi
 from fastapi.staticfiles import StaticFiles
 
 from app.core.middleware.auth_middleware import AuthMiddleware
+from app.modules.activities import activities_web
 from app.modules.auth.auth_router import router as auth_router
 from app.modules.auth_saml import saml_web
 from app.modules.dashboard import dashboard_web
 from app.modules.identities import identities_web
+from app.modules.projects import projects_web
 from app.modules.roles import roles_web
+from app.modules.tasks import tasks_web
 from app.modules.users import users_web
 from app.modules.users.user_router import router as users_router
 from app.web import auth_web
-
+import app.db.models  # Importar modelos para que SQLAlchemy los reconozca
 
 def custom_openapi():
     if app.openapi_schema:
@@ -80,6 +83,9 @@ app.include_router(dashboard_web.router, tags=["Dashboard Web"])
 app.include_router(users_web.router, tags=["Users Web"])
 app.include_router(identities_web.router, tags=["Identities Web"])
 app.include_router(roles_web.router, tags=["Roles Web"])
+app.include_router(projects_web.router, tags=["Projects Web"])
+app.include_router(tasks_web.router, tags=["Tasks Web"])
+app.include_router(activities_web.router, tags=["Activities Web"])
 
 # Montar directorio de archivos estáticos
 app.mount("/static", StaticFiles(directory="app/static"), name="static")

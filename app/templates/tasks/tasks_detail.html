@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% from "components/section_card.html" import section_card %}
+{% from "components/activity_row.html" import activity_row with context %}
+
+{% block content %}
+
+<div class="container-fluid">
+
+    <!-- DETALLE -->
+    {% call section_card() %}
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h2>{{ task.name }}</h2>
+            <p class="text-muted mb-0">Tarea #{{ task.id_task }}</p>
+        </div>
+
+        <div>
+
+            {% if can("update", "tasks", task) %}
+            <a href="/tasks/{{ task.id_task }}/edit"
+               class="btn btn-warning">
+                <i class="fas fa-edit"></i> Editar
+            </a>
+            {% endif %}
+
+            <a href="/tasks/" class="btn btn-secondary">
+                Volver
+            </a>
+
+        </div>
+
+    </div>
+
+    <div class="row">
+
+        <div class="col-md-6 mb-3">
+            <strong>Proyecto:</strong><br>
+            <a href="/projects/{{ task.project.id_project }}">
+                {{ task.project.name }}
+            </a>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <strong>Estado:</strong><br>
+            <span class="badge badge-info">
+                {{ task.status }}
+            </span>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <strong>Prioridad:</strong><br>
+            <span class="badge badge-warning">
+                {{ task.priority }}
+            </span>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <strong>Responsable:</strong><br>
+            {{ task.assigned_user.nombre if task.assigned_user else "-" }}
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <strong>Actividades:</strong><br>
+            {{ task.activities|length }}
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <strong>Horas:</strong><br>
+            {{ task.activities | sum(attribute='time_spent') }}
+        </div>
+
+        <div class="col-12 mb-3">
+            <strong>Descripción:</strong><br>
+            {{ task.description or "-" }}
+        </div>
+
+    </div>
+
+    {% endcall %}
+
+    <!-- ACTIVIDADES -->
+    {% call section_card() %}
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+
+        <h4 class="mb-0">
+            Actividades
+        </h4>
+
+        {% if can("create", "activities") %}
+        <a href="/activities/form?task_id={{ task.id_task }}"
+           class="btn btn-primary btn-sm">
+            <i class="fas fa-plus"></i>
+            Nueva actividad
+        </a>
+        {% endif %}
+
+    </div>
+
+    {% if task.activities %}
+
+    <div class="table-responsive">
+
+        <table class="table table-hover table-striped align-middle">
+
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Usuario</th>
+                    <th>Estado</th>
+                    <th>Horas</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for activity in task.activities %}
+                    {{ activity_row(activity) }}
+                {% endfor %}
+            </tbody>
+
+        </table>
+
+    </div>
+
+    {% else %}
+
+    <div class="text-muted">
+        No hay actividades registradas.
+    </div>
+
+    {% endif %}
+
+    {% endcall %}
+
+</div>
+
+{% endblock %}

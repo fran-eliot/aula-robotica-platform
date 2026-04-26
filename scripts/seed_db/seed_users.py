@@ -1,3 +1,6 @@
+# scripts/seed_db/seed_users.py
+# Este archivo define la función para insertar datos de usuarios en la base de datos.
+
 from app.modules.users.user_model import User
 
 

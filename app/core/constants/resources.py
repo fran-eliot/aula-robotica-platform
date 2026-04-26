@@ -8,3 +8,6 @@ class Resources:
     DASHBOARD = "dashboard"
     STUDENTS = "students"
     AUDIT = "audit"
+    PROJECTS = "projects"
+    TASKS = "tasks"
+    ACTIVITIES = "activities"

@@ -1,15 +1,33 @@
 {% macro btn(url, label, color="primary", icon=None, size="sm") %}
 <a href="{{ url }}" class="btn btn-{{ color }} btn-{{ size }}">
-    {% if icon %}<i class="fas fa-{{ icon }}"></i>{% endif %}
+    {% if icon %}
+        <i class="fas fa-{{ icon }} mr-1"></i>
+    {% endif %}
     {{ label }}
+</a>
+{% endmacro %}
+
+
+{% macro btn_icon(url, color="primary", icon="eye", size="sm") %}
+<a href="{{ url }}" class="btn btn-outline-{{ color }} btn-{{ size }}">
+    <i class="fas fa-{{ icon }}"></i>
 </a>
 {% endmacro %}
 
 
 {% macro btn_submit(label="Guardar") %}
 <button type="submit" class="btn btn-primary">
-    <i class="fas fa-save"></i> {{ label }}
+    <i class="fas fa-save mr-1"></i>
+    {{ label }}
 </button>
+{% endmacro %}
+
+
+{% macro btn_back(url) %}
+<a href="{{ url }}" class="btn btn-secondary">
+    <i class="fas fa-arrow-left mr-1"></i>
+    Volver
+</a>
 {% endmacro %}
 
 
@@ -19,8 +37,9 @@
       class="d-inline"
       onsubmit="return confirm('{{ confirm_text }}')">
 
-    <button type="submit" class="btn btn-danger btn-sm">
-        <i class="fas fa-trash"></i>
+    <button type="submit"
+            class="btn btn-danger btn-sm">
+        <i class="fas fa-trash mr-1"></i>
         Eliminar
     </button>
 </form>

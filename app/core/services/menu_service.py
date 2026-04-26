@@ -48,6 +48,24 @@ def get_menu_structure():
             ]
         },
         {
+            "label": "Proyectos",
+            "icon": "fas fa-project-diagram",
+            "children": [
+                {
+                    "label": "Ver proyectos",
+                    "icon": "far fa-circle",
+                    "url": "/projects/",
+                    "permission": "projects:read"
+                },
+                {
+                    "label": "Nuevo proyecto",
+                    "icon": "far fa-circle",
+                    "url": "/projects/form",
+                    "permission": "projects:create"
+                }
+            ]
+        },
+        {
             "label": "Estudiantes",
             "icon": "fas fa-user-graduate",
             "url": "/students/",

@@ -1,0 +1,97 @@
+{% macro task_row(task) %}
+
+<tr>
+
+    <!-- ID -->
+    <td class="text-muted">
+        #{{ task.id_task }}
+    </td>
+
+    <!-- Nombre -->
+    <td>
+        <a href="/tasks/{{ task.id_task }}"
+           class="font-weight-semibold text-dark">
+            {{ task.name }}
+        </a>
+    </td>
+
+    <!-- Proyecto -->
+    <td>
+        {% if task.project %}
+        <a href="/projects/{{ task.project.id_project }}">
+            {{ task.project.name }}
+        </a>
+        {% else %}
+        <span class="text-muted">-</span>
+        {% endif %}
+    </td>
+
+    <!-- Estado -->
+    <td>
+        {% if task.status == "Pendiente" %}
+            <span class="badge badge-warning">Pendiente</span>
+
+        {% elif task.status == "En progreso" %}
+            <span class="badge badge-info">En progreso</span>
+
+        {% elif task.status == "Completada" %}
+            <span class="badge badge-success">Completada</span>
+
+        {% else %}
+            <span class="badge badge-light">
+                {{ task.status }}
+            </span>
+        {% endif %}
+    </td>
+
+    <!-- Prioridad -->
+    <td>
+        {% if task.priority == "Alta" %}
+            <span class="badge badge-danger">Alta</span>
+
+        {% elif task.priority == "Media" %}
+            <span class="badge badge-warning">Media</span>
+
+        {% else %}
+            <span class="badge badge-secondary">Baja</span>
+        {% endif %}
+    </td>
+
+    <!-- Acciones -->
+    <td class="text-nowrap">
+
+        {% if can("read", "tasks", task) %}
+        <a href="/tasks/{{ task.id_task }}"
+           class="btn btn-sm btn-outline-primary"
+           title="Ver">
+            <i class="fas fa-eye"></i>
+        </a>
+        {% endif %}
+
+        {% if can("update", "tasks", task) %}
+        <a href="/tasks/{{ task.id_task }}/edit"
+           class="btn btn-sm btn-outline-warning"
+           title="Editar">
+            <i class="fas fa-edit"></i>
+        </a>
+        {% endif %}
+
+        {% if can("delete", "tasks", task) %}
+        <form method="post"
+              action="/tasks/{{ task.id_task }}/delete"
+              class="d-inline"
+              onsubmit="return confirm('¿Eliminar tarea?')">
+
+            <button class="btn btn-sm btn-outline-danger"
+                    title="Eliminar">
+                <i class="fas fa-trash"></i>
+            </button>
+
+        </form>
+        {% endif %}
+
+    </td>
+
+</tr>
+
+{% endmacro %}

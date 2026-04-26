@@ -1,0 +1,88 @@
+{% macro project_row(project) %}
+
+<tr>
+
+    <!-- ID -->
+    <td class="text-muted">
+        #{{ project.id_project }}
+    </td>
+
+    <!-- Nombre -->
+    <td>
+        <a href="/projects/{{ project.id_project }}"
+           class="font-weight-semibold text-dark">
+            {{ project.name }}
+        </a>
+    </td>
+
+    <!-- Estado -->
+    <td>
+        {% if project.status == "Activo" %}
+            <span class="badge badge-success">
+                Activo
+            </span>
+
+        {% elif project.status == "Finalizado" %}
+            <span class="badge badge-secondary">
+                Finalizado
+            </span>
+
+        {% else %}
+            <span class="badge badge-light">
+                {{ project.status }}
+            </span>
+        {% endif %}
+    </td>
+
+    <!-- Creado por -->
+    <td>
+        {% if project.creator %}
+            {{ project.creator.nombre }}
+        {% else %}
+            {{ project.created_by }}
+        {% endif %}
+    </td>
+
+    <!-- Fecha -->
+    <td>
+        {{ project.created_at.strftime("%d/%m/%Y") if project.created_at else "-" }}
+    </td>
+
+    <!-- Acciones -->
+    <td class="text-nowrap">
+
+        {% if can("read", "projects", project) %}
+        <a href="/projects/{{ project.id_project }}"
+           class="btn btn-sm btn-outline-primary"
+           title="Ver">
+            <i class="fas fa-eye"></i>
+        </a>
+        {% endif %}
+
+        {% if can("update", "projects", project) %}
+        <a href="/projects/{{ project.id_project }}/edit"
+           class="btn btn-sm btn-outline-warning"
+           title="Editar">
+            <i class="fas fa-edit"></i>
+        </a>
+        {% endif %}
+
+        {% if can("delete", "projects", project) %}
+        <form method="post"
+              action="/projects/{{ project.id_project }}/delete"
+              class="d-inline"
+              onsubmit="return confirm('¿Eliminar este proyecto?')">
+
+            <button class="btn btn-sm btn-outline-danger"
+                    title="Eliminar">
+                <i class="fas fa-trash"></i>
+            </button>
+
+        </form>
+        {% endif %}
+
+    </td>
+
+</tr>
+
+{% endmacro %}

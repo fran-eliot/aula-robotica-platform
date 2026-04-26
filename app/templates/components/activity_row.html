@@ -1,0 +1,107 @@
+{% macro activity_row(activity) %}
+
+<tr>
+
+    <!-- ID -->
+    <td class="text-muted">
+        #{{ activity.id_activity }}
+    </td>
+
+    <!-- Nombre -->
+    <td>
+        <a href="/activities/{{ activity.id_activity }}"
+           class="font-weight-semibold text-dark">
+            {{ activity.name }}
+        </a>
+    </td>
+
+    <!-- Tarea -->
+    <td>
+        {% if activity.task %}
+        <a href="/tasks/{{ activity.task.id_task }}">
+            {{ activity.task.name }}
+        </a>
+        {% else %}
+        <span class="text-muted">-</span>
+        {% endif %}
+    </td>
+
+    <!-- Usuario -->
+    <td>
+        {% if activity.user %}
+            <i class="fas fa-user text-primary mr-1"></i>
+            {{ activity.user.nombre }}
+        {% else %}
+            <span class="text-muted">
+                Sin asignar
+            </span>
+        {% endif %}
+    </td>
+
+    <!-- Estado -->
+    <td>
+        {% if activity.status == "Pendiente" %}
+            <span class="badge badge-warning">
+                Pendiente
+            </span>
+
+        {% elif activity.status == "En progreso" %}
+            <span class="badge badge-info">
+                En progreso
+            </span>
+
+        {% elif activity.status == "Completada" %}
+            <span class="badge badge-success">
+                Completada
+            </span>
+
+        {% else %}
+            <span class="badge badge-light">
+                {{ activity.status }}
+            </span>
+        {% endif %}
+    </td>
+
+    <!-- Horas -->
+    <td>
+        {{ "%.1f"|format(activity.time_spent or 0) }} h
+    </td>
+
+    <!-- Acciones -->
+    <td class="text-nowrap">
+
+        {% if can("read", "activities", activity) %}
+        <a href="/activities/{{ activity.id_activity }}"
+           class="btn btn-sm btn-outline-primary"
+           title="Ver">
+            <i class="fas fa-eye"></i>
+        </a>
+        {% endif %}
+
+        {% if can("update", "activities", activity) %}
+        <a href="/activities/{{ activity.id_activity }}/edit"
+           class="btn btn-sm btn-outline-warning"
+           title="Editar">
+            <i class="fas fa-edit"></i>
+        </a>
+        {% endif %}
+
+        {% if can("delete", "activities", activity) %}
+        <form method="post"
+              action="/activities/{{ activity.id_activity }}/delete"
+              class="d-inline"
+              onsubmit="return confirm('¿Eliminar actividad?')">
+
+            <button class="btn btn-sm btn-outline-danger"
+                    title="Eliminar">
+                <i class="fas fa-trash"></i>
+            </button>
+
+        </form>
+        {% endif %}
+
+    </td>
+
+</tr>
+
+{% endmacro %}

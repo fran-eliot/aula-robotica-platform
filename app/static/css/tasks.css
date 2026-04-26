@@ -1,0 +1,158 @@
+/* =====================================================
+   TASKS MODULE
+===================================================== */
+
+.page-title,
+h1,
+h2,
+h3,
+h4 {
+    font-weight: 700;
+}
+
+/* Cards generales */
+.card,
+.section-card,
+.soft-card {
+    border-radius: 14px;
+    border: none;
+    box-shadow: 0 8px 24px rgba(0,0,0,.06);
+}
+
+/* =====================================================
+   METRICS
+===================================================== */
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+}
+
+.stat-card {
+    background: #fff;
+    padding: 1.2rem;
+    border-radius: 14px;
+    box-shadow: 0 4px 14px rgba(0,0,0,.05);
+    transition: .2s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+}
+
+.stat-card h3 {
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: 700;
+}
+
+.stat-card p {
+    margin: .4rem 0 0;
+    color: #6c757d;
+    font-size: .92rem;
+}
+
+/* =====================================================
+   FILTERS
+===================================================== */
+
+.filters-tasks {
+    background: #fff;
+    padding: 1rem;
+    border-radius: 14px;
+    box-shadow: 0 4px 14px rgba(0,0,0,.04);
+}
+
+/* =====================================================
+   TABLES
+===================================================== */
+
+.table {
+    margin-bottom: 0;
+}
+
+.table thead th {
+    border-top: none;
+    background: #f8f9fa;
+    font-size: .85rem;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+    color: #6c757d;
+}
+
+.table td,
+.table th {
+    vertical-align: middle;
+}
+
+.table-hover tbody tr:hover {
+    background: rgba(0,123,255,.03);
+}
+
+/* =====================================================
+   BADGES
+===================================================== */
+
+.badge {
+    font-size: .78rem;
+    padding: .45rem .65rem;
+    border-radius: 30px;
+}
+
+.badge-pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.badge-progress {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+.badge-completed {
+    background: #d4edda;
+    color: #155724;
+}
+
+/* =====================================================
+   DETAIL VIEW
+===================================================== */
+
+.task-meta strong {
+    display: block;
+    font-size: .85rem;
+    color: #6c757d;
+    margin-bottom: .25rem;
+}
+
+.task-meta div {
+    font-size: 1rem;
+}
+
+/* =====================================================
+   BUTTONS
+===================================================== */
+
+.btn {
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+.btn-sm {
+    border-radius: 8px;
+}
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .table-responsive {
+        font-size: .92rem;
+    }
+}

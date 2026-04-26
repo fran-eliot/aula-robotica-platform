@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% from "components/section_card.html" import section_card %}
+{% from "components/task_row.html" import task_row with context %}
+
+{% block content %}
+
+<div class="container-fluid">
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+
+    <div>
+        <h1>{{ project.name }}</h1>
+        <p class="text-muted mb-0">
+            Proyecto #{{ project.id_project }}
+        </p>
+    </div>
+
+    <div>
+
+        {% if can("update", "projects", project) %}
+        <a href="/projects/{{ project.id_project }}/edit"
+           class="btn btn-warning">
+            <i class="fas fa-edit"></i> Editar
+        </a>
+        {% endif %}
+
+        <a href="/projects/" class="btn btn-secondary">
+            Volver
+        </a>
+
+    </div>
+
+</div>
+
+{% call section_card() %}
+
+<div class="row">
+
+    <div class="col-md-6 mb-3">
+        <strong>Estado:</strong><br>
+        <span class="badge badge-info">
+            {{ project.status }}
+        </span>
+    </div>
+
+    <div class="col-md-6 mb-3">
+        <strong>Total tareas:</strong><br>
+        {{ project.tasks|length }}
+    </div>
+
+    <div class="col-md-6 mb-3">
+        <strong>Creado por:</strong><br>
+        {{ project.created_by }}
+    </div>
+
+    <div class="col-md-6 mb-3">
+        <strong>Fecha:</strong><br>
+        {{ project.created_at }}
+    </div>
+
+    <div class="col-12 mb-3">
+        <strong>Descripción:</strong><br>
+        {{ project.description or "-" }}
+    </div>
+
+</div>
+
+{% endcall %}
+
+{% call section_card() %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+
+    <h4 class="mb-0">
+        <i class="fas fa-tasks mr-2"></i>
+        Tareas del proyecto
+    </h4>
+
+    {% if can("create", "tasks") %}
+    <a href="/tasks/form?project_id={{ project.id_project }}"
+       class="btn btn-primary btn-sm">
+        <i class="fas fa-plus"></i> Nueva tarea
+    </a>
+    {% endif %}
+
+</div>
+
+{% if project.tasks %}
+
+<div class="table-responsive">
+
+<table class="table table-hover align-middle">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Proyecto</th>
+            <th>Estado</th>
+            <th>Prioridad</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for task in project.tasks %}
+            {{ task_row(task) }}
+        {% endfor %}
+    </tbody>
+</table>
+
+</div>
+
+{% else %}
+
+<div class="text-muted">
+    No hay tareas registradas.
+</div>
+
+{% endif %}
+
+{% endcall %}
+
+</div>
+
+{% endblock %}

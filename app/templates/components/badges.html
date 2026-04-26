@@ -19,7 +19,42 @@
         "delete": "danger"
     } %}
 
-    <span class="badge badge-{{ colors[action] if action in colors else "info" }}">
-        {{ action }}
+    <span class="badge badge-{{ colors[action] if action in colors else 'info' }}">
+        {{ action|upper }}
     </span>
+{% endmacro %}
+
+
+{% macro project_status(value) %}
+    {% if value == "Activo" %}
+        <span class="badge badge-success">Activo</span>
+    {% elif value == "Finalizado" %}
+        <span class="badge badge-secondary">Finalizado</span>
+    {% else %}
+        <span class="badge badge-light">{{ value }}</span>
+    {% endif %}
+{% endmacro %}
+
+
+{% macro task_status(value) %}
+    {% if value == "Pendiente" %}
+        <span class="badge badge-warning">Pendiente</span>
+    {% elif value == "En progreso" %}
+        <span class="badge badge-info">En progreso</span>
+    {% elif value == "Completada" %}
+        <span class="badge badge-success">Completada</span>
+    {% else %}
+        <span class="badge badge-light">{{ value }}</span>
+    {% endif %}
+{% endmacro %}
+
+
+{% macro priority(value) %}
+    {% if value == "Alta" %}
+        <span class="badge badge-danger">Alta</span>
+    {% elif value == "Media" %}
+        <span class="badge badge-warning">Media</span>
+    {% else %}
+        <span class="badge badge-secondary">Baja</span>
+    {% endif %}
 {% endmacro %}

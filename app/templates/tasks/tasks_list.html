@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% from "components/page_header.html" import page_header with context %}
+{% from "components/section_card.html" import section_card %}
+{% from "components/filters_bar.html" import filters_bar %}
+{% from "components/form.html" import input, select %}
+{% from "components/data_table.html" import data_table with context %}
+{% from "components/task_row.html" import task_row with context %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/tasks.css">
+{% endblock %}
+
+{% block content %}
+
+{% call section_card() %}
+
+    <!-- HEADER -->
+    <div class="mb-4">
+        {{ page_header(
+            "Tareas",
+            "tasks",
+            total_count,
+            "/tasks/form",
+            "Nueva tarea",
+            "create",
+            "tasks"
+        ) }}
+    </div>
+
+    <!-- FILTROS -->
+    <div class="mb-4">
+
+        {% call filters_bar("/tasks/", "filters-tasks") %}
+
+            <div class="col-md-4 mb-2">
+                {{ input(
+                    "search",
+                    "",
+                    search,
+                    type="text",
+                    placeholder="Buscar tarea..."
+                ) }}
+            </div>
+
+            <div class="col-md-4 mb-2">
+                {{ select(
+                    "status",
+                    "",
+                    [
+                        ("all", "Todos"),
+                        ("Pendiente", "Pendiente"),
+                        ("En progreso", "En progreso"),
+                        ("Completada", "Completada")
+                    ],
+                    status
+                ) }}
+            </div>
+
+            <div class="col-md-4 mb-2">
+                <select name="project_id" class="form-control">
+                    <option value="">Todos los proyectos</option>
+
+                    {% for p in projects %}
+                    <option
+                        value="{{ p.id_project }}"
+                        {% if project_id == p.id_project %}selected{% endif %}
+                    >
+                        {{ p.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+        {% endcall %}
+
+    </div>
+
+    <!-- MÉTRICAS -->
+    <div class="stats-grid mb-4">
+
+        <div class="stat-card">
+            <h3>{{ total_count }}</h3>
+            <p>Total tareas</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>{{ pending_count }}</h3>
+            <p>Pendientes</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>{{ progress_count }}</h3>
+            <p>En progreso</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>{{ completed_count }}</h3>
+            <p>Completadas</p>
+        </div>
+
+    </div>
+
+    <!-- TABLA -->
+    <div class="bg-white shadow-sm rounded">
+
+        {{ data_table(
+            items=tasks,
+            row_renderer=task_row,
+            headers=[
+                "ID",
+                "Nombre",
+                "Proyecto",
+                "Estado",
+                "Prioridad",
+                "Responsable",
+                "Acciones"
+            ],
+
+            empty_title="No se encontraron tareas",
+            empty_icon="tasks",
+            empty_action_url="/tasks/form",
+            empty_action_label="Crear tarea",
+            empty_action_perm="create",
+            empty_resource="tasks",
+
+            page=page,
+            total_pages=total_pages,
+            search=search,
+            status=status
+        ) }}
+
+    </div>
+
+{% endcall %}
+
+{% endblock %}

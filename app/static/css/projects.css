@@ -1,0 +1,6 @@
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin-bottom:1rem}
+.stat-card{background:#fff;border-radius:16px;padding:1rem;box-shadow:0 4px 14px rgba(0,0,0,.08)}
+.badge-soft{padding:.35rem .6rem;border-radius:999px;font-size:.8rem}
+.badge-active{background:#e8f7ee;color:#1e7e34}.badge-done{background:#eef2ff;color:#4338ca}
+.priority-high{color:#dc2626;font-weight:700}.priority-medium{color:#d97706}.priority-low{color:#059669}
+.table-actions{display:flex;gap:.4rem;flex-wrap:wrap}

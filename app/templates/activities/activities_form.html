@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% from "components/section_card.html" import section_card %}
+{% from "components/form.html" import input, textarea, select %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/activities.css">
+{% endblock %}
+
+{% block content %}
+
+{% set form_action = "/activities/" ~ activity.id_activity ~ "/edit" if activity else "/activities/form" %}
+
+{% call section_card() %}
+
+<div class="mb-4">
+    <h2>
+        {{ "Editar actividad" if activity else "Nueva actividad" }}
+    </h2>
+</div>
+
+{% if errors %}
+<div class="alert alert-danger">
+    <ul class="mb-0">
+        {% for field, error in errors.items() %}
+        <li><strong>{{ field }}:</strong> {{ error }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+<form method="post" action="{{ form_action }}">
+
+<div class="row">
+
+    <div class="col-md-6 mb-3">
+        {{ input(
+            "name",
+            "Nombre",
+            form_data.name if form_data else activity.name if activity else ""
+        ) }}
+    </div>
+
+    <div class="col-md-6 mb-3">
+        {{ select(
+            "status",
+            "Estado",
+            [
+                ("Pendiente", "Pendiente"),
+                ("En progreso", "En progreso"),
+                ("Completada", "Completada")
+            ],
+            form_data.status if form_data else activity.status if activity else "Pendiente"
+        ) }}
+    </div>
+
+    <div class="col-md-6 mb-3">
+        <label>Tarea</label>
+
+        <select name="task_id" class="form-control">
+
+            {% for task in tasks %}
+            <option
+                value="{{ task.id_task }}"
+                {% if (activity and activity.task_id == task.id_task)
+                   or (task_id == task.id_task)
+                   or (form_data and form_data.task_id == task.id_task) %}
+                    selected
+                {% endif %}
+            >
+                {{ task.name }}
+            </option>
+            {% endfor %}
+
+        </select>
+    </div>
+
+    <div class="col-md-6 mb-3">
+        <label>Usuario</label>
+
+        <select name="user_id" class="form-control">
+
+            <option value="">Sin asignar</option>
+
+            {% for user in users %}
+            <option
+                value="{{ user.id_usuario }}"
+                {% if (activity and activity.user_id == user.id_usuario)
+                   or (form_data and form_data.user_id == user.id_usuario) %}
+                    selected
+                {% endif %}
+            >
+                {{ user.nombre }}
+            </option>
+            {% endfor %}
+
+        </select>
+    </div>
+
+    <div class="col-md-6 mb-3">
+        {{ input(
+            "time_spent",
+            "Horas invertidas",
+            form_data.time_spent if form_data else activity.time_spent if activity else "0",
+            type="number"
+        ) }}
+    </div>
+
+    <div class="col-12 mb-3">
+        {{ textarea(
+            "description",
+            "Descripción",
+            form_data.description if form_data else activity.description if activity else ""
+        ) }}
+    </div>
+
+</div>
+
+<div class="d-flex gap-2 mt-4">
+
+    <button class="btn btn-primary">
+        <i class="fas fa-save"></i>
+        {{ "Guardar cambios" if activity else "Crear actividad" }}
+    </button>
+
+    <a href="/activities/" class="btn btn-secondary">
+        Cancelar
+    </a>
+
+</div>
+
+</form>
+
+{% endcall %}
+
+{% endblock %}

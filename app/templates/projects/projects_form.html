@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {{ "Editar Proyecto" if project else "Nuevo Proyecto" }}
+{% endblock %}
+
+{% block content %}
+
+<div class="content-wrapper">
+
+    <!-- Header -->
+    <section class="content-header">
+        <div class="container-fluid">
+            <h1>
+                {{ "Editar Proyecto" if project else "Nuevo Proyecto" }}
+            </h1>
+        </div>
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+
+            <div class="card card-primary">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        {{ "Modificar datos del proyecto" if project else "Crear nuevo proyecto" }}
+                    </h3>
+                </div>
+
+                <!-- Form -->
+                <form method="post">
+
+                    <div class="card-body">
+
+                        <!-- ===================================================== -->
+                        <!-- 🔴 ERRORES GENERALES -->
+                        <!-- ===================================================== -->
+                        {% if errors %}
+                        <div class="alert alert-danger">
+                            <ul class="mb-0">
+                                {% for field, error in errors.items() %}
+                                    <li><strong>{{ field }}:</strong> {{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+
+
+                        <!-- ===================================================== -->
+                        <!-- 📝 NOMBRE -->
+                        <!-- ===================================================== -->
+                        <div class="form-group">
+                            <label>Nombre *</label>
+
+                            <input
+                                type="text"
+                                name="name"
+                                class="form-control {% if errors and errors.get('name') %}is-invalid{% endif %}"
+                                placeholder="Ej: Robot Seguidor de Línea"
+                                value="{{
+                                    (form_data.name if form_data and form_data.name)
+                                    or (project.name if project)
+                                    or ''
+                                }}"
+                                required
+                            >
+
+                            {% if errors and errors.get('name') %}
+                                <div class="invalid-feedback">
+                                    {{ errors.get('name') }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+
+                        <!-- ===================================================== -->
+                        <!-- 📝 DESCRIPCIÓN -->
+                        <!-- ===================================================== -->
+                        <div class="form-group">
+                            <label>Descripción</label>
+
+                            <textarea
+                                name="description"
+                                class="form-control"
+                                rows="4"
+                                placeholder="Describe el objetivo del proyecto..."
+                            >{{
+                                (form_data.description if form_data and form_data.description)
+                                or (project.description if project)
+                                or ''
+                            }}</textarea>
+                        </div>
+
+
+                        <!-- ===================================================== -->
+                        <!-- 📊 STATUS (solo en edición) -->
+                        <!-- ===================================================== -->
+                        {% if project %}
+                        <div class="form-group">
+                            <label>Estado</label>
+
+                            <select
+                                name="status"
+                                class="form-control {% if errors and errors.get('status') %}is-invalid{% endif %}"
+                            >
+                                {% set current_status =
+                                    (form_data.status if form_data and form_data.status)
+                                    or project.status
+                                %}
+
+                                <option value="Activo"
+                                    {% if current_status == "Activo" %}selected{% endif %}
+                                >
+                                    Activo
+                                </option>
+
+                                <option value="Finalizado"
+                                    {% if current_status == "Finalizado" %}selected{% endif %}
+                                >
+                                    Finalizado
+                                </option>
+                            </select>
+
+                            {% if errors and errors.get('status') %}
+                                <div class="invalid-feedback">
+                                    {{ errors.get('status') }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
+
+                        <!-- ===================================================== -->
+                        <!-- ℹ️ INFO SOLO LECTURA -->
+                        <!-- ===================================================== -->
+                        {% if project %}
+                        <div class="form-group">
+                            <label>Creado por</label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                value="{{ project.created_by }}"
+                                disabled
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label>Fecha de creación</label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                value="{{ project.created_at }}"
+                                disabled
+                            >
+                        </div>
+                        {% endif %}
+
+                    </div>
+
+
+                    <!-- ===================================================== -->
+                    <!-- FOOTER -->
+                    <!-- ===================================================== -->
+                    <div class="card-footer d-flex justify-content-between">
+
+                        <a href="/projects/" class="btn btn-secondary">
+                            Cancelar
+                        </a>
+
+                        <button type="submit" class="btn btn-primary">
+                            {{ "Actualizar proyecto" if project else "Crear proyecto" }}
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+    </section>
+
+</div>
+
+{% endblock %}

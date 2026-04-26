@@ -1,3 +1,6 @@
+# scripts/seed_db/seed_audit.py
+# Este archivo define la función para insertar datos de auditoría en la base de datos.
+
 import random
 from datetime import UTC, datetime
 

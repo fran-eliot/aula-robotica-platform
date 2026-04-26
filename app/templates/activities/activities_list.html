@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% from "components/page_header.html" import page_header with context %}
+{% from "components/section_card.html" import section_card %}
+{% from "components/data_table.html" import data_table with context %}
+{% from "components/activity_row.html" import activity_row with context %}
+{% from "components/filters_bar.html" import filters_bar %}
+{% from "components/form.html" import input, select %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/activities.css">
+{% endblock %}
+
+{% block content %}
+
+{% call section_card() %}
+
+<div class="mb-4">
+    {{ page_header(
+        "Actividades",
+        "clipboard-list",
+        total_count,
+        "/activities/form",
+        "Nueva actividad",
+        "create",
+        "activities"
+    ) }}
+</div>
+
+<!-- FILTROS -->
+<div class="mb-4">
+
+    {% call filters_bar("/activities/", "filters-activities") %}
+
+        <div class="col-md-4 mb-2">
+            {{ input(
+                "search",
+                "",
+                search,
+                type="text",
+                placeholder="Buscar actividad..."
+            ) }}
+        </div>
+
+        <div class="col-md-4 mb-2">
+            {{ select(
+                "status",
+                "",
+                [
+                    ("all", "Todos"),
+                    ("Pendiente", "Pendiente"),
+                    ("En progreso", "En progreso"),
+                    ("Completada", "Completada")
+                ],
+                status
+            ) }}
+        </div>
+
+        <div class="col-md-4 mb-2">
+            <select name="task_id" class="form-control">
+                <option value="">Todas las tareas</option>
+
+                {% for task in tasks %}
+                <option
+                    value="{{ task.id_task }}"
+                    {% if task_id == task.id_task %}selected{% endif %}
+                >
+                    {{ task.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+    {% endcall %}
+
+</div>
+
+<!-- MÉTRICAS -->
+<div class="stats-grid mb-4">
+
+    <div class="stat-card">
+        <h3>{{ total_count }}</h3>
+        <p>Total actividades</p>
+    </div>
+
+    <div class="stat-card">
+        <h3>{{ pending_count }}</h3>
+        <p>Pendientes</p>
+    </div>
+
+    <div class="stat-card">
+        <h3>{{ progress_count }}</h3>
+        <p>En progreso</p>
+    </div>
+
+    <div class="stat-card">
+        <h3>{{ completed_count }}</h3>
+        <p>Completadas</p>
+    </div>
+
+</div>
+
+<!-- TABLA -->
+<div class="bg-white shadow-sm rounded">
+
+    {{ data_table(
+        items=activities,
+        row_renderer=activity_row,
+        headers=[
+            "ID",
+            "Nombre",
+            "Tarea",
+            "Usuario",
+            "Estado",
+            "Horas",
+            "Acciones"
+        ],
+
+        empty_title="No hay actividades registradas",
+        empty_icon="clipboard-list",
+        empty_action_url="/activities/form",
+        empty_action_label="Crear actividad",
+        empty_action_perm="create",
+        empty_resource="activities",
+
+        page=page,
+        total_pages=total_pages,
+        search=search,
+        status=status
+    ) }}
+
+</div>
+
+{% endcall %}
+
+{% endblock %}

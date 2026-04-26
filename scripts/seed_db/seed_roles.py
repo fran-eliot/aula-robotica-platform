@@ -1,3 +1,7 @@
+# scripts/seed_db/seed_roles.py
+# Este archivo define la función para insertar datos de roles y permisos en la 
+# base de datos.
+
 from app.modules.roles.role_model import Permission, Role
 
 
@@ -19,14 +23,32 @@ def seed_roles(db):
         "users:create",
         "users:update",
         "users:delete",
+
         "roles:read",
         "roles:create",
         "roles:update",
         "roles:delete",
+
         "identities:read",
         "identities:create",
         "identities:update",
         "identities:delete",
+
+        "projects:read",
+        "projects:create",
+        "projects:update",
+        "projects:delete",
+
+        "tasks:read",
+        "tasks:create",
+        "tasks:update",
+        "tasks:delete",
+
+        "activities:read",
+        "activities:create",
+        "activities:update",
+        "activities:delete",
+
         "dashboard:read",
         "students:read",
         "audit:read"
@@ -46,17 +68,39 @@ def seed_roles(db):
         perms["users:read"],
         perms["users:update"],
         perms["dashboard:read"],
-        perms["students:read"]
+        perms["students:read"],
+
+        perms["projects:read"],
+        perms["projects:create"],
+        perms["projects:update"],
+
+        perms["tasks:read"],
+        perms["tasks:create"],
+        perms["tasks:update"],
+
+        perms["activities:read"],
+        perms["activities:create"],
+
     ]
 
     estudiante.permissions = [
         perms["dashboard:read"],
-        perms["students:read"]
+        perms["students:read"],
+        perms["projects:read"],
+        perms["tasks:read"],
+        perms["activities:read"],
+        perms["activities:create"],
+        perms["activities:update"]
     ]
 
     uah_user.permissions = [
         perms["dashboard:read"],
-        perms["students:read"]
+        perms["students:read"],
+        perms["projects:read"],
+        perms["tasks:read"],
+        perms["activities:read"],
+        perms["activities:create"],
+        perms["activities:update"]
     ]
 
     db.commit()

@@ -1,3 +1,7 @@
+# scripts/seed_db/seed_identities.py
+# Este archivo define la función para insertar datos de identidades en la base de 
+# datos.
+
 from app.core.security import hash_password
 from app.modules.identities.identity_model import Identity
 

@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% from "components/section_card.html" import section_card %}
+{% from "components/form.html" import input, textarea, select %}
+
+{% block content %}
+
+{% set form_action = "/tasks/" ~ task.id_task ~ "/edit" if task else "/tasks/form" %}
+
+{% call section_card() %}
+
+<div class="mb-4">
+    <h2>{{ "Editar tarea" if task else "Nueva tarea" }}</h2>
+</div>
+
+{% if errors %}
+<div class="alert alert-danger">
+    <ul class="mb-0">
+        {% for field, error in errors.items() %}
+        <li><strong>{{ field }}:</strong> {{ error }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+<form method="post" action="{{ form_action }}">
+
+    <div class="row">
+
+        <div class="col-md-6 mb-3">
+            {{ input(
+                "name",
+                "Nombre",
+                form_data.name if form_data else task.name if task else ""
+            ) }}
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label>Proyecto</label>
+
+            <select name="project_id" class="form-control">
+
+                {% for p in projects %}
+                <option
+                    value="{{ p.id_project }}"
+                    {% if (task and task.project_id == p.id_project)
+                       or (form_data and form_data.project_id == p.id_project) %}
+                        selected
+                    {% endif %}
+                >
+                    {{ p.name }}
+                </option>
+                {% endfor %}
+
+            </select>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label>Responsable</label>
+
+            <select name="assigned_user_id" class="form-control">
+                <option value="">Sin asignar</option>
+
+                {% for u in users %}
+                <option
+                    value="{{ u.id_usuario }}"
+                    {% if (task and task.assigned_user_id == u.id_usuario)
+                       or (form_data and form_data.assigned_user_id == u.id_usuario) %}
+                        selected
+                    {% endif %}
+                >
+                    {{ u.nombre }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            {{ select(
+                "status",
+                "Estado",
+                [
+                    ("Pendiente", "Pendiente"),
+                    ("En progreso", "En progreso"),
+                    ("Completada", "Completada")
+                ],
+                form_data.status if form_data else task.status if task else "Pendiente"
+            ) }}
+        </div>
+
+        <div class="col-md-3 mb-3">
+            {{ select(
+                "priority",
+                "Prioridad",
+                [
+                    ("Baja", "Baja"),
+                    ("Media", "Media"),
+                    ("Alta", "Alta")
+                ],
+                form_data.priority if form_data else task.priority if task else "Media"
+            ) }}
+        </div>
+
+        <div class="col-12 mb-3">
+            {{ textarea(
+                "description",
+                "Descripción",
+                form_data.description if form_data else task.description if task else ""
+            ) }}
+        </div>
+
+    </div>
+
+    <div class="d-flex gap-2 mt-4">
+
+        <button class="btn btn-primary">
+            <i class="fas fa-save"></i>
+            {{ "Guardar cambios" if task else "Crear tarea" }}
+        </button>
+
+        <a href="/tasks/" class="btn btn-secondary">
+            Cancelar
+        </a>
+
+    </div>
+
+</form>
+
+{% endcall %}
+
+{% endblock %}

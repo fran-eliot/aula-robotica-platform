@@ -72,6 +72,12 @@ class User(Base):
         back_populates="user"
     )
 
+    # 🧑‍💻 Tareas asignadas
+    activities = relationship(
+        "Activity",
+        back_populates="user"
+    )
+
     # =========================================================
     # 🧠 HELPERS (ligeros, sin lógica de negocio pesada)
     # =========================================================
