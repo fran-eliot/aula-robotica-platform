@@ -1,171 +1,237 @@
 # 10_RBAC_CONTEXTUAL.md
 
-# RBAC y Autorización Contextual
-
-## Propósito
-
-Este documento describe la arquitectura de autorización de Aula Robótica Platform.
-
-El sistema combina:
-
-- RBAC global,
-- permisos granulares,
-- autorización contextual por proyecto,
-- ownership,
-- autorización SSR visual,
-- políticas reutilizables,
-- helpers centralizados.
-
-El objetivo es construir una arquitectura enterprise flexible y escalable. 
+# 🛡️ RBAC y Autorización Contextual
 
 ---
 
-# Filosofía de diseño
+# 📌 Introducción
 
-La autorización del sistema sigue varios principios:
+La autorización constituye uno de los componentes fundamentales de la arquitectura de Aula Robótica Platform.
 
-## 1. Desacoplamiento
+Mientras que la autenticación permite verificar la identidad del usuario, la autorización determina qué operaciones puede realizar sobre los distintos recursos del sistema.
 
-Autenticación y autorización son sistemas independientes.
+La plataforma implementa un modelo híbrido que combina:
+
+- RBAC (Role-Based Access Control)
+- permisos granulares
+- autorización contextual
+- ownership
+- políticas reutilizables
+- renderizado contextual SSR
+- validaciones backend
+
+Este enfoque permite construir una arquitectura flexible, mantenible y preparada para futuras ampliaciones sin necesidad de rediseñar el sistema de permisos.
+
+---
+
+# 🎯 Objetivos
+
+La arquitectura RBAC fue diseñada para satisfacer simultáneamente requisitos funcionales y arquitectónicos.
+
+## Objetivos funcionales
+
+- controlar el acceso a los recursos;
+- limitar operaciones según el perfil del usuario;
+- facilitar la administración de permisos;
+- soportar colaboración multiusuario;
+- proteger recursos compartidos;
+- permitir crecimiento futuro.
+
+---
+
+## Objetivos técnicos
+
+- desacoplar autenticación y autorización;
+- minimizar duplicación de lógica;
+- reutilizar políticas de autorización;
+- soportar autorización contextual;
+- favorecer mantenibilidad;
+- aproximar la arquitectura a modelos enterprise.
+
+---
+
+# 🧠 Principios de Diseño
+
+---
+
+# Separación de responsabilidades
+
+La autenticación y la autorización son procesos completamente independientes.
 
 ```text
-Authentication → quién eres
-Authorization → qué puedes hacer
+Autenticación
+↓
+
+¿Quién eres?
+
+Autorización
+
+↓
+
+¿Qué puedes hacer?
 ```
+
+Esta separación simplifica la evolución futura del sistema y facilita la incorporación de nuevos mecanismos de autenticación.
 
 ---
 
-## 2. Permisos atómicos
+# Permisos atómicos
 
-Los permisos son independientes de los roles.
+La unidad mínima del sistema de autorización es el permiso.
 
-Ejemplo:
+Cada permiso representa una acción concreta sobre un recurso.
+
+Ejemplos:
 
 ```text
-projects:update
-tasks:create
-activities:delete
+users:create
+users:update
+projects:delete
+tasks:update
+activities:read
+dashboard:view
 ```
 
----
-
-## 3. Roles como agregadores
-
-Los roles simplemente agrupan permisos.
+Los permisos no dependen directamente de los usuarios, sino que posteriormente se agrupan mediante roles.
 
 ---
 
-## 4. Contextualización
+# Roles como agregadores
 
-El acceso depende también del contexto:
+Los roles actúan como agrupaciones lógicas de permisos.
 
-- proyecto,
-- ownership,
-- pertenencia,
-- coordinación,
-- relaciones funcionales.
+En lugar de asignar permisos individualmente a cada usuario, éstos se conceden a través de uno o varios roles.
+
+Este enfoque simplifica enormemente la administración del sistema.
 
 ---
 
-## 5. Backend-first security
+# Autorización contextual
 
-La seguridad real SIEMPRE se valida en backend.
+El acceso no depende únicamente del rol asignado al usuario.
 
-El frontend SSR solo mejora UX.
+También se consideran otros elementos:
+
+- proyecto actual;
+- pertenencia al proyecto;
+- ownership;
+- relación con la entidad;
+- estado del recurso;
+- contexto funcional.
+
+Este modelo proporciona mucha mayor flexibilidad que un RBAC tradicional.
+
+---
+
+# Backend First Authorization
+
+Toda autorización efectiva se realiza siempre desde el backend.
+
+La interfaz únicamente adapta la experiencia de usuario ocultando acciones no disponibles.
+
+No obstante, cualquier operación vuelve a validarse desde servidor antes de ejecutarse.
 
 ---
 
 # Arquitectura General
 
-La autorización actual combina:
+La autorización del sistema combina diferentes mecanismos.
 
-```text
-JWT Permissions
-        +
-RBAC Global
-        +
-Project Membership
-        +
-Ownership
-        +
-Policies
-        +
-SSR Contextual Authorization
+```mermaid
+flowchart TD
+
+A[Usuario autenticado]
+
+--> B[Roles]
+
+--> C[Permisos]
+
+--> D[Autorización contextual]
+
+--> E[Ownership]
+
+--> F[Policies]
+
+--> G[Decisión final]
 ```
 
----
-
-# Componentes Principales
-
-## Núcleo RBAC
-
-### User
-### Role
-### Permission
-### UserRole
-### RolePermission
+Cada uno de estos niveles aporta información adicional para determinar si una operación debe permitirse o rechazarse.
 
 ---
 
-## Autorización contextual
+# Componentes del Sistema
 
-### ProjectMember
-### ProjectRoleEnum
+La arquitectura RBAC se encuentra formada por varios elementos independientes.
 
----
-
-## Policies reutilizables
-
-### can_user_action()
-### can_manage_tasks()
-### can_view_activity()
+| Componente | Responsabilidad |
+|------------|-----------------|
+| User | Usuario de la plataforma |
+| Identity | Identidad de autenticación |
+| Role | Perfil funcional |
+| Permission | Acción autorizada |
+| UserRole | Asociación usuario-rol |
+| RolePermission | Asociación rol-permiso |
+| Policies | Reglas reutilizables |
+| Context Resolver | Resolución del contexto |
 
 ---
 
 # Modelo RBAC Global
 
-## Usuarios
-
-Los usuarios representan personas del sistema. :contentReference[oaicite:0]{index=0}
-
-No contienen credenciales.
-
-Las credenciales viven en `Identity`.
+El sistema implementa un modelo RBAC clásico desacoplado de la autenticación.
 
 ---
 
-## Identidades
+# Usuarios
 
-Las identidades representan autenticación. :contentReference[oaicite:1]{index=1}
+Los usuarios representan personas registradas en la plataforma.
 
-Permiten:
+Contienen únicamente información funcional:
 
-- login local,
-- OAuth futuro,
-- SAML futuro,
-- múltiples providers.
+- nombre;
+- correo;
+- estado;
+- información académica.
 
----
-
-## Roles
-
-Los roles representan perfiles funcionales globales. :contentReference[oaicite:2]{index=2}
-
-Ejemplos:
-
-```text
-admin
-profesor
-estudiante
-```
+Las credenciales de autenticación permanecen desacopladas.
 
 ---
 
-## Permisos
+# Identidades
 
-Los permisos representan acciones específicas. :contentReference[oaicite:3]{index=3}
+La autenticación se gestiona mediante entidades independientes.
 
-Formato estándar:
+Esta separación permite incorporar en el futuro diferentes proveedores de autenticación como:
+
+- login local;
+- OAuth2;
+- SAML;
+- LDAP;
+- Single Sign-On.
+
+---
+
+# Roles
+
+Los roles representan perfiles funcionales globales.
+
+Actualmente la plataforma incorpora:
+
+| Rol | Descripción |
+|------|-------------|
+| Administrador | Gestión completa de la plataforma |
+| Profesor | Gestión académica |
+| Estudiante | Participación en proyectos |
+
+La arquitectura permite incorporar nuevos roles sin modificar el resto del sistema.
+
+---
+
+# Permisos
+
+Los permisos representan acciones concretas sobre recursos específicos.
+
+Formato utilizado:
 
 ```text
 resource:action
@@ -174,604 +240,679 @@ resource:action
 Ejemplos:
 
 ```text
-users:read
 projects:create
-activities:update
-tasks:delete
+projects:update
+projects:delete
+
+tasks:create
+tasks:update
+
+activities:create
+
+users:update
 ```
+
+Este formato resulta fácilmente extensible y facilita futuras automatizaciones.
 
 ---
 
-# Relación Usuario ↔ Rol
+# Relaciones del Modelo
 
-La relación es many-to-many mediante:
+La arquitectura utiliza relaciones many-to-many.
+
+## Usuario ↔ Rol
+
+Un usuario puede disponer de varios roles.
+
+Un mismo rol puede asignarse a múltiples usuarios.
 
 ```text
-user_rol
+User
+
+↓
+
+UserRole
+
+↓
+
+Role
 ```
-
-:contentReference[oaicite:4]{index=4}
-
-Esto permite:
-
-- múltiples roles por usuario,
-- reutilización,
-- evolución futura,
-- granularidad enterprise.
 
 ---
 
-# Relación Rol ↔ Permiso
+## Rol ↔ Permiso
 
-La relación también es many-to-many mediante:
+Cada rol agrupa varios permisos.
+
+Un permiso puede reutilizarse por distintos roles.
 
 ```text
-role_permissions
+Role
+
+↓
+
+RolePermission
+
+↓
+
+Permission
 ```
 
-:contentReference[oaicite:5]{index=5}
-
-Esto desacopla:
-
-```text
-roles
-≠
-permissions
-```
-
----
-
-# Roles Globales Actuales
-
-## admin
-
-Acceso total del sistema.
-
-Bypass global de autorización.
-
----
-
-## profesor
-
-Acceso funcional de gestión académica.
-
----
-
-## estudiante
-
-Acceso operativo limitado.
-
----
-
-# Roles Globales Futuros
-
-Arquitectura preparada para:
-
-```text
-coordinador
-gestor
-auditor
-operador
-supervisor
-```
+Esta separación evita duplicidades y mejora considerablemente la mantenibilidad del sistema.
 
 ---
 
 # Jerarquía de Roles
 
-Existe jerarquía conceptual de roles. :contentReference[oaicite:6]{index=6}
+Aunque el sistema implementa un modelo RBAC clásico, los roles presentan distintos niveles de responsabilidad dentro de la plataforma.
 
-```python
-ROLE_HIERARCHY = {
-    "admin": 4,
-    "profesor": 3,
-    "coordinator": 2,
-    "estudiante": 1
-}
+La jerarquía no implica herencia automática de permisos, sino una clasificación funcional que facilita la administración y comprensión del sistema.
+
+```text
+Administrador
+
+│
+
+├── Profesor
+
+│
+
+└── Estudiante
 ```
 
-Actualmente se usa principalmente para validaciones simples.
+Cada rol dispone de un conjunto de permisos adaptado a sus responsabilidades.
 
 ---
 
 # Permisos Efectivos
 
-Los permisos efectivos pueden derivarse desde:
+Los permisos efectivos de un usuario son el resultado de combinar toda la información disponible en el momento de la operación.
 
-- JWT,
-- roles,
-- relaciones contextuales.
+No dependen exclusivamente del rol asignado.
 
----
+Para determinar si una acción está permitida se consideran:
 
-## Helper principal
-
-```python
-get_permissions_from_roles()
-```
-
-:contentReference[oaicite:7]{index=7}
+- roles asignados;
+- permisos asociados;
+- ownership;
+- pertenencia al proyecto;
+- contexto funcional;
+- estado del recurso.
 
 ---
 
-# RBAC basado en JWT
+## Resolución de Permisos
 
-Tras autenticación, el JWT contiene:
+```mermaid
+flowchart LR
 
-```json
-{
-  "roles": [...],
-  "permissions": [...]
-}
-```
+Usuario
 
-Esto permite:
+--> Roles
 
-- reducir queries,
-- SSR rápido,
-- validación ligera,
-- render contextual inmediato.
+Roles
 
----
+--> Permisos
 
-# Arquitectura Contextual
+Permisos
 
-El RBAC global no es suficiente para un sistema colaborativo.
+--> Contexto
 
-Por eso existe autorización contextual.
+Contexto
 
----
+--> Ownership
 
-# Project Membership
-
-Los proyectos usan:
-
-```text
-project_members
-```
-
-:contentReference[oaicite:8]{index=8}
-
-Cada relación incluye:
-
-```text
-project_id
-user_id
-role
-```
-
----
-
-# Roles Contextuales de Proyecto
-
-## coordinator
-
-Puede:
-
-- gestionar tareas,
-- coordinar miembros,
-- administrar flujo operativo,
-- supervisar actividad.
-
----
-
-## member
-
-Puede:
-
-- participar,
-- ejecutar tareas,
-- registrar actividad,
-- subir adjuntos.
-
----
-
-# Diferencia entre Roles Globales y Contextuales
-
-## Roles Globales
-
-Aplican a TODO el sistema.
-
-Ejemplo:
-
-```text
-admin
-profesor
-```
-
----
-
-## Roles Contextuales
-
-Aplican SOLO dentro de un proyecto.
-
-Ejemplo:
-
-```text
-coordinator
-member
-```
-
----
-
-# Arquitectura Desacoplada
-
-Esto es extremadamente importante.
-
-Los roles contextuales NO dependen del RBAC global.
-
-Esto evita:
-
-- explosión de roles,
-- acoplamiento,
-- complejidad exponencial.
-
----
-
-# Policies reutilizables
-
-La autorización contextual vive principalmente en:
-
-```text
-app/core/authorization/
-```
-
----
-
-# Policies principales
-
-## can_user_action()
-
-Policy unificada principal. :contentReference[oaicite:9]{index=9}
-
-Combina:
-
-- roles,
-- permisos,
-- ownership,
-- proyecto,
-- coordinación.
-
----
-
-# Flujo interno de autorización
-
-```text
-Admin bypass
-    ↓
-Permiso global
-    ↓
-Contexto proyecto
-    ↓
 Ownership
-    ↓
-Denegar
+
+--> Política
+
+Política
+
+--> Resultado
 ```
 
----
-
-# Admin Bypass
-
-Los administradores tienen acceso total.
-
-```python
-if "admin" in roles:
-    return True
-```
-
-:contentReference[oaicite:10]{index=10}
-
----
-
-# Permisos Globales
-
-Validación estándar:
-
-```python
-permission_name = f"{resource}:{action}"
-```
-
----
-
-# Contexto Proyecto
-
-Para tareas y proyectos:
-
-- membership,
-- coordinación,
-- ownership contextual.
-
----
-
-# Ejemplo Task Authorization
-
-## Lectura
-
-```text
-Miembro del proyecto
-```
-
----
-
-## Escritura
-
-```text
-Coordinator del proyecto
-```
+Este proceso permite mantener un modelo de autorización flexible sin incrementar la complejidad del código.
 
 ---
 
 # Ownership
 
-Existe fallback ownership:
+Uno de los mecanismos más importantes implementados es la validación de ownership.
 
-```python
-if action in ["read", "update"] and user_id == target_id:
-```
+Ownership determina si un recurso pertenece funcionalmente al usuario que intenta modificarlo.
 
-:contentReference[oaicite:11]{index=11}
+Ejemplos habituales:
 
----
-
-# Project Permissions Helpers
-
-Helpers especializados: :contentReference[oaicite:12]{index=12}
-
-```python
-is_project_member()
-is_project_coordinator()
-can_manage_project()
-can_manage_tasks()
-user_in_project()
-```
+- propietario de un proyecto;
+- responsable de una tarea;
+- autor de una actividad;
+- creador de un recurso.
 
 ---
 
-# Task Permissions
+## Ventajas
 
-Sistema especializado para tareas. :contentReference[oaicite:13]{index=13}
+La incorporación de ownership permite:
 
-Incluye:
-
-```python
-can_view_task()
-ensure_can_view_task()
-```
+- reducir permisos excesivos;
+- proteger recursos compartidos;
+- facilitar colaboración;
+- mejorar la trazabilidad.
 
 ---
 
-# Activity Permissions
+# Membresía de Proyecto
 
-Sistema especializado para actividades. :contentReference[oaicite:14]{index=14}
+Muchas operaciones dependen de la pertenencia del usuario a un proyecto concreto.
 
-Incluye:
+Antes de ejecutar determinadas acciones el sistema verifica:
 
-```python
-can_view_activity()
-ensure_can_view_activity()
-```
+- si el usuario pertenece al proyecto;
+- si dispone del rol adecuado dentro del mismo;
+- si mantiene permisos suficientes.
 
----
-
-# Reglas Actuales de Actividades
-
-## admin
-
-Acceso total.
+Este mecanismo evita accesos cruzados entre proyectos independientes.
 
 ---
 
-## estudiante
+# Roles Contextuales
 
-Solo actividades propias.
-
----
-
-## profesor/coordinator
-
-Actividades de proyectos donde participa.
-
----
-
-# Dependencias FastAPI
-
-La capa HTTP usa guards reutilizables.
+Además del rol global, determinadas funcionalidades pueden depender de un rol específico dentro de un proyecto.
 
 Ejemplos:
 
-```python
-require_permission_web()
-require_roles_web()
-require_owner_or_permission_web()
+| Rol contextual | Capacidades |
+|---------------|-------------|
+| Coordinador | Gestión completa del proyecto |
+| Colaborador | Trabajo sobre tareas asignadas |
+| Observador | Consulta sin modificación |
+
+Este enfoque permite reutilizar los mismos usuarios en distintos proyectos con responsabilidades diferentes.
+
+---
+
+# Políticas de Autorización
+
+La lógica de autorización se organiza mediante políticas reutilizables.
+
+Una política representa una regla de negocio encargada de determinar si una operación concreta está permitida.
+
+Ejemplos:
+
+- puede editar un proyecto;
+- puede eliminar una tarea;
+- puede administrar usuarios;
+- puede visualizar auditoría.
+
+Las políticas encapsulan la lógica de autorización evitando duplicaciones en los controladores.
+
+---
+
+# Arquitectura de Policies
+
+```mermaid
+flowchart TD
+
+Solicitud
+
+--> Policy
+
+Policy
+
+--> Roles
+
+Policy
+
+--> Ownership
+
+Policy
+
+--> Contexto
+
+Roles
+
+--> Resultado
+
+Ownership
+
+--> Resultado
+
+Contexto
+
+--> Resultado
 ```
 
 ---
 
-# Frontend Authorization SSR
+# Helpers de Autorización
 
-El frontend implementa autorización visual contextual.
+Para simplificar el desarrollo, las comprobaciones más frecuentes se encapsulan en funciones reutilizables.
 
-NO es seguridad real.
+Estas funciones reciben:
 
-Es UX contextual.
+- usuario;
+- recurso;
+- acción;
+- contexto.
 
----
+Y devuelven una decisión binaria.
 
-# Helpers SSR disponibles
+```text
+True
 
-```python
-has_role()
-has_perm()
-can()
-is_owner()
-is_project_coordinator()
+↓
+
+Operación permitida
+
+False
+
+↓
+
+Operación denegada
 ```
 
----
-
-# Capacidades SSR
-
-## Ocultación contextual
-
-Botones.
+Esta aproximación mejora la mantenibilidad y facilita el testing de la lógica de autorización.
 
 ---
 
-## Navegación dinámica
+# Integración con la Interfaz
 
-Menús filtrados por permisos.
+La arquitectura RBAC también participa en el renderizado de la interfaz.
 
----
+Antes de generar cada vista, el backend calcula los permisos efectivos del usuario.
 
-## Renderizado condicional
+Con esta información la interfaz puede:
 
-Tabs, acciones, formularios.
+- ocultar botones;
+- deshabilitar acciones;
+- mostrar módulos disponibles;
+- adaptar la navegación.
 
----
+Es importante destacar que estas restricciones son únicamente visuales.
 
-## Contexto dinámico
-
-Detail layouts adaptativos.
-
----
-
-# Ejemplo SSR
-
-```jinja2
-{% if has_perm("projects:update") %}
-```
+Todas las operaciones vuelven a validarse posteriormente en backend.
 
 ---
 
-# Arquitectura Enterprise
+# Ejemplo de Flujo de Autorización
 
-El sistema ya implementa patrones enterprise reales:
+Supongamos que un usuario intenta modificar una tarea.
 
-- RBAC desacoplado,
-- autorización contextual,
-- ownership,
-- policy engine,
-- permisos granulares,
-- SSR contextual,
-- reusable guards.
+El sistema sigue una secuencia similar a la siguiente:
 
----
+1. Validar autenticación.
+2. Obtener roles asignados.
+3. Resolver permisos efectivos.
+4. Comprobar pertenencia al proyecto.
+5. Verificar ownership de la tarea.
+6. Aplicar la política correspondiente.
+7. Autorizar o rechazar la operación.
 
-# Beneficios de la Arquitectura
-
-## Escalabilidad
-
-Puede crecer a cientos de permisos.
+Este flujo permite incorporar nuevas reglas sin modificar la estructura general del sistema.
 
 ---
+
+# Beneficios del Modelo
+
+La combinación de RBAC, permisos granulares y autorización contextual aporta numerosas ventajas.
 
 ## Flexibilidad
 
-Roles y contexto desacoplados.
+Permite representar escenarios complejos sin proliferación de roles.
 
 ---
 
-## Seguridad
+## Escalabilidad
 
-Validación backend centralizada.
+La incorporación de nuevos módulos únicamente requiere añadir nuevos permisos y políticas.
+
+---
+
+## Mantenibilidad
+
+Las reglas de autorización permanecen centralizadas y desacopladas del resto del código.
 
 ---
 
 ## Reutilización
 
-Policies reutilizables.
+Las mismas políticas pueden utilizarse desde:
+
+- vistas SSR;
+- endpoints REST;
+- WebSockets;
+- servicios internos.
 
 ---
 
-## Bajo acoplamiento
+## Seguridad
 
-Frontend desacoplado del backend.
-
----
-
-## Evolución futura
-
-Preparado para:
-
-- multi-tenant,
-- organizaciones,
-- departamentos,
-- jerarquías complejas,
-- SSO institucional.
+La autorización contextual reduce considerablemente el riesgo de accesos indebidos, incluso cuando distintos usuarios comparten el mismo rol global.
 
 ---
 
-# Limitaciones Actuales
+# Integración con la Arquitectura SSR
 
-## Policies dispersas
+La arquitectura de autorización se integra de forma transparente con el modelo **Server-Side Rendering (SSR)** utilizado por Aula Robótica Platform.
 
-Algunas reglas siguen repartidas entre módulos.
+Antes de renderizar cualquier página, el backend calcula los permisos efectivos del usuario autenticado y los incorpora al contexto de la plantilla Jinja2.
 
----
-
-## No existe Policy Engine formal
-
-Todavía no hay motor declarativo completo.
+Esto permite adaptar dinámicamente la interfaz sin trasladar la lógica de autorización al navegador.
 
 ---
 
-## No existe ABAC completo
+## Renderizado Contextual
 
-Aún no se usan atributos avanzados.
+Cada vista puede modificar automáticamente:
+
+- menús disponibles;
+- botones de acción;
+- formularios;
+- opciones administrativas;
+- enlaces de navegación;
+- paneles de administración.
+
+Como consecuencia, cada usuario visualiza únicamente aquellas funcionalidades para las que dispone de autorización.
 
 ---
 
-## No existe cache de autorización
+## Importante
 
-Cada request recalcula permisos.
+La ocultación de elementos visuales mejora la experiencia de usuario, pero **no constituye un mecanismo de seguridad**.
+
+Todas las operaciones vuelven a validarse posteriormente en backend antes de ejecutarse.
 
 ---
 
-# Evolución futura
+# Integración con WebSockets
 
-## ABAC híbrido
+La plataforma incorpora funcionalidades colaborativas mediante WebSockets.
 
-```text
-RBAC + atributos + contexto
+Estas comunicaciones también utilizan el sistema RBAC.
+
+Antes de aceptar una conexión WebSocket se realizan varias comprobaciones.
+
+---
+
+## Flujo de Validación
+
+```mermaid
+flowchart LR
+
+Cliente
+
+--> Handshake
+
+Handshake
+
+--> Usuario
+
+Usuario
+
+--> Roles
+
+Roles
+
+--> Permisos
+
+Permisos
+
+--> Contexto
+
+Contexto
+
+--> Room
+
+Room
+
+--> Conexión aceptada
 ```
 
 ---
 
-## Policy registry
+## Operaciones Protegidas
 
-Centralizar todas las policies.
+La autorización controla el acceso a:
 
----
+- dashboard realtime;
+- actividad reciente;
+- notificaciones;
+- Kanban colaborativo;
+- rooms de proyecto.
 
-## Permission caching
-
-Reducir carga en render SSR.
-
----
-
-## Multi-organization support
-
-Permisos por organización.
+De este modo únicamente reciben información los usuarios autorizados.
 
 ---
 
-## Dynamic permission inheritance
+# Relación con la Arquitectura IAM
 
-Herencia contextual avanzada.
+RBAC constituye únicamente una parte del modelo IAM implementado por la plataforma.
 
----
+Mientras que IAM gestiona:
 
-# Resumen
+- identidades;
+- autenticación;
+- proveedores;
+- usuarios;
 
-La plataforma implementa actualmente una arquitectura híbrida moderna:
+RBAC determina qué operaciones puede ejecutar posteriormente cada usuario autenticado.
 
 ```text
-JWT + RBAC + Contextual Authorization + Ownership + SSR Authorization
+Identity
+
+↓
+
+Authentication
+
+↓
+
+User
+
+↓
+
+Roles
+
+↓
+
+Permissions
+
+↓
+
+Policies
+
+↓
+
+Authorization
 ```
 
-El sistema ya supera ampliamente un CRUD académico tradicional y se aproxima a arquitecturas enterprise reales de:
+Esta separación facilita futuras integraciones con:
 
-- internal admin platforms,
-- operations systems,
-- collaborative management tools,
-- educational enterprise platforms.
+- OAuth2;
+- LDAP;
+- Active Directory;
+- SAML;
+- Single Sign-On.
+
+---
+
+# Auditoría de Autorizaciones
+
+El sistema puede registrar información relacionada con operaciones relevantes de autorización.
+
+Entre otros eventos:
+
+- accesos denegados;
+- modificaciones administrativas;
+- cambios de permisos;
+- asignación de roles;
+- operaciones críticas.
+
+Esta información resulta especialmente útil para:
+
+- depuración;
+- análisis de incidencias;
+- trazabilidad;
+- auditorías de seguridad.
+
+---
+
+# Casos de Uso
+
+## Caso 1
+
+Un estudiante intenta eliminar un proyecto.
+
+Proceso:
+
+1. Usuario autenticado.
+2. Resolución de roles.
+3. Obtención de permisos.
+4. Evaluación del contexto.
+5. Aplicación de la política.
+6. Operación denegada.
+
+---
+
+## Caso 2
+
+Un profesor modifica una tarea perteneciente a un proyecto del que forma parte.
+
+Proceso:
+
+1. Usuario autenticado.
+2. Permiso de edición.
+3. Verificación de pertenencia.
+4. Validación de ownership.
+5. Operación autorizada.
+
+---
+
+## Caso 3
+
+Un administrador accede al módulo de auditoría.
+
+Proceso:
+
+1. Usuario autenticado.
+2. Rol administrador.
+3. Permiso audit:read.
+4. Acceso concedido.
+
+---
+
+# Buenas Prácticas Aplicadas
+
+Durante el desarrollo se siguieron diversas recomendaciones ampliamente utilizadas en arquitecturas backend modernas.
+
+Entre ellas:
+
+- separación entre autenticación y autorización;
+- centralización de políticas;
+- permisos reutilizables;
+- validaciones backend;
+- principio de mínimo privilegio;
+- desacoplamiento entre UI y autorización;
+- reutilización de helpers;
+- integración con middleware;
+- arquitectura preparada para crecimiento.
+
+---
+
+# Ventajas de la Arquitectura
+
+La solución implementada proporciona numerosos beneficios.
+
+## Seguridad
+
+Las operaciones siempre se validan desde servidor.
+
+---
+
+## Flexibilidad
+
+Es posible añadir nuevos recursos y permisos sin modificar el diseño general.
+
+---
+
+## Escalabilidad
+
+El crecimiento funcional únicamente requiere incorporar nuevas políticas y permisos.
+
+---
+
+## Mantenibilidad
+
+Toda la lógica de autorización permanece centralizada.
+
+---
+
+## Reutilización
+
+Las mismas reglas pueden utilizarse desde:
+
+- vistas SSR;
+- APIs REST;
+- WebSockets;
+- servicios internos.
+
+---
+
+## Extensibilidad
+
+La arquitectura queda preparada para incorporar nuevos mecanismos de autenticación y autorización sin afectar al resto del sistema.
+
+---
+
+# Estado Actual
+
+Actualmente el sistema dispone de:
+
+✅ Modelo RBAC completamente funcional.
+
+✅ Permisos granulares.
+
+✅ Roles desacoplados.
+
+✅ Validaciones contextuales.
+
+✅ Ownership.
+
+✅ Políticas reutilizables.
+
+✅ Middleware de autorización.
+
+✅ Integración SSR.
+
+✅ Protección WebSocket.
+
+✅ Integración con IAM.
+
+---
+
+# Evolución Futura
+
+La arquitectura actual permite evolucionar hacia escenarios más avanzados sin necesidad de rediseñar el modelo de autorización.
+
+Entre las mejoras previstas destacan:
+
+- políticas declarativas;
+- ABAC (Attribute Based Access Control);
+- autorización basada en organizaciones;
+- delegación de permisos;
+- permisos temporales;
+- jerarquías dinámicas de roles;
+- integración con proveedores SSO;
+- autorización distribuida.
+
+---
+
+# 📌 Conclusiones
+
+El modelo RBAC implementado en Aula Robótica Platform constituye una solución flexible y mantenible para la gestión de autorizaciones dentro de una plataforma colaborativa.
+
+La combinación de roles, permisos granulares, autorización contextual, ownership y políticas reutilizables permite controlar el acceso a los recursos de forma precisa sin incrementar innecesariamente la complejidad del sistema.
+
+La estrecha integración con la arquitectura SSR, los WebSockets, el middleware de seguridad y el modelo IAM proporciona una solución coherente que mantiene separadas las responsabilidades de autenticación y autorización, facilitando tanto el mantenimiento como la futura evolución hacia arquitecturas empresariales de mayor complejidad.
+
+Gracias a esta aproximación, la plataforma dispone de una base sólida sobre la que incorporar nuevas funcionalidades, nuevos perfiles de usuario y futuros mecanismos de identidad federada sin comprometer la seguridad ni la mantenibilidad del sistema.
+

@@ -9,6 +9,7 @@ venv/
 __pycache__/
 *.pyc
 *.pyo
+.pytest_cache/
 
 # Archivos temporales
 *.sqlite3
@@ -27,3 +28,5 @@ LLM_CONTEXT/
 storage/activity_attachments/*
 !storage/activity_attachments/.gitkeep
 
+htmlcov/
+*.db

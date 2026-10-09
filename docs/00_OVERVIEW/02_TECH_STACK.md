@@ -1,399 +1,674 @@
 # 02_TECH_STACK.md
 
-# Stack Tecnológico
-
-# 🐍 Backend
-
-## Python 3.13
-
-Lenguaje principal del proyecto.
-
-Se utiliza como base para:
-
-- backend web
-- lógica de negocio
-- realtime
-- autorización
-- renderizado SSR
-- automatización
-- testing
+# ⚙️ Aula Robótica Platform — Stack Tecnológico
 
 ---
 
-## FastAPI
+# 📌 Introducción
 
-Framework principal de backend.
+Aula Robótica Platform utiliza un stack tecnológico moderno orientado al desarrollo backend modular, colaboración realtime y despliegue cloud multicontenedor.
 
-La plataforma utiliza FastAPI como núcleo arquitectónico para:
+La selección tecnológica se realizó priorizando:
 
-- SSR routes
-- REST APIs
-- WebSockets
-- dependency injection
-- middleware
-- authentication
-- realtime communication
+* mantenibilidad,
+* modularidad,
+* rendimiento,
+* simplicidad arquitectónica,
+* seguridad,
+* capacidad realtime,
+* y aproximación a entornos productivos reales.
 
----
-
-## SQLAlchemy
-
-ORM principal del sistema.
-
-Uso actual:
-
-- modelos relacionales
-- relationships
-- eager loading
-- query optimization
-- ownership/context queries
-- transactional workflows
+El stack combina tecnologías backend modernas, renderizado SSR, sincronización WebSocket, despliegue Docker y herramientas DevOps orientadas a calidad software y despliegue cloud.
 
 ---
 
-## MariaDB
+# 🧠 Filosofía Tecnológica
 
-Base de datos relacional principal.
+La arquitectura tecnológica del proyecto sigue varios principios fundamentales:
 
-Actualmente utilizada para:
-
-- IAM
-- RBAC
-- proyectos
-- tareas
-- actividades
-- auditoría
-- notificaciones
-- adjuntos
+* Backend-first architecture
+* SSR-first rendering
+* Modular domain-driven structure
+* Realtime collaboration
+* Cloud-ready deployment
+* DevOps-oriented infrastructure
+* Seguridad backend-centralizada
+* Despliegue reproducible
 
 ---
 
-## Pydantic
+# 🐍 Backend Principal
 
-Validación y serialización de datos.
-
-Uso:
-
-- schemas
-- DTOs
-- validación de entrada
-- respuestas API
+El núcleo de la plataforma está desarrollado en Python utilizando FastAPI como framework principal.
 
 ---
 
-# 🔐 Seguridad
+# Python 3.13
 
-## JWT Authentication
+## Uso principal
 
-Sistema principal de autenticación.
+Lenguaje base de toda la plataforma.
 
-Implementado mediante:
+## Motivos de selección
 
-- access tokens
-- refresh tokens
-- JWT payload permissions
-- expiración controlada
+* Sintaxis clara y mantenible
+* Excelente ecosistema backend
+* Alto soporte para asincronía
+* Integración natural con FastAPI
+* Gran productividad de desarrollo
 
----
+## Uso dentro del proyecto
 
-## HTTPOnly Cookies
-
-Los tokens se almacenan mediante cookies seguras.
-
-Ventajas:
-
-- protección frente a XSS
-- SSR integration
-- persistencia segura
-
----
-
-## SessionMiddleware
-
-Utilizado para:
-
-- flash messages
-- toast notifications
-- estado temporal SSR
-- mensajes transitorios UI
-
-Actualmente integrado mediante:
-
-```python
-from starlette.middleware.sessions import SessionMiddleware
-```
+* Backend completo
+* Lógica negocio
+* WebSockets
+* Servicios
+* Persistencia
+* Middleware
+* IAM
 
 ---
 
-# 🔐 RBAC + Contextual Authorization
-La plataforma utiliza autorización híbrida:
+# FastAPI
 
-### Global RBAC
-- roles
-- permissions
-- policies
+## Rol
 
-### Contextual Authorization
-Validaciones dinámicas basadas en:
-- ownership
-- project coordinators
-- resource permissions
-- entity relationships
+Framework backend principal.
 
-### bcrypt
-- Hash seguro de contraseñas.
+## Responsabilidades
 
-# 🌐 Frontend SSR
+* APIs REST
+* Renderizado SSR
+* Endpoints WebSocket
+* Middleware
+* Dependency Injection
+* Validación automática
 
-### Jinja2
-Motor principal de renderizado server-side.
-**Uso:**
-- templates
-- macros reutilizables
-- partial rendering
-- contextual UI
-- permission-aware rendering
+## Motivos de selección
 
-### Bootstrap 4/5
-Sistema base responsive.
-**Uso:**
-- grid system
-- forms
-- layout
-- utilities
-- responsive UI
+* Alto rendimiento ASGI
+* Excelente soporte async
+* Integración WebSocket
+* Documentación automática OpenAPI
+* Tipado moderno
+* Arquitectura modular
 
-### AdminLTE
-Base visual administrativa enterprise-style. Actualmente proporciona:
-- layout administrativo
-- sidebars
-- cards
-- dashboard structure
-- widgets base
+## Uso en el proyecto
 
-### Font Awesome
-Sistema principal de iconografía. Uso intensivo en:
-- navegación
-- dashboards
-- acciones
-- timelines
-- auditoría
-- botones contextuales
+* Gestión IAM
+* Gestión proyectos
+* Gestión tareas
+* Dashboard
+* Auditoría
+* Notificaciones
+* Realtime
 
-# ⚡ Arquitectura JavaScript
-La plataforma utiliza una arquitectura JS modular organizada por dominios funcionales.
+---
 
-### Modular JS Architecture
-Estructura basada en:
-```text
-static/js/
-├── core/
-├── dashboard/
-├── kanban/
-├── projects/
-├── tasks/
-├── activities/
-└── notifications/
-```
+# Uvicorn
 
-### Core JS
-Incluye funcionalidades reutilizables:
-- toast system
-- confirm dialogs
-- flash handlers
-- websocket clients
-- reusable utilities
+## Rol
 
-### Toast Notification System
-Sistema centralizado de notificaciones UI.
-Características:
-- SSR compatible
-- autoclose
-- categories
-- reusable rendering
-- session flash integration
+Servidor ASGI principal.
 
-### Reusable Confirm Dialog System
-Reemplazo progresivo de confirm() nativos.
-Basado en:
-- data-confirm
-- reusable modal dialogs
-- centralized handlers
+## Responsabilidades
 
-## 📡 Realtime Architecture
+* ejecución FastAPI
+* conexiones HTTP
+* conexiones WebSocket
+* soporte asincronía
 
-### FastAPI WebSockets
-La plataforma incorpora realtime mediante WebSockets.
-Uso actual:
-- dashboard sync
-- notifications
-- timelines
-- realtime updates
+## Motivos de selección
 
-### WebSocket Rooms
-La arquitectura ya soporta segmentación lógica tipo “rooms”.
-Ejemplos:
-- dashboard channels
-- project channels
-- user-specific notifications
+* Alto rendimiento
+* Compatibilidad ASGI
+* Integración FastAPI
+* Soporte realtime
 
-Preparado para:
-- collaborative editing
-- realtime Kanban
-- user presence
+---
 
-## 📊 Visualización de Datos
+# 🧩 Arquitectura Frontend SSR
 
-### Chart.js
-Utilizado en dashboards y métricas.
-Uso actual:
-- activity charts
-- user statistics
-- project metrics
-- realtime visual indicators
+La interfaz sigue una arquitectura SSR (Server-Side Rendering).
 
-## 🎨 Arquitectura CSS
-La plataforma utiliza una arquitectura CSS modular.
+---
 
-### Foundation Layer
-- base.css
-- layout.css
-- utilities.css
+# Jinja2
 
-Responsabilidades:
-- reset
-- spacing
-- typography
-- layout primitives
+## Rol
 
-### Design System Layer
-- components.css
-- forms.css
-- tables.css
-- buttons.css
+Motor de templates principal.
 
-Incluye:
-- reusable cards
-- forms
-- tables
-- badges
-- buttons
-- alerts
-- toasts
+## Responsabilidades
 
-### Feature-oriented CSS
-CSS organizado por dominio funcional.
-Ejemplos:
-- dashboard.css
-- projects.css
-- tasks.css
-- activities.css
-- kanban.css
-- notifications.css
+* renderizado HTML
+* templates reutilizables
+* macros
+* layouts
+* rendering contextual
 
-## 🧩 Arquitectura Backend
+## Motivos de selección
 
-### Core Layer
-Infraestructura transversal reutilizable.
-`app/core/`
+* Integración FastAPI
+* Simplicidad
+* Flexibilidad
+* Renderizado backend-first
 
-Incluye:
-- security
-- middleware
-- websocket
-- authorization
-- constants
-- template context
-- flash system
-- utilities
+## Uso dentro del proyecto
 
-### Modular Domain Architecture
-La plataforma sigue arquitectura modular por dominios.
-`modules/`
+* Dashboard
+* Kanban
+* Gestión usuarios
+* Actividades
+* Auditoría
+* Notificaciones
 
-Dominios actuales:
-- auth
-- users
-- roles
-- identities
-- projects
-- tasks
-- activities
-- audit
-- notifications
-- activity_feed
-- auth_saml
+---
 
-## 🧪 Testing Stack
-- pytest (Framework principal de testing)
-- pytest-cov (Cobertura de tests)
-- Ruff (Linting y calidad de código)
+# AdminLTE
 
-### Testing Goals
-Objetivos actuales:
-- services
-- permissions
-- authorization
-- realtime
-- websocket workflows
+## Rol
 
-## ⚙️ Tooling y Dev Environment
+Framework visual administrativo.
 
-### uv
-Gestión moderna de entorno y dependencias Python.
-Uso actual:
-- dependency management
-- virtual environments
-- execution workflows
+## Responsabilidades
 
-Ejemplo:
-```bash
-uv run uvicorn app.main:app --reload
-```
+* estructura visual
+* componentes UI
+* dashboards
+* cards
+* tablas
+* navegación lateral
 
-### GitHub
-Control de versiones principal.
+## Motivos de selección
 
-### GitHub Actions
-CI/CD pipeline.
-Actualmente utilizado para:
-- linting
-- testing
-- quality checks
-- validation workflows
+* Diseño enterprise-style
+* Componentes administrativos
+* Responsive
+* Integración Bootstrap
 
-### SonarCloud
-Análisis estático y calidad de código.
-Uso:
-- maintainability
-- code smells
-- coverage analysis
-- technical debt tracking
+---
 
-## 📚 APIs y Documentación
-### Swagger / OpenAPI
-Documentación automática FastAPI.
-Disponible para APIs REST del sistema.
+# Bootstrap
 
-## 🚀 Infraestructura Futura
-### Docker
-Previsto para:
-- despliegue
-- entornos reproducibles
-- desarrollo aislado
+## Rol
 
-### Alembic
-Previsto para:
-- migraciones SQLAlchemy
-- versionado DB
+Framework CSS principal.
 
-## 🏁 Resumen Técnico
-La plataforma utiliza una arquitectura moderna SSR-first centrada en:
-- seguridad
-- modularidad
-- realtime
-- maintainability
-- reusable UI
-- enterprise workflows
+## Responsabilidades
 
-combinando FastAPI, SSR rendering y realtime communication bajo una arquitectura progresivamente escalable.
+* grid system
+* responsive layout
+* componentes visuales
+* formularios
+
+---
+
+# JavaScript
+
+## Uso principal
+
+* interacción cliente
+* integración realtime
+* WebSockets
+* actualización dinámica DOM
+* gráficos
+* eventos UI
+
+---
+
+# Chart.js
+
+## Rol
+
+Biblioteca gráficos dashboard.
+
+## Uso actual
+
+* productividad
+* métricas tareas
+* actividad dashboard
+
+---
+
+# ⚡ Realtime Stack
+
+La plataforma incorpora sincronización realtime multiusuario mediante WebSockets.
+
+---
+
+# FastAPI WebSockets
+
+## Responsabilidades
+
+* conexiones persistentes
+* sincronización realtime
+* broadcasting
+* rooms
+* eventos live
+
+## Funcionalidades implementadas
+
+* Kanban colaborativo
+* actividad reciente
+* notificaciones
+* usuarios conectados
+* dashboard dinámico
+
+---
+
+# Arquitectura realtime
+
+La lógica realtime se implementa mediante:
+
+* WebSocket endpoints
+* connection managers
+* broadcasting
+* eventos servidor
+* sincronización frontend
+
+---
+
+# 🗄️ Persistencia y Base de Datos
+
+---
+
+# MariaDB 11
+
+## Rol
+
+Base de datos principal.
+
+## Responsabilidades
+
+* persistencia usuarios
+* proyectos
+* tareas
+* actividades
+* auditoría
+* notificaciones
+
+## Motivos de selección
+
+* motor relacional robusto
+* compatibilidad MySQL
+* integridad relacional
+* facilidad despliegue Docker
+
+---
+
+# SQLAlchemy
+
+## Rol
+
+ORM principal.
+
+## Responsabilidades
+
+* modelos relacionales
+* relaciones ORM
+* queries
+* persistencia
+* abstracción SQL
+
+## Motivos de selección
+
+* integración FastAPI
+* mantenibilidad
+* separación lógica SQL
+* tipado Python
+
+---
+
+# PyMySQL
+
+## Rol
+
+Driver conexión MariaDB/MySQL.
+
+---
+
+# 🔐 Seguridad e IAM
+
+La seguridad constituye una parte central de la arquitectura.
+
+---
+
+# JWT
+
+## Uso principal
+
+Autenticación stateless.
+
+## Responsabilidades
+
+* tokens autenticación
+* sesiones backend
+* validación usuarios
+
+---
+
+# Cookies HTTPOnly
+
+## Uso principal
+
+Almacenamiento seguro de sesión.
+
+## Beneficios
+
+* mitigación parcial XSS
+* integración SSR
+* sesiones transparentes
+
+---
+
+# RBAC Contextual
+
+## Responsabilidades
+
+* roles
+* permisos
+* ownership
+* autorización granular
+
+## Implementación
+
+* middleware auth
+* validación backend
+* permisos contextuales
+
+---
+
+# Middleware de Seguridad
+
+## Funciones principales
+
+* validación sesión
+* autorización
+* protección endpoints
+* control acceso
+
+---
+
+# ☁️ Infraestructura Cloud y DevOps
+
+La plataforma evolucionó hacia una infraestructura cloud moderna desplegada sobre Linux real.
+
+---
+
+# Hetzner Cloud
+
+## Rol
+
+Proveedor cloud VPS.
+
+## Uso actual
+
+* despliegue producción-like
+* hosting plataforma
+* snapshots
+* networking
+
+## Motivos de selección
+
+* buena relación coste/rendimiento
+* VPS Linux flexible
+* control infraestructura
+
+---
+
+# Ubuntu Server 24.04
+
+## Rol
+
+Sistema operativo servidor.
+
+## Responsabilidades
+
+* infraestructura Linux
+* ejecución Docker
+* networking
+* seguridad
+* despliegue
+
+---
+
+# Docker
+
+## Rol
+
+Contenerización aplicación.
+
+## Responsabilidades
+
+* aislamiento servicios
+* reproducibilidad
+* despliegue consistente
+
+## Uso actual
+
+* API FastAPI
+* MariaDB
+* Nginx
+
+---
+
+# Docker Compose
+
+## Rol
+
+Orquestación multicontenedor.
+
+## Responsabilidades
+
+* coordinación servicios
+* redes Docker
+* persistencia
+* despliegue completo
+
+## Arquitectura actual
+
+| Servicio | Función         |
+| -------- | --------------- |
+| api      | backend FastAPI |
+| mariadb  | persistencia    |
+| nginx    | reverse proxy   |
+
+---
+
+# Nginx
+
+## Rol
+
+Reverse Proxy principal.
+
+## Responsabilidades
+
+* entrada HTTP pública
+* forwarding backend
+* proxy WebSocket
+* aislamiento infraestructura
+* preparación HTTPS
+
+## Motivos de selección
+
+* alto rendimiento
+* estándar industria
+* integración WebSockets
+* arquitectura productiva
+
+---
+
+# Persistencia Docker
+
+## Uso actual
+
+Persistencia mediante volúmenes Docker para:
+
+* MariaDB
+* uploads
+* logs
+* backups
+
+---
+
+# Firewall y Hardening
+
+## Medidas implementadas
+
+* SSH mediante claves
+* root deshabilitado
+* firewall Linux
+* aislamiento backend
+* separación contenedores
+
+---
+
+# 🧪 Calidad Software
+
+La calidad software forma parte activa del flujo desarrollo.
+
+---
+
+# pytest
+
+## Rol
+
+Framework testing principal.
+
+## Uso actual
+
+* tests backend
+* tests servicios
+* tests repositorios
+* validación API
+
+---
+
+# pytest-cov
+
+## Rol
+
+Cobertura código.
+
+## Estado actual
+
+Cobertura aproximada:
+
+* ≈ 75%
+
+---
+
+# Ruff
+
+## Rol
+
+Linting y análisis estático.
+
+## Responsabilidades
+
+* calidad código
+* formato
+* detección problemas
+
+---
+
+# SonarCloud
+
+## Rol
+
+Análisis calidad software.
+
+## Uso actual
+
+* quality gates
+* maintainability
+* code smells
+* coverage
+
+---
+
+# 🔄 CI/CD
+
+---
+
+# GitHub Actions
+
+## Rol
+
+Pipeline automatización principal.
+
+## Validaciones actuales
+
+* testing
+* coverage
+* linting
+* SonarCloud
+* validación despliegue
+
+---
+
+# 📊 Observabilidad y Logging
+
+Actualmente el proyecto utiliza:
+
+* logs Docker
+* logs FastAPI
+* logs WebSocket
+* validación runtime
+
+La arquitectura queda preparada para futura evolución hacia:
+
+* observabilidad avanzada,
+* métricas centralizadas,
+* monitoring,
+* tracing.
+
+---
+
+# 🚀 Estado Tecnológico Actual
+
+Actualmente la plataforma dispone de:
+
+✅ Backend modular FastAPI
+✅ Renderizado SSR operativo
+✅ WebSockets realtime operativos
+✅ MariaDB persistente
+✅ Docker deployment funcional
+✅ Reverse proxy Nginx operativo
+✅ VPS Linux desplegado
+✅ CI/CD automatizado
+✅ Calidad software integrada
+
+---
+
+# 🔮 Evolución Tecnológica Futura
+
+La arquitectura actual prepara el sistema para futura evolución hacia:
+
+* HTTPS completo
+* SAML institucional
+* SPA desacoplada
+* observabilidad avanzada
+* Kubernetes
+* cloud-native scaling
+* monitorización avanzada
+* métricas centralizadas
+
+---
+
+# 📌 Conclusión
+
+El stack tecnológico seleccionado permitió evolucionar Aula Robótica Platform desde un entorno académico inicial hacia una plataforma backend moderna capaz de integrar:
+
+* realtime,
+* IAM avanzado,
+* Docker,
+* despliegue cloud,
+* WebSockets,
+* DevOps,
+* reverse proxy,
+* arquitectura modular,
+* y colaboración multiusuario.
+
+La combinación de tecnologías backend modernas, infraestructura Linux real y despliegue multicontenedor aproxima la plataforma a arquitecturas utilizadas habitualmente en entornos profesionales reales.

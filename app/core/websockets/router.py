@@ -28,7 +28,7 @@ async def websocket_endpoint(
 ):
 
     # ⚠️ recuperar usuario desde cookie JWT
-    user = await get_current_user_ws(websocket, db)
+    user = get_current_user_ws(websocket, db)
 
     project = db.query(Project).get(project_id)
 
@@ -50,7 +50,7 @@ async def dashboard_websocket_endpoint(
     websocket: WebSocket,
     db: Session = Depends(get_db),
 ):
-    user = await get_current_user_ws(websocket, db)
+    user = get_current_user_ws(websocket, db)
 
     if not user:
         await websocket.close(code=1008)

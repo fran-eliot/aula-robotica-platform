@@ -1,159 +1,129 @@
 # 🤖 Aula Robótica Platform
 
-![Python](https://img.shields.io/badge/python-3.13-blue)
-![FastAPI](https://img.shields.io/badge/FastAPI-backend-success)
-![Coverage](https://img.shields.io/badge/coverage-75%25-brightgreen)
-![Tests](https://github.com/fran-eliot/aula-robotica-platform/actions/workflows/tests.yml/badge.svg)
+> Plataforma colaborativa educativa desarrollada para la gestión de proyectos de robótica, con arquitectura backend modular, IAM avanzado, WebSockets realtime y despliegue cloud multicontenedor.
 
-Plataforma web modular desarrollada para la gestión colaborativa del **Aula de Robótica de la Escuela Politécnica Superior de la Universidad de Alcalá (UAH)**.
-
-El proyecto integra:
-
-* gestión de usuarios e identidades,
-* autenticación y autorización avanzada,
-* control de acceso RBAC contextual,
-* gestión colaborativa de proyectos,
-* tareas Kanban realtime,
-* auditoría,
-* notificaciones,
-* dashboard administrativo,
-* arquitectura preparada para SAML/SSO institucional.
-
-Desarrollado como **Proyecto Final del CFGS DAM (Desarrollo de Aplicaciones Multiplataforma)** con enfoque profesional en:
-
-* arquitectura backend,
-* seguridad,
-* testing,
-* realtime,
-* calidad software,
-* mantenibilidad,
-* escalabilidad.
+![Python](https://img.shields.io/badge/Python-3.13-blue)
+![FastAPI](https://img.shields.io/badge/FastAPI-Backend-009688)
+![Docker](https://img.shields.io/badge/Docker-Deployed-2496ED)
+![Nginx](https://img.shields.io/badge/Nginx-Reverse_Proxy-009639)
+![MariaDB](https://img.shields.io/badge/MariaDB-11-blue)
+![WebSockets](https://img.shields.io/badge/WebSockets-Realtime-purple)
+![Coverage](https://img.shields.io/badge/Coverage-75%25-success)
+![CI/CD](https://img.shields.io/badge/GitHub_Actions-Automated-black)
+![License](https://img.shields.io/badge/license-Educational-lightgrey)
 
 ---
 
 # 📚 Tabla de contenidos
 
-* Visión general
+* Descripción
 * Características principales
-* Arquitectura del sistema
+* Arquitectura
+* Infraestructura Cloud
 * Stack tecnológico
-* Funcionalidades
-* Sistema IAM y seguridad
+* Seguridad e IAM
 * Realtime y WebSockets
 * Calidad software
-* Testing y cobertura
-* Estructura del proyecto
-* Modelo de datos
-* Instalación y ejecución
 * Docker y despliegue
-* API y documentación
-* Roadmap futuro
-* Documentación adicional
+* Instalación local
+* Estructura del proyecto
+* Documentación técnica
+* Estado actual
+* Roadmap
 * Autor
 
 ---
 
-# 🚀 Visión general
+# 📖 Descripción
 
-Aula Robótica Platform no es únicamente un CRUD administrativo.
+**Aula Robótica Platform** es una plataforma colaborativa educativa orientada a la gestión de proyectos de robótica desarrollada como **Proyecto Final del CFGS DAM (Desarrollo de Aplicaciones Multiplataforma)**.
 
-El sistema ha sido diseñado como una plataforma extensible para soportar:
+La aplicación permite gestionar usuarios, identidades, proyectos, tareas, actividades y notificaciones mediante una arquitectura backend moderna basada en:
 
-* operaciones internas del Aula de Robótica,
-* coordinación de proyectos,
-* trabajo colaborativo,
-* gestión académica,
-* seguimiento de actividades,
-* competiciones como Eurobot Spain,
-* integración futura con sistemas institucionales.
+* FastAPI
+* SQLAlchemy
+* MariaDB
+* JWT Authentication
+* WebSockets
+* Arquitectura IAM desacoplada
+* RBAC contextual
+* Docker
+* Nginx Reverse Proxy
 
-La aplicación sigue una arquitectura modular orientada a separar claramente:
-
-* presentación,
-* lógica de negocio,
-* persistencia,
-* seguridad,
-* realtime.
+El proyecto ha evolucionado desde un entorno académico local hasta una infraestructura cloud desplegada sobre Linux real utilizando Docker Compose y arquitectura multicontenedor.
 
 ---
 
 # ✨ Características principales
 
-## 🔐 Seguridad e IAM
+## ⚡ Realtime Collaboration
 
-* Autenticación JWT
+* WebSockets multiusuario
+* Kanban sincronizado
+* Actualización instantánea de actividad
+* Dashboard realtime
+* Notificaciones live
+* Sincronización colaborativa
+
+---
+
+## 🔐 IAM & Security
+
+* JWT Authentication
 * Cookies HTTPOnly
 * RBAC contextual
 * Roles globales y contextuales
-* Sistema granular de permisos
-* Middleware de autenticación
-* Protección SSR y API
-* Auditoría completa
+* Middleware de autorización
+* Auditoría integrada
 * Arquitectura preparada para SAML/SSO
 
-## 📊 Dashboard administrativo
-
-* Métricas globales
-* Feed de actividad
-* Logs recientes
-* Estadísticas de proyectos
-* Estado de tareas
-* Métricas contextuales por usuario
+---
 
 ## 👥 Gestión de usuarios
 
 * CRUD completo
-* Activación/desactivación
+* Gestión de identidades
+* Activación y desactivación
 * Roles y permisos efectivos
-* Visualización contextual
-* Auditoría integrada
-
-## 🔑 Gestión de identidades
-
-* Identidades desacopladas del usuario
-* Soporte multi-provider
-* Arquitectura preparada para OAuth/SAML
-* Asociación flexible usuario-identidad
-
-## 📁 Gestión de proyectos
-
-* Creación y edición
-* Miembros y coordinadores
-* Gestión colaborativa
-* Feed de actividad
-* Métricas por proyecto
-
-## ✅ Gestión de tareas
-
-* Kanban realtime
-* Prioridades
-* Estados
-* Asignaciones
 * Auditoría de cambios
-* Actualización sincronizada mediante WebSockets
-
-## 🔔 Notificaciones
-
-* Sistema realtime
-* Notificaciones contextuales
-* Marcado de lectura
-* Integración con tareas y proyectos
-
-## 🧾 Auditoría
-
-Registro centralizado de:
-
-* login/logout,
-* acciones CRUD,
-* cambios críticos,
-* operaciones de seguridad,
-* actividad del sistema.
 
 ---
 
-# 🏗️ Arquitectura del sistema
+## 📁 Gestión de proyectos
 
-El proyecto utiliza una arquitectura modular multicapa.
+* Gestión colaborativa
+* Miembros y coordinadores
+* Feed de actividad
+* Actividades asociadas
+* Métricas por proyecto
+* Control contextual de acceso
+
+---
+
+## ✅ Gestión de tareas
+
+* Kanban colaborativo
+* Drag & Drop
+* Prioridades
+* Estados
+* Asignaciones
+* Auditoría
+* Realtime mediante WebSockets
+
+---
+
+## 🔔 Notificaciones
+
+* Notificaciones contextuales
+* Sistema realtime
+* Marcado de lectura
+* Integración con proyectos y tareas
+
+---
+
+# 🏗 Arquitectura del sistema
+
+La plataforma utiliza una arquitectura modular multicapa.
 
 ```text
 ┌──────────────────────────────┐
@@ -163,41 +133,71 @@ El proyecto utiliza una arquitectura modular multicapa.
                │
                ▼
 ┌──────────────────────────────┐
-│         FastAPI Routers      │
-│ SSR + API REST + WebSockets  │
+│ FastAPI Routers + WebSockets │
 └──────────────┬───────────────┘
                │
                ▼
 ┌──────────────────────────────┐
-│        Service Layer         │
-│ Business Logic / IAM / RBAC  │
+│     Service Layer / IAM      │
+│ RBAC / Business Logic        │
 └──────────────┬───────────────┘
                │
                ▼
 ┌──────────────────────────────┐
-│     SQLAlchemy ORM Layer     │
+│       SQLAlchemy ORM         │
 └──────────────┬───────────────┘
                │
                ▼
 ┌──────────────────────────────┐
-│         MariaDB DB           │
+│          MariaDB             │
 └──────────────────────────────┘
 ```
 
-## Arquitectura híbrida
+---
 
-La aplicación combina:
+# ☁️ Infraestructura Cloud
 
-* SSR tradicional mediante Jinja2,
-* API REST,
-* comunicación realtime mediante WebSockets.
+La plataforma ha sido desplegada y validada sobre una infraestructura cloud real.
 
-Esto permite:
+## Infraestructura utilizada
 
-* rapidez de desarrollo,
-* buena experiencia de usuario,
-* simplicidad operativa,
-* realtime sin SPA compleja.
+* Hetzner Cloud VPS (CX22)
+* Ubuntu Server 24.04 LTS
+* Docker Engine
+* Docker Compose
+* Nginx Reverse Proxy
+* MariaDB 11
+* Docker Volumes
+* WebSockets operativos
+* SSH Hardening
+* Firewall Cloud
+* Snapshot de recuperación
+
+---
+
+## Arquitectura desplegada
+
+```text
+Internet
+    │
+    ▼
+Nginx Reverse Proxy
+    │
+    ▼
+FastAPI + WebSockets
+    │
+    ▼
+MariaDB
+```
+
+### Características del despliegue
+
+* Arquitectura multicontenedor
+* Persistencia desacoplada
+* Reverse proxy dedicado
+* Networking privado Docker
+* Realtime validado
+* Despliegue reproducible
 
 ---
 
@@ -207,304 +207,251 @@ Esto permite:
 
 * Python 3.13
 * FastAPI
-* SQLAlchemy ORM
-* MariaDB
+* SQLAlchemy
+* PyMySQL
+* Pydantic
 * Uvicorn
 
-## Frontend
+---
+
+## Frontend SSR
 
 * Jinja2
 * AdminLTE
 * Bootstrap
+* JavaScript
 * Chart.js
 * SweetAlert2
+
+---
+
+## Base de datos
+
+* MariaDB 11
+
+---
 
 ## Seguridad
 
 * JWT
 * Cookies HTTPOnly
-* bcrypt
 * RBAC contextual
-* Middleware de autenticación
+* Middleware Authentication
+* Auditoría
 
-## Realtime
+---
 
-* WebSockets
-* Broadcast de eventos
-* Sincronización Kanban
-
-## Calidad software
-
-* Pytest
-* Ruff
-* SonarQube Cloud
-* GitHub Actions
-* Coverage
-
-## Infraestructura
+## DevOps
 
 * Docker
-* uv
-* GitHub
-* CI/CD
+* Docker Compose
+* Nginx
+* Ubuntu Server
+* Hetzner Cloud
+* GitHub Actions
 
 ---
 
-# ⚙️ Funcionalidades
+# 🔐 Seguridad e IAM
 
-# 1. Sistema IAM
-
-El sistema implementa un modelo IAM completo basado en:
-
-* usuarios,
-* identidades,
-* roles,
-* permisos,
-* ownership,
-* contexto de proyecto.
-
-## Roles principales
-
-* Administrador
-* Profesor
-* Coordinador
-* Estudiante
-
-## Control de acceso
-
-El acceso se valida tanto:
-
-* en backend,
-* como en frontend SSR.
-
-Esto incluye:
-
-* menús dinámicos,
-* botones condicionales,
-* validación de acciones,
-* ownership,
-* permisos efectivos.
-
----
-
-# 2. Dashboard
-
-El dashboard muestra información diferente según el usuario.
-
-## Administradores
-
-* usuarios,
-* roles,
-* identidades,
-* actividad reciente,
-* auditoría,
-* estadísticas globales.
-
-## Usuarios contextuales
-
-* proyectos asignados,
-* tareas,
-* progreso,
-* feed de actividad,
-* notificaciones.
-
----
-
-# 3. Gestión de proyectos
-
-Cada proyecto puede incluir:
-
-* miembros,
-* coordinadores,
-* tareas,
-* actividades,
-* notificaciones,
-* feed de actividad.
+La plataforma implementa una arquitectura IAM desacoplada orientada a entornos educativos y colaborativos.
 
 ## Características
 
-* roles contextuales,
-* colaboración,
-* seguimiento,
-* realtime.
+* Gestión User / Identity desacoplada
+* Roles globales
+* Roles contextuales
+* Ownership validation
+* RBAC granular
+* Auditoría de acciones
+* Middleware de autorización
 
 ---
 
-# 4. Sistema Kanban
+## Seguridad de infraestructura
 
-El sistema Kanban soporta:
-
-* drag & drop,
-* realtime,
-* sincronización automática,
-* persistencia inmediata.
-
-## Estados
-
-* To Do
-* Doing
-* Done
-
-## Flujo realtime
-
-```text
-Cliente A
-   │
-   ▼
-Drag & Drop
-   │
-   ▼
-Backend valida permisos
-   │
-   ▼
-DB Update
-   │
-   ▼
-Broadcast WebSocket
-   │
-   ▼
-Clientes sincronizados
-```
-
----
-
-# 🔐 Sistema de seguridad
-
-## Autenticación
-
-La autenticación utiliza:
-
-* JWT Access Token,
-* Refresh Token,
-* Cookies HTTPOnly.
-
-## Ventajas
-
-* protección frente a XSS,
-* integración sencilla SSR,
-* separación frontend/backend.
-
----
-
-## RBAC contextual
-
-La autorización combina:
-
-* roles globales,
-* roles contextuales,
-* permisos granulares.
-
-```text
-Usuario
-   │
-   ▼
-Rol Global
-   │
-   ▼
-Proyecto
-   │
-   ▼
-Rol Contextual
-   │
-   ▼
-Permisos efectivos
-```
-
----
-
-## Auditoría
-
-Todas las acciones relevantes quedan registradas:
-
-* usuario,
-* acción,
-* recurso,
-* IP,
-* timestamp,
-* user-agent.
+* SSH mediante claves ED25519
+* Root deshabilitado
+* Usuario administrativo dedicado
+* Firewall Cloud
+* Docker Network privada
+* Backend no expuesto directamente
+* Reverse Proxy Nginx
 
 ---
 
 # ⚡ Realtime y WebSockets
 
-La plataforma incorpora comunicación realtime para:
+La plataforma incorpora comunicación realtime autenticada.
 
-* Kanban,
-* notificaciones,
-* sincronización de actividad.
+## Funcionalidades
 
-## Características
+* Dashboard realtime
+* Kanban sincronizado
+* Notificaciones live
+* Activity Feed
+* Actualización instantánea
 
-* salas por proyecto,
-* broadcast selectivo,
-* sincronización automática,
-* arquitectura desacoplada.
+---
+
+## Endpoints principales
+
+```text
+/ws/dashboard
+/ws/notifications
+/ws/projects/{id}
+```
+
+---
+
+## Validación realizada
+
+* HTTP 101 Switching Protocols
+* Múltiples clientes simultáneos
+* Sincronización realtime funcional
+* Logs Docker verificados
 
 ---
 
 # 🧪 Calidad software
 
-El proyecto incorpora una estrategia real de calidad software.
+La calidad del software constituye uno de los pilares principales del proyecto.
 
-## Herramientas
+## Herramientas utilizadas
 
-| Herramienta     | Uso              |
-| --------------- | ---------------- |
-| Ruff            | Linting          |
-| Pytest          | Testing          |
-| Coverage        | Cobertura        |
-| SonarQube Cloud | Calidad estática |
-| GitHub Actions  | CI/CD            |
+* Pytest
+* Ruff
+* SonarCloud
+* GitHub Actions
+* Coverage
 
 ---
 
-# 🧪 Testing y cobertura
+## Cobertura y testing
 
 Actualmente el proyecto dispone de:
 
-* más de 240 tests automatizados,
-* cobertura superior al 75%,
-* testing de servicios críticos,
-* integración automática CI/CD.
+* Más de 240 tests automatizados
+* Cobertura superior al 75%
+* Testing de servicios críticos
+* Validación automática CI/CD
+* Análisis estático automatizado
 
-## Tests cubiertos
+---
 
-* services,
-* autenticación,
-* permisos,
-* dashboard,
-* proyectos,
-* tareas,
-* notificaciones,
-* activity feed.
+## Componentes cubiertos
 
-## Ejecutar tests
+* Autenticación
+* Permisos
+* Dashboard
+* Usuarios
+* Roles
+* Identidades
+* Proyectos
+* Tareas
+* Notificaciones
+* Activity Feed
+
+---
+
+# 🐳 Docker y despliegue
+
+La infraestructura completa está preparada para desplegarse mediante Docker Compose.
+
+## Servicios desplegados
+
+* FastAPI
+* MariaDB
+* Nginx Reverse Proxy
+
+---
+
+## Despliegue rápido
 
 ```bash
-uv run pytest
-```
+git clone https://github.com/fran-eliot/aula-robotica-platform.git
 
-## Coverage
+cd aula-robotica-platform/deploy
 
-```bash
-uv run pytest --cov=app --cov-report=html
+cp .env.example .env
+
+docker compose up -d --build
 ```
 
 ---
 
-# 📁 Estructura del proyecto
+## Gestión de contenedores
+
+```bash
+docker compose ps
+```
+
+```bash
+docker compose logs -f
+```
+
+```bash
+docker compose down
+```
+
+---
+
+# 🚀 Instalación local
+
+## Clonar repositorio
+
+```bash
+git clone https://github.com/fran-eliot/aula-robotica-platform.git
+
+cd aula-robotica-platform
+```
+
+---
+
+## Instalar dependencias
+
+```bash
+uv sync
+```
+
+---
+
+## Configurar entorno
+
+Crear:
+
+```text
+.env
+```
+
+a partir de:
+
+```text
+.env.example
+```
+
+---
+
+## Ejecutar aplicación
+
+```bash
+uv run uvicorn app.main:app --reload
+```
+
+Disponible en:
+
+```text
+http://127.0.0.1:8000
+```
+
+---
+
+# 📂 Estructura del proyecto
 
 ```text
 app/
 ├── core/
-│   ├── security/
-│   ├── middleware/
-│   ├── permissions/
-│   └── utils/
-│
 ├── db/
-│   └── session/
-│
 ├── modules/
 │   ├── auth/
 │   ├── users/
@@ -514,144 +461,30 @@ app/
 │   ├── tasks/
 │   ├── notifications/
 │   ├── dashboard/
-│   ├── websocket/
+│   ├── activities/
 │   └── audit/
 │
-├── static/
 ├── templates/
+├── static/
 └── main.py
+
+deploy/
+├── Dockerfile
+├── docker-compose.yml
+├── nginx/
+├── scripts/
+└── .env.example
+
+docs/
+
+tests/
 ```
 
 ---
 
-# 🧩 Modelo de datos
+# 📚 Documentación técnica
 
-## Entidades principales
-
-* Users
-* Identities
-* Roles
-* Permissions
-* Projects
-* Tasks
-* Activities
-* Notifications
-* AuditLogs
-
-## Relaciones principales
-
-```text
-User 1 ─── N Identities
-User N ─── N Roles
-Project 1 ─── N Tasks
-Project N ─── N Members
-User 1 ─── N AuditLogs
-```
-
----
-
-# 🚀 Instalación y ejecución
-
-## Clonar repositorio
-
-```bash
-git clone https://github.com/fran-eliot/aula-robotica-platform
-cd aula-robotica-platform
-```
-
-## Instalar dependencias
-
-```bash
-uv sync
-```
-
-## Configurar variables de entorno
-
-Crear:
-
-```text
-.env
-```
-
-## Ejecutar aplicación
-
-```bash
-uv run uvicorn app.main:app --reload
-```
-
-Aplicación disponible en:
-
-```text
-http://127.0.0.1:8000
-```
-
----
-
-# 🐳 Docker y despliegue
-
-El proyecto está preparado para despliegue mediante Docker.
-
-## Objetivos del despliegue
-
-* portabilidad,
-* reproducibilidad,
-* aislamiento,
-* facilidad de instalación.
-
----
-
-# 📘 API y documentación
-
-## Swagger UI
-
-```text
-/api/docs
-```
-
-## ReDoc
-
-```text
-/api/redoc
-```
-
-La documentación OpenAPI incluye:
-
-* endpoints,
-* modelos,
-* autenticación,
-* respuestas,
-* validaciones.
-
----
-
-# 🛣️ Roadmap futuro
-
-## Integraciones
-
-* SAML/SSO UAH
-* OAuth2
-* proveedores externos
-
-## Plataforma
-
-* SPA complementaria
-* métricas avanzadas
-* analytics
-* mobile support
-* realtime avanzado
-
-## Infraestructura
-
-* despliegue cloud,
-* Docker Compose,
-* Kubernetes,
-* escalado horizontal.
-
----
-
-# 📚 Documentación adicional
-
-El proyecto incluye documentación técnica extensa en:
+El proyecto incorpora documentación técnica detallada en:
 
 ```text
 docs/
@@ -659,28 +492,86 @@ docs/
 
 Incluyendo:
 
-* arquitectura,
-* seguridad,
-* módulos,
-* decisiones arquitectónicas,
-* despliegue,
-* testing,
-* evolución del proyecto,
-* integración SAML.
+* Arquitectura
+* Seguridad IAM
+* Docker
+* Despliegue Cloud
+* Realtime
+* Testing
+* Modelo de datos
+* Decisiones arquitectónicas
+* Integración SAML
+
+---
+
+# 🚀 Estado actual
+
+✅ Plataforma funcional
+
+✅ IAM avanzado
+
+✅ Realtime operativo
+
+✅ WebSockets autenticados
+
+✅ Docker Compose operativo
+
+✅ Despliegue Cloud realizado
+
+✅ Reverse Proxy Nginx
+
+✅ MariaDB persistente
+
+✅ Seguridad documentada
+
+✅ Cobertura > 75%
+
+✅ CI/CD operativo
+
+---
+
+# 🔮 Roadmap
+
+## Seguridad
+
+* HTTPS completo
+* Certificados SSL
+* OAuth2
+* SAML real
+* MFA
+
+---
+
+## Infraestructura
+
+* Deploy automático
+* Observabilidad
+* Monitorización
+* Backups automatizados
+
+---
+
+## Plataforma
+
+* Métricas avanzadas
+* SPA complementaria
+* Mobile support
+* Escalabilidad horizontal
+* Kubernetes
 
 ---
 
 # 👨‍💻 Autor
 
-## Francisco “Fran” Ramírez Martín
+## Francisco Ramírez Martín
 
-Backend Developer · Full Stack · Data & AI Enthusiast
+**Backend Developer · Full Stack Developer · Data & AI Enthusiast**
 
 ### Formación
 
-* CFGS DAM
-* Ingeniería Informática (UNED)
-* Bootcamp Full Stack
+* CFGS DAM — IES Lope de Vega
+* Grado en Ingeniería Informática — UNED
+* Bootcamp Full Stack Development
 * Bootcamp Data Analytics
 
 ### Tecnologías principales
@@ -689,8 +580,8 @@ Backend Developer · Full Stack · Data & AI Enthusiast
 * FastAPI
 * Java
 * Spring Boot
-* SQL
 * Angular
+* SQL
 * Docker
 * AWS
 
@@ -698,8 +589,16 @@ Backend Developer · Full Stack · Data & AI Enthusiast
 
 🔗 LinkedIn
 
-[https://linkedin.com/in/franeliot](https://linkedin.com/in/franeliot)
+https://linkedin.com/in/franeliot
 
 💻 GitHub
 
-[https://github.com/fran-eliot](https://github.com/fran-eliot)
+https://github.com/fran-eliot
+
+---
+
+# 📈 Conclusión
+
+Aula Robótica Platform demuestra la viabilidad de una plataforma educativa colaborativa moderna basada en arquitectura modular, IAM avanzado, WebSockets realtime, despliegue cloud, Docker y buenas prácticas DevOps.
+
+El proyecto combina backend moderno, seguridad, testing, realtime e infraestructura cloud real, reproduciendo una arquitectura cercana a la utilizada en numerosos entornos profesionales actuales.

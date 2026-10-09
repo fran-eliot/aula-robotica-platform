@@ -1,512 +1,1022 @@
 # 41_GITHUB_ACTIONS.md
 
-# GitHub Actions Architecture
+# ⚙️ GitHub Actions
 
-## Objetivo
+---
 
-Este documento describe la integración actual de GitHub Actions dentro de Aula Robótica Platform.
+# 📌 Introducción
 
-Actualmente GitHub Actions constituye el núcleo del sistema CI automatizado del proyecto.
+GitHub Actions constituye el motor de automatización utilizado por Aula Robótica Platform para implementar la estrategia de **Integración Continua (CI)**.
+
+Permite ejecutar automáticamente diferentes procesos de validación cada vez que se produce un cambio en el repositorio, garantizando que todas las modificaciones cumplen los estándares de calidad definidos antes de incorporarse al proyecto.
+
+Gracias a GitHub Actions, el proyecto automatiza tareas que anteriormente debían realizarse manualmente, mejorando la productividad del desarrollo y reduciendo la posibilidad de introducir errores.
+
+---
+
+# 🎯 Objetivos
+
+La incorporación de GitHub Actions persigue varios objetivos.
+
+## Objetivos funcionales
+
+- automatizar tareas repetitivas;
+- validar el proyecto tras cada modificación;
+- ejecutar pruebas automáticamente;
+- detectar errores tempranamente;
+- mejorar la calidad del software.
+
+---
+
+## Objetivos técnicos
+
+- automatizar pipelines;
+- ejecutar workflows reproducibles;
+- integrar herramientas de calidad;
+- facilitar despliegues futuros;
+- versionar la configuración del pipeline;
+- favorecer el desarrollo colaborativo.
+
+---
+
+# ¿Qué es GitHub Actions?
+
+GitHub Actions es la plataforma de automatización integrada en GitHub que permite ejecutar flujos de trabajo (workflows) como respuesta a distintos eventos producidos dentro del repositorio.
+
+Cada workflow se define mediante archivos YAML almacenados dentro del propio proyecto.
+
+Esto convierte la automatización en parte del código fuente, siguiendo el principio de **Pipeline as Code**.
+
+---
+
+# Pipeline as Code
+
+Toda la configuración de automatización forma parte del repositorio.
+
+Esto proporciona importantes ventajas:
+
+- versionado;
+- trazabilidad;
+- revisión mediante Pull Requests;
+- colaboración;
+- reproducibilidad;
+- mantenimiento simplificado.
+
+La configuración evoluciona conjuntamente con el resto del proyecto.
+
+---
+
+# Arquitectura General
+
+```mermaid
+flowchart LR
+
+Developer
+
+--> GitHub Repository
+
+GitHub Repository
+
+--> GitHub Actions
+
+GitHub Actions
+
+--> Workflow
+
+Workflow
+
+--> Jobs
+
+Jobs
+
+--> Steps
+
+Steps
+
+--> Resultado
+```
+
+---
+
+# Arquitectura de un Workflow
+
+Cada workflow se encuentra formado por varios niveles.
+
+```text
+Workflow
+
+↓
+
+Jobs
+
+↓
+
+Steps
+
+↓
+
+Actions
+
+↓
+
+Resultado
+```
+
+Cada nivel aporta un mayor grado de especialización dentro del proceso de automatización.
+
+---
+
+# Workflows
+
+Un **workflow** representa un proceso completo de automatización.
+
+Cada workflow puede contener uno o varios trabajos (jobs) que se ejecutan de forma secuencial o paralela.
+
+Ejemplos habituales:
+
+- validación del código;
+- testing;
+- análisis de calidad;
+- construcción de imágenes;
+- despliegue.
+
+---
+
+# Jobs
+
+Cada workflow puede dividirse en varios jobs independientes.
+
+Un job representa una unidad lógica de trabajo.
+
+Ejemplos:
+
+- instalar dependencias;
+- ejecutar Ruff;
+- ejecutar Pytest;
+- calcular cobertura;
+- ejecutar SonarCloud.
+
+La separación en jobs mejora la organización y facilita futuras ampliaciones del pipeline.
+
+---
+
+# Steps
+
+Cada job está formado por varios steps.
+
+Un step representa una acción concreta.
+
+Ejemplos:
+
+- checkout del repositorio;
+- instalación de Python;
+- instalación de dependencias;
+- ejecución de comandos;
+- subida de artefactos.
+
+Los steps se ejecutan de forma secuencial dentro del mismo job.
+
+---
+
+# Eventos de Ejecución
+
+Los workflows pueden ejecutarse automáticamente cuando ocurre un determinado evento dentro del repositorio.
+
+Entre los eventos más habituales destacan:
+
+| Evento | Descripción |
+|---------|-------------|
+| push | envío de cambios |
+| pull_request | creación o actualización de PR |
+| workflow_dispatch | ejecución manual |
+| schedule | ejecución programada |
+
+Esta flexibilidad permite adaptar el pipeline a distintos escenarios de desarrollo.
+
+---
+
+# Flujo General
+
+```mermaid
+flowchart TD
+
+Commit
+
+--> Push
+
+Push
+
+--> GitHub
+
+GitHub
+
+--> Workflow
+
+Workflow
+
+--> Jobs
+
+Jobs
+
+--> Steps
+
+Steps
+
+--> Resultado
+```
+
+---
+
+# GitHub Hosted Runners
+
+Los workflows se ejecutan sobre máquinas virtuales temporales proporcionadas por GitHub.
+
+Estas máquinas reciben el nombre de **GitHub Hosted Runners**.
+
+Cada ejecución dispone de un entorno limpio e independiente.
+
+Entre sus ventajas destacan:
+
+- aislamiento;
+- reproducibilidad;
+- ausencia de configuración manual;
+- disponibilidad inmediata.
+
+---
+
+# Sistema Operativo
+
+El proyecto utiliza runners Linux basados en Ubuntu.
+
+Esta elección proporciona:
+
+- rapidez;
+- compatibilidad con Python;
+- integración con Docker;
+- entorno similar al VPS desplegado.
+
+La homogeneidad entre los entornos reduce la aparición de diferencias entre desarrollo y producción.
+
+---
+
+# Ciclo de Vida de una Ejecución
+
+Cada ejecución sigue una secuencia claramente definida.
+
+```mermaid
+flowchart TD
+
+Crear Runner
+
+↓
+
+Checkout
+
+↓
+
+Instalar Dependencias
+
+↓
+
+Ejecutar Jobs
+
+↓
+
+Generar Resultados
+
+↓
+
+Eliminar Runner
+```
+
+Una vez finalizada la ejecución, el runner es destruido automáticamente.
+
+Esto garantiza que todas las ejecuciones parten siempre desde un entorno limpio.
+
+---
+
+# Checkout del Repositorio
+
+El primer paso habitual consiste en descargar el contenido del repositorio.
+
+Este proceso permite que el runner disponga del código necesario para ejecutar las distintas validaciones.
+
+A partir de este momento comienzan el resto de tareas automatizadas.
+
+---
+
+# Instalación del Entorno
+
+Antes de ejecutar cualquier herramienta es necesario preparar el entorno.
+
+Las tareas habituales incluyen:
+
+- instalación de Python;
+- actualización de pip;
+- instalación de dependencias;
+- restauración de cachés;
+- preparación del proyecto.
+
+Esta fase garantiza que todas las herramientas se ejecuten sobre un entorno consistente.
+
+---
+
+# Organización del Pipeline
+
+La estrategia seguida en Aula Robótica Platform divide las validaciones en varias fases consecutivas.
+
+De forma simplificada:
+
+1. Preparación del entorno.
+2. Instalación de dependencias.
+3. Linting.
+4. Testing.
+5. Coverage.
+6. SonarCloud.
+7. Resultado final.
+
+Esta organización facilita la localización de errores cuando alguna etapa falla.
+
+---
+
+# Beneficios de GitHub Actions
+
+La utilización de GitHub Actions proporciona numerosas ventajas.
+
+Entre ellas destacan:
+
+- automatización;
+- repetibilidad;
+- integración con GitHub;
+- facilidad de mantenimiento;
+- ejecución bajo demanda;
+- escalabilidad;
+- integración con herramientas externas;
+- preparación para despliegues automáticos.
+
+---
+
+# Integración con la Estrategia DevOps
+
+GitHub Actions constituye el núcleo operativo de la estrategia CI/CD implementada en Aula Robótica Platform.
+
+Su integración con:
+
+- Ruff;
+- Pytest;
+- Coverage;
+- SonarCloud;
+- Docker;
+
+permite construir pipelines completamente automatizados preparados para evolucionar hacia un proceso DevOps mucho más avanzado.
+
+---
+
+# 🔄 Ejecución del Workflow
+
+Una vez activado un evento del repositorio, GitHub Actions inicia automáticamente el workflow correspondiente.
+
+Cada ejecución se desarrolla siguiendo una secuencia perfectamente definida que garantiza que todas las validaciones se realicen en el orden adecuado.
+
+---
+
+# Flujo de Ejecución
+
+```mermaid
+flowchart TD
+
+Evento
+
+--> Workflow
+
+Workflow
+
+--> Preparación Runner
+
+Preparación Runner
+
+--> Checkout
+
+Checkout
+
+--> Instalación Dependencias
+
+Instalación Dependencias
+
+--> Validaciones
+
+Validaciones
+
+--> Resultados
+
+Resultados
+
+--> Finalización
+```
+
+---
+
+# Preparación del Runner
+
+Cada ejecución comienza creando un runner completamente limpio.
+
+Durante esta fase se prepara:
+
+- sistema operativo;
+- variables de entorno;
+- espacio de trabajo;
+- herramientas base;
+- conectividad con GitHub.
+
+La utilización de runners efímeros garantiza que cada ejecución sea independiente de las anteriores.
+
+---
+
+# Variables de Entorno
+
+GitHub Actions permite definir variables reutilizables durante la ejecución.
+
+Estas variables pueden emplearse para:
+
+- rutas;
+- versiones de Python;
+- configuración de herramientas;
+- parámetros del pipeline;
+- opciones de ejecución.
+
+La utilización de variables simplifica el mantenimiento de los workflows.
+
+---
+
+# Secrets
+
+Las credenciales sensibles nunca deben almacenarse directamente dentro del repositorio.
+
+GitHub Actions incorpora un sistema de **Secrets** que permite gestionar información confidencial de forma segura.
+
+Ejemplos:
+
+- tokens de SonarCloud;
+- claves API;
+- credenciales de despliegue;
+- variables privadas.
+
+Los secrets únicamente están disponibles durante la ejecución del workflow.
+
+---
+
+# Instalación de Dependencias
+
+Tras preparar el entorno, el pipeline instala todas las dependencias necesarias para ejecutar el proyecto.
+
+Esta fase incluye:
+
+- instalación de Python;
+- actualización de pip;
+- instalación mediante requirements;
+- preparación de librerías adicionales.
+
+Con ello se garantiza que todas las herramientas trabajen sobre un entorno consistente.
+
+---
+
+# Caché de Dependencias
+
+GitHub Actions permite reutilizar determinadas dependencias entre ejecuciones mediante mecanismos de caché.
+
+Entre los elementos que pueden almacenarse destacan:
+
+- paquetes Python;
+- dependencias;
+- herramientas auxiliares.
+
+El uso de caché reduce significativamente el tiempo necesario para ejecutar el pipeline.
+
+---
+
+# Linting Automático
+
+Una vez preparado el entorno comienza la validación estática del código.
+
+En Aula Robótica Platform esta tarea se realiza mediante **Ruff**.
+
+Su objetivo consiste en detectar:
+
+- errores de estilo;
+- problemas sintácticos;
+- código redundante;
+- importaciones innecesarias;
+- incumplimiento de buenas prácticas.
+
+El pipeline se detiene automáticamente si Ruff detecta errores que requieren corrección.
+
+---
+
+# Testing Automatizado
+
+Superada la fase de linting, GitHub Actions ejecuta la batería completa de pruebas automatizadas.
+
+Las pruebas permiten verificar:
+
+- servicios;
+- modelos;
+- autenticación;
+- autorización;
+- endpoints;
+- lógica de negocio.
+
+Cada cambio queda validado automáticamente antes de integrarse en el repositorio principal.
+
+---
+
+# Cobertura de Código
+
+Tras finalizar los tests, el pipeline calcula la cobertura alcanzada.
+
+La cobertura mide qué porcentaje del código ha sido ejecutado por las pruebas automáticas.
+
+Este indicador resulta especialmente útil para identificar zonas insuficientemente verificadas.
+
+---
+
+# Integración con SonarCloud
+
+Una vez obtenidos los resultados del testing, GitHub Actions envía la información a SonarCloud.
+
+SonarCloud analiza aspectos como:
+
+- bugs;
+- vulnerabilidades;
+- duplicación;
+- mantenibilidad;
+- cobertura;
+- deuda técnica.
+
+El análisis complementa las validaciones realizadas previamente durante el pipeline.
+
+---
+
+# Flujo de Calidad
+
+```mermaid
+flowchart LR
+
+Código
+
+--> Ruff
+
+Ruff
+
+--> Pytest
+
+Pytest
+
+--> Coverage
+
+Coverage
+
+--> SonarCloud
+
+SonarCloud
+
+--> Quality Gate
+```
+
+---
+
+# Gestión de Errores
+
+Cuando alguna fase produce un error, GitHub Actions finaliza inmediatamente la ejecución.
+
+Esto evita:
+
+- continuar con información inválida;
+- desperdiciar recursos;
+- generar resultados inconsistentes.
+
+Cada error queda registrado en el informe del workflow.
+
+---
+
+# Registro de Ejecución
+
+GitHub Actions mantiene un historial completo de todas las ejecuciones realizadas.
+
+Para cada ejecución puede consultarse:
+
+- fecha;
+- duración;
+- commit asociado;
+- autor;
+- estado;
+- logs completos.
+
+Este historial facilita enormemente la depuración de incidencias.
+
+---
+
+# Logs
+
+Cada step genera información detallada sobre su ejecución.
+
+Los logs permiten identificar:
+
+- comandos ejecutados;
+- errores;
+- tiempos;
+- advertencias;
+- resultados parciales.
+
+Disponer de esta información resulta esencial para resolver fallos en el pipeline.
+
+---
+
+# Artefactos
+
+GitHub Actions permite generar artefactos durante la ejecución.
+
+Entre los más habituales se encuentran:
+
+- informes de cobertura;
+- resultados de testing;
+- informes HTML;
+- ficheros temporales;
+- paquetes generados.
+
+Los artefactos permanecen disponibles para su descarga una vez finalizado el workflow.
+
+---
+
+# Ejecuciones Paralelas
+
+GitHub Actions permite ejecutar distintos jobs de forma simultánea.
+
+La paralelización mejora considerablemente el tiempo total del pipeline cuando existen tareas independientes.
+
+En proyectos de mayor tamaño esta característica resulta especialmente útil para:
+
+- testing en distintas versiones;
+- múltiples sistemas operativos;
+- validaciones independientes.
+
+---
+
+# Matrices de Ejecución
+
+GitHub Actions incorpora estrategias basadas en matrices.
+
+Una matriz permite ejecutar automáticamente el mismo workflow sobre múltiples configuraciones.
+
+Ejemplos:
+
+- diferentes versiones de Python;
+- distintos sistemas operativos;
+- múltiples configuraciones del proyecto.
+
+Aunque Aula Robótica Platform utiliza actualmente una configuración única, la arquitectura queda preparada para incorporar esta funcionalidad en el futuro.
+
+---
+
+# Cancelación Inteligente
+
+Cuando un desarrollador realiza varios commits consecutivos sobre la misma rama, GitHub Actions puede cancelar automáticamente ejecuciones anteriores.
+
+Esta optimización evita consumir recursos innecesarios y acelera el ciclo de integración.
+
+---
+
+# Beneficios de la Automatización
+
+La automatización mediante GitHub Actions aporta ventajas significativas:
+
+- reducción del trabajo manual;
+- mayor repetibilidad;
+- validación homogénea;
+- menor probabilidad de error humano;
+- mejor trazabilidad;
+- mayor rapidez en la detección de incidencias.
 
 ---
 
 # Estado Actual
 
-# GitHub Actions implementado
+Actualmente GitHub Actions automatiza:
 
-Actualmente sí existe integración activa mediante:
+✅ Preparación del entorno.
 
-```text
-.github/workflows/tests.yml
-```
+✅ Instalación de dependencias.
 
----
+✅ Linting con Ruff.
 
-# Objetivos actuales
+✅ Testing con Pytest.
 
-La pipeline automatiza:
+✅ Cobertura.
 
-- testing,
-- linting,
-- coverage,
-- quality gates,
-- análisis SonarCloud.
+✅ Integración con SonarCloud.
 
----
+✅ Quality Gates.
 
-# Filosofía
+✅ Historial de ejecuciones.
 
-Cada push o Pull Request debe validar automáticamente:
+✅ Logs detallados.
 
-```text
-calidad + estabilidad + mantenibilidad
-```
+La arquitectura deja preparada la incorporación de nuevos workflows y fases de automatización conforme evolucione la plataforma.
 
 ---
 
-# Arquitectura Pipeline
+# 🐳 Integración con Docker
 
-```text
-Push / PR
-    ↓
+La estrategia de automatización implementada mediante GitHub Actions ha sido diseñada para integrarse de forma natural con la infraestructura Docker utilizada durante el despliegue del proyecto.
+
+Aunque la versión actual mantiene un despliegue supervisado, la arquitectura permite incorporar posteriormente la construcción y publicación automática de imágenes Docker.
+
+Esta evolución no requiere modificar el diseño general del pipeline.
+
+---
+
+# Pipeline Orientado a Contenedores
+
+La separación entre integración continua y despliegue facilita incorporar nuevas fases al workflow.
+
+```mermaid
+flowchart TD
+
+Código Fuente
+
+--> GitHub
+
+GitHub
+
+--> GitHub Actions
+
 GitHub Actions
-    ↓
-Install Dependencies
-    ↓
-Linting
-    ↓
-Pytest
-    ↓
-Coverage
-    ↓
-SonarCloud
-    ↓
-GitHub Status
+
+--> Build Docker
+
+Build Docker
+
+--> Docker Image
+
+Docker Image
+
+--> Docker Registry
+
+Docker Registry
+
+--> Docker Compose
+
+Docker Compose
+
+--> VPS Ubuntu
 ```
 
 ---
 
-# Capacidades Actuales
+# Construcción de Imágenes
 
-# Testing
+Una evolución natural del pipeline consiste en automatizar la generación de imágenes Docker.
 
-La pipeline ejecuta:
+Este proceso permitiría:
 
-```text
-pytest
-```
+- construir imágenes reproducibles;
+- etiquetar versiones automáticamente;
+- validar la construcción;
+- publicar imágenes en un registro.
 
-para validar backend y lógica funcional.
-
----
-
-# Linting
-
-La pipeline valida:
-
-- estilo,
-- consistencia,
-- calidad base.
+La contenerización garantiza que el entorno validado durante el pipeline sea idéntico al utilizado posteriormente durante el despliegue.
 
 ---
 
-# Coverage
+# Integración con Docker Compose
 
-El sistema incluye:
+Docker Compose constituye el mecanismo de orquestación utilizado por Aula Robótica Platform.
 
-```text
-coverage gate
-```
+GitHub Actions puede evolucionar para automatizar tareas como:
 
-para impedir degradación progresiva.
+- actualización de imágenes;
+- recreación de contenedores;
+- reinicio controlado de servicios;
+- verificación posterior al despliegue.
 
----
-
-# SonarCloud
-
-Integración activa para:
-
-- bugs,
-- code smells,
-- duplicación,
-- maintainability,
-- technical debt.
+Esta integración simplifica considerablemente el mantenimiento operativo de la plataforma.
 
 ---
 
-# Filosofía Quality Gate
+# Integración con la Infraestructura Cloud
 
-El objetivo NO es solo "que compile".
+El proyecto se encuentra desplegado actualmente sobre una infraestructura cloud compuesta por:
 
-La pipeline busca:
+- Hetzner Cloud;
+- Ubuntu Server;
+- Docker;
+- Docker Compose;
+- Nginx;
+- MariaDB.
 
-- proteger arquitectura,
-- controlar deuda técnica,
-- mantener calidad evolutiva.
-
----
-
-# Runtime CI
-
-# Dependency Management
-
-La plataforma ya usa:
-
-```text
-uv
-pyproject.toml
-uv.lock
-```
-
-como stack moderno Python.
+GitHub Actions constituye el punto de partida para automatizar progresivamente la actualización de esta infraestructura.
 
 ---
 
-# Beneficios
+# Integración con Nginx
 
-- velocidad,
-- reproducibilidad,
-- resolución consistente.
+Aunque Nginx no forma parte directamente del pipeline, la automatización puede incorporar comprobaciones relacionadas con el servidor de entrada.
 
----
+Entre ellas:
 
-# Integración SonarCloud
+- validación de configuración;
+- comprobación de disponibilidad;
+- verificación de respuesta HTTP;
+- comprobación del proxy WebSocket.
 
-Archivo relacionado:
-
-```text
-sonar-project.properties
-```
+Estas verificaciones ayudan a garantizar que la infraestructura desplegada continúa funcionando correctamente.
 
 ---
 
-# Objetivos
+# Estrategia de Versionado
 
-## Static Analysis
+GitHub Actions facilita mantener una correspondencia clara entre:
 
-Analizar:
+- commits;
+- versiones;
+- artefactos;
+- imágenes Docker;
+- despliegues.
 
-- backend,
-- arquitectura,
-- mantenibilidad.
-
----
-
-# Quality Trends
-
-Permitir evolución sostenible del proyecto.
+Este versionado mejora la trazabilidad y simplifica posibles tareas de recuperación.
 
 ---
 
-# GitHub Workflow Philosophy
+# Observabilidad del Pipeline
 
-La arquitectura sigue:
+Cada ejecución genera información detallada que puede utilizarse para supervisar el comportamiento del proceso de integración.
 
-```text
-automation-first development
-```
+Entre los indicadores disponibles destacan:
 
----
+- duración del pipeline;
+- tiempo por job;
+- porcentaje de éxito;
+- frecuencia de ejecución;
+- histórico de fallos.
 
-# Beneficios
-
-## Desarrollo más seguro
-
-Errores detectados antes de merge.
+Estos datos permiten identificar oportunidades de mejora y optimización.
 
 ---
 
-## Refactor continuo
+# Optimización del Pipeline
 
-Mayor confianza al evolucionar arquitectura.
+La arquitectura de GitHub Actions permite reducir progresivamente los tiempos de ejecución mediante distintas técnicas.
 
----
+Entre ellas:
 
-## Enterprise readiness
+- reutilización de cachés;
+- paralelización de jobs;
+- matrices de ejecución;
+- reutilización de acciones;
+- reducción de dependencias innecesarias.
 
-Base sólida DevOps.
-
----
-
-# Pull Requests
-
-La pipeline está preparada para actuar como:
-
-```text
-quality gate before merge
-```
+Estas optimizaciones mejoran la productividad del equipo y reducen el tiempo necesario para validar cada cambio.
 
 ---
 
-# Estrategia Evolutiva
+# Reutilización de Actions
 
-Actualmente:
+GitHub Marketplace proporciona un amplio catálogo de acciones reutilizables.
 
-```text
-CI only
-```
+Entre las utilizadas o previstas para el proyecto destacan:
 
----
+- checkout del repositorio;
+- configuración de Python;
+- gestión de caché;
+- ejecución de SonarCloud;
+- carga de artefactos.
 
-# Futuro previsto
-
-## CD
-
-Deploy automático.
+La reutilización de acciones ampliamente utilizadas reduce el mantenimiento del pipeline.
 
 ---
 
-## Multi-environment
+# Buenas Prácticas Aplicadas
 
-- dev,
-- staging,
-- production.
+La implementación de GitHub Actions sigue diversas recomendaciones habituales en proyectos profesionales.
 
----
+Entre ellas:
 
-## Docker build
+- workflows pequeños y especializados;
+- separación entre jobs;
+- reutilización de acciones;
+- uso de secrets;
+- pipelines reproducibles;
+- validaciones automáticas;
+- logs detallados;
+- configuración versionada.
 
-Build automático imágenes.
-
----
-
-## Security scanning
-
-- secrets,
-- dependencies,
-- vulnerabilities.
+Estas prácticas mejoran tanto la mantenibilidad como la escalabilidad del sistema de automatización.
 
 ---
 
-# Posibles futuras pipelines
+# Roadmap de Automatización
 
-# Backend Pipeline
+La arquitectura deja preparada la incorporación de nuevas capacidades conforme evolucione la plataforma.
 
-- tests,
-- lint,
-- coverage,
-- security.
+Entre las principales líneas de evolución se encuentran:
 
----
-
-# Frontend Pipeline
-
-Futuro JS modular.
-
----
-
-# Realtime Testing Pipeline
-
-Futuro:
-
-- websocket testing,
-- realtime integration.
+- construcción automática de imágenes Docker;
+- publicación en Docker Registry;
+- despliegues automáticos;
+- múltiples entornos;
+- validaciones posteriores al despliegue;
+- monitorización automática;
+- rollback controlado;
+- despliegues blue-green.
 
 ---
 
-# Deployment Pipeline
+# Integración con la Estrategia DevOps
 
-Futuro:
+GitHub Actions constituye el elemento que conecta el desarrollo del software con la infraestructura desplegada.
 
-```text
-build
-→ deploy
-→ healthcheck
-→ rollback
-```
+Su integración con:
 
----
+- GitHub;
+- Docker;
+- Docker Compose;
+- SonarCloud;
+- VPS Ubuntu;
+- Nginx;
 
-# Riesgos Actuales
-
-## 1. Sin deploy
-
-GitHub Actions todavía NO despliega.
+permite construir una estrategia DevOps progresiva, escalable y alineada con las buenas prácticas actuales.
 
 ---
 
-## 2. Sin Docker build
+# Estado Actual
 
-Containerización aún pendiente.
+Actualmente Aula Robótica Platform dispone de una automatización basada en GitHub Actions que incorpora:
 
----
+✅ Ejecución automática de workflows.
 
-## 3. Realtime testing limitado
+✅ Validación tras eventos del repositorio.
 
-Poca cobertura WebSockets.
+✅ Preparación automática del entorno.
 
----
+✅ Instalación de dependencias.
 
-## 4. Frontend testing parcial
+✅ Linting mediante Ruff.
 
-JS architecture todavía evolucionando.
+✅ Testing automatizado con Pytest.
 
----
+✅ Medición de cobertura.
 
-# Roadmap GitHub Actions
+✅ Integración con SonarCloud.
 
-# Corto plazo
+✅ Quality Gates.
 
-- mejorar cobertura,
-- mejorar reporting,
-- realtime tests.
+✅ Historial de ejecuciones.
 
----
+✅ Gestión segura mediante Secrets.
 
-# Medio plazo
-
-- Docker build,
-- staging deploy,
-- security scanning.
+✅ Preparación para integración con Docker.
 
 ---
 
-# Largo plazo
+# Evolución Futura
 
-- multi-env pipelines,
-- observability checks,
-- distributed deployment.
+La evolución prevista permitirá transformar la actual estrategia de Integración Continua en un proceso DevOps mucho más completo.
 
----
+Entre las mejoras contempladas destacan:
 
-# Valor Arquitectónico
+- generación automática de imágenes Docker;
+- publicación en registros privados;
+- despliegues automáticos sobre VPS;
+- múltiples entornos (desarrollo, pruebas y producción);
+- monitorización continua;
+- observabilidad avanzada;
+- despliegues progresivos;
+- recuperación automática ante errores.
 
-GitHub Actions ya representa uno de los pilares DevOps más maduros del proyecto.
-
-Actualmente aporta:
-
-- automatización,
-- calidad continua,
-- feedback rápido,
-- control técnico,
-- protección arquitectura.
+Gracias a la modularidad de los workflows, estas mejoras podrán incorporarse sin alterar la estructura existente.
 
 ---
 
-# Relación con otros documentos
+# 📊 Beneficios Obtenidos
 
-Relacionado con:
+La incorporación de GitHub Actions ha permitido:
 
-- `39_CI_CD.md`
-- `40_DOCKER.md`
-- `42_ENVIRONMENT.md`
-- `16_TESTING_STATUS.md`
-- `36_MONITORING.md`
+- automatizar tareas repetitivas;
+- reducir el tiempo de validación;
+- mejorar la calidad del software;
+- detectar errores tempranamente;
+- incrementar la confianza en cada integración;
+- facilitar el desarrollo colaborativo;
+- preparar el proyecto para futuras automatizaciones de despliegue.
 
 ---
 
-# Conclusión
+# 📌 Conclusiones
 
-La integración actual con GitHub Actions proporciona una base moderna y profesional de integración continua.
+GitHub Actions constituye el núcleo operativo de la estrategia de Integración Continua implementada en Aula Robótica Platform.
 
-Aunque todavía no existe despliegue automatizado, el proyecto ya dispone de:
+La automatización de tareas como la preparación del entorno, el análisis estático del código, la ejecución de pruebas automatizadas, la medición de cobertura y la integración con SonarCloud permite garantizar que cada modificación del proyecto sea evaluada de forma homogénea antes de incorporarse al repositorio principal.
 
-- testing automatizado,
-- linting,
-- coverage,
-- SonarCloud,
-- pipelines reproducibles,
-- quality gates.
+La estrecha integración con GitHub, Docker y la infraestructura cloud desplegada sobre Hetzner convierte a GitHub Actions en una pieza fundamental para la evolución del proyecto hacia un modelo DevOps cada vez más automatizado.
 
-La siguiente gran evolución será:
+Esta aproximación mejora la calidad del software, reduce el esfuerzo manual y proporciona una base sólida para futuras estrategias de despliegue continuo, monitorización y escalabilidad en entornos profesionales.
 
-```text
-full CI/CD + containerized deployment
-```
-
-## Workflow final implementado
-
-El workflow definitivo incluye:
-
-- cache de dependencias,
-- creación automática de entorno,
-- ejecución Ruff,
-- pytest con cobertura,
-- upload de artifacts,
-- integración SonarCloud.
-
-El pipeline permite validar automáticamente la calidad del proyecto en cada ejecución.
-
-```yml
-name: CI Pipeline
-
-on:
-#  push:
-#  pull_request:
-  workflow_dispatch:
-
-jobs:
-  test:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.13"
-
-      - name: Install uv
-        run: python -m pip install --upgrade pip uv
-
-      - name: Cache dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/uv
-            .venv
-          key: uv-${{ runner.os }}-${{ hashFiles('uv.lock') }}
-          restore-keys: |
-            uv-${{ runner.os }}-
-
-      - name: Install dependencies
-        run: uv sync --dev
-
-      - name: Create env
-        run: |
-          cat > .env <<EOF
-          DATABASE_URL=sqlite:///./test.db
-          SECRET_KEY=supersecretkey
-          ACCESS_TOKEN_EXPIRE_MINUTES=60
-          DEBUG=true
-          APP_BASE_URL=http://localhost:8000
-          SAML_ENTITY_ID=http://localhost:8000
-          SAML_ACS_URL=http://localhost:8000/auth/saml/acs
-          SAML_METADATA_URL=http://localhost:8000/auth/saml/metadata
-          EOF
-
-      - name: Run linter
-        run: uv run ruff check app tests
-
-      # Gate temporal. Luego subir a 90+
-      - name: Run tests with coverage
-        run: |
-          uv run pytest \
-            --cov=app \
-            --cov-report=term-missing \
-            --cov-report=xml \
-            --cov-fail-under=75 \
-            -v
-
-      - name: Upload coverage artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-report
-          path: coverage.xml
-  sonar:
-    name: SonarCloud Scan
-    runs-on: ubuntu-latest
-    needs: test
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.13"
-
-      - name: Install uv
-        run: python -m pip install --upgrade pip uv
-
-      - name: Install dependencies
-        run: uv sync --dev
-
-      - name: Create env
-        run: |
-          cat > .env <<EOF
-          DATABASE_URL=sqlite:///./test.db
-          SECRET_KEY=supersecretkey
-          EOF
-
-      - name: Generate coverage
-        run: uv run pytest --cov=app --cov-report=xml
-
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarqube-scan-action@v6
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-```

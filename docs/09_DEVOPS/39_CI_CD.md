@@ -1,554 +1,1001 @@
 # 39_CI_CD.md
 
-# CI/CD Architecture
-
-## Objetivo
-
-Este documento describe la estrategia actual y futura de CI/CD de Aula Robótica Platform.
-
-Actualmente la plataforma ya dispone de una base DevOps moderna basada en:
-
-- GitHub Actions,
-- testing automatizado,
-- linting,
-- coverage gates,
-- SonarCloud,
-- pipelines automáticos,
-- validación continua.
-
-Aunque el despliegue todavía es únicamente local, la arquitectura ya está evolucionando hacia:
-
-```text
-Enterprise Continuous Integration Platform
-```
+# 🚀 Integración Continua y Despliegue Continuo (CI/CD)
 
 ---
 
-# Filosofía CI/CD
+# 📌 Introducción
 
-La estrategia actual prioriza:
+La estrategia de **Integración Continua (Continuous Integration, CI)** y **Despliegue Continuo (Continuous Deployment, CD)** constituye uno de los pilares fundamentales del proceso de desarrollo de Aula Robótica Platform.
 
-- calidad continua,
-- automatización,
-- feedback rápido,
-- prevención de regresiones,
-- evolución incremental.
+Su incorporación permite automatizar gran parte del ciclo de vida del software, garantizando que cada modificación del código fuente sea validada de forma sistemática antes de incorporarse al proyecto.
+
+La automatización reduce significativamente la posibilidad de introducir errores, mejora la calidad del código y facilita la evolución continua de la aplicación.
+
+En Aula Robótica Platform esta estrategia se implementa mediante **GitHub Actions**, integrando herramientas de análisis estático, testing automatizado y validación de calidad antes del despliegue sobre la infraestructura cloud.
 
 ---
 
-# Estado Actual
+# 🎯 Objetivos
 
-# Continuous Integration
+La estrategia CI/CD persigue varios objetivos complementarios.
 
-Actualmente sí existe CI automatizado mediante:
+## Objetivos funcionales
 
-```text
+- automatizar la validación del software;
+- detectar errores tempranamente;
+- garantizar estabilidad del proyecto;
+- facilitar despliegues repetibles;
+- mejorar la productividad del desarrollo.
+
+---
+
+## Objetivos técnicos
+
+- automatizar pipelines;
+- integrar testing continuo;
+- ejecutar análisis estático;
+- verificar cobertura;
+- validar calidad del código;
+- preparar despliegues cloud;
+- reducir intervención manual.
+
+---
+
+# 🧠 Filosofía DevOps
+
+La estrategia adoptada sigue los principios fundamentales de DevOps.
+
+El objetivo no consiste únicamente en automatizar tareas, sino en integrar desarrollo, validación y despliegue dentro de un proceso continuo.
+
+Cada cambio realizado sobre el repositorio desencadena automáticamente un conjunto de validaciones que garantizan que el proyecto continúa siendo estable.
+
+Esta filosofía aporta:
+
+- mayor confianza;
+- entregas frecuentes;
+- reducción de errores;
+- mejor mantenibilidad;
+- evolución continua.
+
+---
+
+# ¿Qué es la Integración Continua?
+
+La Integración Continua consiste en incorporar pequeños cambios al repositorio de forma frecuente.
+
+Cada integración activa automáticamente un pipeline encargado de validar el estado completo del proyecto.
+
+De esta forma los problemas aparecen inmediatamente después de introducirse, reduciendo enormemente el coste de corregirlos.
+
+---
+
+# ¿Qué es el Despliegue Continuo?
+
+El Despliegue Continuo representa el siguiente paso dentro del ciclo DevOps.
+
+Una vez superadas todas las validaciones automáticas, el software puede desplegarse de forma repetible sobre un entorno controlado.
+
+En Aula Robótica Platform el despliegue se realiza actualmente sobre un VPS Linux utilizando Docker Compose y Nginx.
+
+Aunque el despliegue continúa siendo supervisado, la arquitectura queda preparada para automatizar este proceso en futuras versiones.
+
+---
+
+# Beneficios de CI/CD
+
+La incorporación de CI/CD aporta ventajas tanto durante el desarrollo como en explotación.
+
+Entre las principales destacan:
+
+- reducción de errores;
+- detección temprana de incidencias;
+- automatización del proceso de validación;
+- despliegues repetibles;
+- mejora continua;
+- mayor calidad del software;
+- reducción del trabajo manual.
+
+---
+
+# Arquitectura General
+
+La estrategia CI/CD se integra con el flujo general de desarrollo del proyecto.
+
+```mermaid
+flowchart LR
+
+Developer
+
+--> GitHub
+
+GitHub
+
+--> GitHub Actions
+
 GitHub Actions
-```
 
----
+--> Ruff
 
-# Pipeline principal
+GitHub Actions
 
-Workflow actual:
+--> Pytest
 
-```text
-tests.yml
-```
+GitHub Actions
 
----
+--> Coverage
 
-# Capacidades actuales
+GitHub Actions
 
-## Testing automático
+--> SonarCloud
 
-La pipeline ejecuta:
-
-```text
-pytest
-```
-
----
-
-## Linting
-
-El pipeline valida calidad de código mediante:
-
-```text
-linter
-```
-
----
-
-## Coverage Gate
-
-La pipeline incluye:
-
-```text
-coverage threshold
-```
-
-para evitar degradación de cobertura.
-
----
-
-## SonarCloud
-
-Integración activa con:
-
-```text
 SonarCloud
-```
 
-para análisis estático y calidad continua.
+--> Quality Gate
+
+Quality Gate
+
+--> Docker Deployment
+```
 
 ---
 
-# Arquitectura Actual
+# Flujo General del Pipeline
+
+Cada modificación del código sigue una secuencia claramente definida.
+
+```mermaid
+flowchart TD
+
+Commit
+
+--> Push
+
+Push
+
+--> Workflow
+
+Workflow
+
+--> Instalación Dependencias
+
+--> Ruff
+
+--> Pytest
+
+--> Coverage
+
+--> SonarCloud
+
+--> Resultado
+```
+
+Este flujo garantiza que únicamente el código validado pueda avanzar hacia fases posteriores del ciclo de desarrollo.
+
+---
+
+# Eventos que Activan la Integración Continua
+
+GitHub Actions puede ejecutar automáticamente los pipelines como respuesta a distintos eventos del repositorio.
+
+Entre los más habituales:
+
+- push;
+- pull request;
+- merge;
+- ejecución manual;
+- programación periódica.
+
+La automatización evita depender de ejecuciones manuales por parte del desarrollador.
+
+---
+
+# Pipeline como Código
+
+Toda la definición del pipeline forma parte del propio repositorio.
+
+Esto proporciona varias ventajas:
+
+- versionado;
+- trazabilidad;
+- revisión mediante pull requests;
+- reproducibilidad;
+- colaboración.
+
+La configuración permanece almacenada junto al resto del código fuente.
+
+---
+
+# Componentes Principales del Pipeline
+
+La estrategia CI integra distintas herramientas especializadas.
+
+| Componente | Responsabilidad |
+|------------|-----------------|
+| GitHub | Gestión del código fuente |
+| GitHub Actions | Automatización del pipeline |
+| Ruff | Linting |
+| Pytest | Testing |
+| Coverage | Cobertura de código |
+| SonarCloud | Calidad software |
+| Docker | Preparación del despliegue |
+
+Cada herramienta aporta una validación diferente dentro del proceso global.
+
+---
+
+# Integración con el Flujo de Desarrollo
+
+El pipeline forma parte del flujo habitual de trabajo del desarrollador.
 
 ```text
-Push / Pull Request
-        ↓
+Modificar código
+
+↓
+
+Commit
+
+↓
+
+Push
+
+↓
+
 GitHub Actions
-        ↓
-Install Dependencies
-        ↓
-Linting
-        ↓
-Pytest
-        ↓
-Coverage
-        ↓
-SonarCloud Analysis
-        ↓
-Feedback GitHub
+
+↓
+
+Validaciones automáticas
+
+↓
+
+Corrección de errores
+
+↓
+
+Merge
 ```
 
----
-
-# Filosofía DevOps Actual
-
-La plataforma sigue actualmente una estrategia:
-
-```text
-CI-first
-Deployment-later
-```
+Gracias a este modelo, la calidad del proyecto se controla de forma continua y no únicamente al finalizar el desarrollo de una funcionalidad.
 
 ---
 
-# Objetivos Actuales
+# Integración con Git
 
-## Calidad temprana
+La estrategia CI se encuentra estrechamente integrada con el sistema de control de versiones.
 
-Detectar:
+Cada commit representa una unidad de trabajo que puede ser validada automáticamente.
 
-- errores,
-- regresiones,
-- problemas estilo,
-- fallos cobertura.
+Esto permite detectar rápidamente el commit responsable de una incidencia cuando alguna validación falla.
 
 ---
 
-## Evolución segura
+# Integración con Docker
 
-Permitir refactors progresivos manteniendo estabilidad.
+La evolución reciente del proyecto ha permitido integrar la estrategia CI con la infraestructura Docker utilizada durante el despliegue.
 
----
+Aunque actualmente el despliegue sobre el VPS continúa siendo supervisado, la arquitectura ya está preparada para automatizar completamente la generación de imágenes Docker y su despliegue en futuras versiones.
 
-## Arquitectura enterprise-ready
-
-Preparar la base para:
-
-- Docker,
-- CD,
-- staging,
-- producción,
-- observabilidad.
+Esta separación facilita mantener un pipeline único para validación y otro específico para despliegue.
 
 ---
 
-# Testing Automatizado
+# Integración con SonarCloud
 
-# Framework Principal
+Uno de los elementos más importantes del pipeline es la incorporación de SonarCloud como herramienta de análisis estático.
 
-```text
-pytest
-```
+SonarCloud complementa los tests automáticos evaluando aspectos que no pueden detectarse únicamente mediante testing funcional.
 
----
+Entre ellos:
 
-# Objetivos actuales
+- mantenibilidad;
+- duplicación;
+- complejidad;
+- code smells;
+- cobertura;
+- calidad global.
 
-## Backend correctness
-
-Validar:
-
-- services,
-- routers,
-- autorización,
-- lógica negocio.
+El uso de **Quality Gates** impide que cambios con problemas importantes avancen dentro del proceso de integración.
 
 ---
 
-## Seguridad
+# Preparación para DevOps
 
-Validar:
+La arquitectura actual deja preparada la evolución hacia una estrategia DevOps más completa.
 
-- RBAC,
-- permisos,
-- autenticación,
-- ownership.
+La automatización existente permite incorporar posteriormente:
 
----
+- despliegues automáticos;
+- generación de imágenes Docker;
+- publicación en registros;
+- despliegues por entornos;
+- monitorización;
+- rollback automático.
 
-## Realtime futuro
-
-Preparar testing para:
-
-- WebSockets,
-- eventos realtime,
-- dashboards vivos.
+La separación entre integración continua y despliegue facilita realizar esta evolución sin modificar la estructura general del proyecto.
 
 ---
 
-# Coverage Strategy
+# 🧪 Estrategia de Validación
 
-La pipeline usa:
+La Integración Continua implementada en Aula Robótica Platform no se limita a ejecutar pruebas automatizadas.
 
-```text
-coverage gate
-```
+El pipeline combina diferentes mecanismos de validación que permiten evaluar múltiples aspectos del software antes de aceptar cualquier modificación en el repositorio.
 
----
-
-# Objetivo
-
-Evitar reducción progresiva de calidad.
+Cada herramienta aporta información complementaria sobre la calidad del proyecto.
 
 ---
 
-# Filosofía
+# Arquitectura de Validación
 
-No solo ejecutar tests, sino garantizar:
+```mermaid
+flowchart TD
 
-```text
-mínimo nivel de cobertura aceptable
+Código Fuente
+
+--> Ruff
+
+Código Fuente
+
+--> Pytest
+
+Código Fuente
+
+--> Coverage
+
+Código Fuente
+
+--> SonarCloud
+
+Ruff --> Resultado
+
+Pytest --> Resultado
+
+Coverage --> Resultado
+
+SonarCloud --> Resultado
+
+Resultado
+
+--> Quality Gate
 ```
 
 ---
 
 # Linting
 
-La pipeline incluye:
+El primer nivel de validación corresponde al análisis estático del código.
 
-```text
-linting automático
+Su objetivo consiste en detectar:
+
+- errores sintácticos;
+- incumplimiento del estilo;
+- importaciones innecesarias;
+- código redundante;
+- posibles problemas de mantenimiento.
+
+La detección temprana de este tipo de incidencias reduce considerablemente la aparición de errores posteriores.
+
+---
+
+# Testing Automatizado
+
+Tras superar el análisis estático, el pipeline ejecuta la batería completa de pruebas automatizadas.
+
+Estas pruebas verifican el correcto funcionamiento de:
+
+- servicios;
+- modelos;
+- endpoints;
+- autenticación;
+- autorización;
+- lógica de negocio.
+
+Cada modificación queda validada automáticamente antes de poder integrarse en la rama principal.
+
+---
+
+# Cobertura de Código
+
+La cobertura constituye uno de los indicadores utilizados para medir el grado de validación automática del proyecto.
+
+Durante la ejecución del pipeline se calcula el porcentaje de líneas ejecutadas por los tests.
+
+En la versión actual del proyecto:
+
+- cobertura real aproximada: **75 %**
+- cobertura registrada por SonarCloud: **73,7 %**
+
+La diferencia se debe al método de cálculo empleado por ambas herramientas.
+
+---
+
+# Quality Gates
+
+Uno de los aspectos más importantes del pipeline es la utilización de **Quality Gates**.
+
+Un Quality Gate representa un conjunto de condiciones que el proyecto debe cumplir antes de considerarse válido.
+
+Entre los indicadores evaluados pueden encontrarse:
+
+- cobertura mínima;
+- ausencia de errores críticos;
+- complejidad aceptable;
+- duplicación reducida;
+- mantenibilidad.
+
+Si alguna condición no se cumple, el pipeline finaliza con error.
+
+---
+
+# Flujo de Validación
+
+```mermaid
+flowchart LR
+
+Código
+
+--> Ruff
+
+Ruff
+
+--> Pytest
+
+Pytest
+
+--> Coverage
+
+Coverage
+
+--> SonarCloud
+
+SonarCloud
+
+--> Quality Gate
+
+Quality Gate
+
+--> Pipeline Correcto
 ```
 
 ---
 
-# Objetivos
+# SonarCloud
 
-- consistencia,
-- legibilidad,
-- calidad,
-- deuda técnica controlada.
+SonarCloud constituye la herramienta principal para el análisis avanzado de calidad.
 
----
+Complementa las pruebas funcionales incorporando métricas relacionadas con:
 
-# SonarCloud Integration
-
-# Objetivo
-
-Análisis continuo de:
-
-- code smells,
-- bugs,
-- duplicación,
-- maintainability,
-- cobertura,
+- mantenibilidad;
+- fiabilidad;
+- seguridad;
+- duplicación;
+- complejidad;
 - deuda técnica.
 
----
-
-# Beneficios
-
-## Quality Gate
-
-Evitar degradación silenciosa.
+Este análisis permite detectar problemas que normalmente no aparecen durante la ejecución de los tests.
 
 ---
 
-## Arquitectura sostenible
+# Métricas Analizadas
 
-Ayuda especialmente en:
+Entre las métricas principales evaluadas destacan:
 
-- realtime,
-- SSR,
-- services,
-- JS modular future.
-
----
-
-# Runtime Actual
-
-# Desarrollo Local
-
-Actualmente el despliegue es:
-
-```text
-local-only
-```
+| Métrica | Objetivo |
+|----------|----------|
+| Bugs | detectar errores potenciales |
+| Vulnerabilities | identificar problemas de seguridad |
+| Code Smells | mejorar mantenibilidad |
+| Coverage | validar pruebas |
+| Duplications | reducir código repetido |
+| Maintainability | facilitar evolución |
 
 ---
 
-# Runtime principal
+# Calidad del Código
 
-```text
-uv
-uvicorn
-```
+La calidad software no depende exclusivamente del correcto funcionamiento de la aplicación.
 
----
+También resulta importante mantener:
 
-# Entorno actual
+- arquitectura limpia;
+- bajo acoplamiento;
+- alta cohesión;
+- complejidad controlada;
+- nomenclatura consistente;
+- ausencia de duplicación.
 
-Principalmente:
-
-```text
-development environment
-```
+El pipeline ayuda a mantener estos criterios de forma automática.
 
 ---
 
-# Continuous Delivery
+# Gestión de Errores
 
-# Estado actual
+Cuando alguna validación falla, GitHub Actions interrumpe inmediatamente la ejecución del pipeline.
 
-Actualmente NO existe CD automático.
+Esto evita:
 
----
+- integrar código defectuoso;
+- desplegar versiones inestables;
+- aumentar la deuda técnica;
+- introducir regresiones.
 
-# No implementado todavía
-
-- staging,
-- production deployment,
-- Docker deployment,
-- container registry,
-- infra automation.
+El desarrollador recibe información detallada sobre el origen del problema para facilitar su resolución.
 
 ---
 
-# Filosofía Evolutiva
+# Validación de Pull Requests
 
-La estrategia actual es:
+Uno de los escenarios más importantes consiste en la validación automática de Pull Requests.
 
-```text
-primero arquitectura sólida
-después despliegue avanzado
-```
+Antes de aceptar una integración se ejecutan nuevamente todas las comprobaciones del pipeline.
 
----
-
-# Arquitectura Objetivo
-
-# Continuous Delivery futuro
-
-Objetivo:
-
-```text
-push
-→ tests
-→ quality gates
-→ build
-→ deploy staging
-→ deploy production
-```
+De esta forma únicamente las ramas que superan todas las validaciones pueden incorporarse al proyecto principal.
 
 ---
 
-# Posibles Entornos
+# Beneficios para el Equipo
 
-## Development
+La automatización del pipeline aporta ventajas importantes durante el desarrollo colaborativo.
 
-Local.
+Entre ellas:
 
----
-
-## Staging
-
-Testing integración.
-
----
-
-## Production
-
-Despliegue real institucional.
+- criterios homogéneos;
+- reducción de errores humanos;
+- integración frecuente;
+- menor tiempo de revisión;
+- mayor confianza en los cambios.
 
 ---
 
-# Estrategia futura
+# Integración con Docker
 
-# Blue/Green Deployment
+La estrategia CI queda preparada para integrarse con la infraestructura Docker utilizada durante el despliegue.
 
-Posible futura adopción.
+En futuras versiones el pipeline podrá incorporar automáticamente:
 
----
+- construcción de imágenes;
+- etiquetado de versiones;
+- publicación en registros;
+- validación de contenedores.
 
-# Rollbacks
-
-Deployments reversibles.
-
----
-
-# Realtime-safe deployments
-
-Importante para:
-
-- WebSockets,
-- dashboards,
-- sesiones activas.
+Esto permitirá automatizar completamente el ciclo de construcción.
 
 ---
 
-# Integración Futura Docker
+# Preparación para Continuous Deployment
 
-CI/CD evolucionará junto con:
+Aunque actualmente el despliegue sobre el VPS continúa realizándose de forma supervisada, la arquitectura se encuentra preparada para evolucionar hacia un modelo de Continuous Deployment.
 
-```text
-Docker
+El flujo previsto sería:
+
+```mermaid
+flowchart TD
+
+Commit
+
+--> CI
+
+CI
+
+--> Quality Gate
+
+Quality Gate
+
+--> Build Docker
+
+Build Docker
+
+--> Docker Registry
+
+Docker Registry
+
+--> VPS
+
+VPS
+
+--> Docker Compose
+
 Docker Compose
-containerized deployment
+
+--> Aplicación Desplegada
 ```
 
 ---
 
-# Integración futura Monitoring
+# Integración con la Infraestructura Cloud
 
-Pipelines podrán validar:
+La evolución del proyecto hacia un entorno desplegado sobre Hetzner Cloud permite conectar la fase de integración continua con el despliegue sobre una infraestructura Linux real.
 
-- healthchecks,
-- websocket health,
-- observabilidad,
-- readiness.
+Esta separación entre validación y despliegue facilita:
 
----
-
-# Integración futura Security
-
-Posibles futuras fases:
-
-- dependency scanning,
-- secret scanning,
-- SAST,
-- DAST,
-- SBOM.
+- despliegues repetibles;
+- reducción de riesgos;
+- recuperación rápida;
+- futuras automatizaciones.
 
 ---
 
-# Riesgos Actuales
+# Beneficios Globales
 
-## 1. Solo entorno local
+La estrategia CI/CD implementada aporta numerosos beneficios al ciclo de vida del software.
 
-No existe aún:
+Entre los más relevantes destacan:
 
-- staging,
-- producción.
-
----
-
-## 2. Sin deploy automático
-
-No hay CD.
-
----
-
-## 3. Sin Docker
-
-Infraestructura aún no containerizada.
+- validación continua;
+- calidad objetiva;
+- automatización;
+- reducción de errores;
+- mejora de la mantenibilidad;
+- integración con Docker;
+- preparación para despliegues automáticos;
+- alineación con prácticas DevOps modernas.
 
 ---
 
-## 4. Testing realtime limitado
+# Estado Actual
 
-WebSockets todavía poco cubiertos.
+Actualmente la estrategia de integración continua incorpora:
 
----
+✅ GitHub Actions.
 
-## 5. Frontend testing parcial
+✅ Ruff.
 
-JS modular todavía en evolución.
+✅ Pytest.
 
----
+✅ Coverage.
 
-# Roadmap CI/CD
+✅ SonarCloud.
 
-# Corto plazo
+✅ Quality Gates.
 
-- mejorar coverage,
-- tests realtime,
-- tests frontend,
-- refactor pipelines.
+✅ Validación automática.
 
----
+✅ Integración con Docker.
 
-# Medio plazo
-
-- Docker,
-- Docker Compose,
-- staging environment,
-- deploy scripts.
+✅ Preparación para despliegue cloud.
 
 ---
 
-# Largo plazo
+# ☁️ Estrategia de Despliegue Continuo
 
-- Kubernetes,
-- observabilidad integrada,
-- auto-scaling,
-- distributed realtime infra.
+La estrategia de **Continuous Deployment (CD)** constituye la evolución natural del proceso de Integración Continua implantado en Aula Robótica Platform.
 
----
+Mientras que la Integración Continua garantiza que cada modificación del código cumple los estándares de calidad definidos, el Despliegue Continuo persigue automatizar la publicación de nuevas versiones sobre la infraestructura de producción o preproducción.
 
-# Valor Arquitectónico
+Actualmente el proyecto utiliza un modelo de **despliegue supervisado**, donde las validaciones son completamente automáticas y la publicación final sobre el VPS se realiza de forma controlada por el desarrollador.
 
-Aunque todavía temprano, la plataforma ya posee una base DevOps sorprendentemente madura:
-
-- CI automatizado,
-- coverage,
-- SonarCloud,
-- linting,
-- quality gates.
+Este enfoque proporciona un equilibrio adecuado entre automatización y control operativo.
 
 ---
 
-# Conclusión
+# Arquitectura General del Despliegue
 
-El proyecto ya dispone de una estrategia real de integración continua moderna.
+```mermaid
+flowchart LR
 
-Actualmente la arquitectura CI/CD permite:
+Developer
 
-- evolución segura,
-- refactor continuo,
-- calidad progresiva,
-- feedback automatizado,
-- deuda técnica controlada.
+--> GitHub
 
-La siguiente gran evolución será:
+GitHub
 
-```text
-containerized continuous delivery platform
+--> GitHub Actions
+
+GitHub Actions
+
+--> Build
+
+Build
+
+--> Docker Image
+
+Docker Image
+
+--> Docker Compose
+
+Docker Compose
+
+--> VPS Ubuntu
+
+VPS Ubuntu
+
+--> Aplicación
 ```
 
-## Estado final de integración continua
+---
 
-El pipeline CI/CD final ejecuta automáticamente:
+# Integración con Docker
 
-1. instalación de dependencias,
-2. validación Ruff,
-3. ejecución de tests,
-4. generación de cobertura,
-5. análisis SonarCloud.
+Docker constituye el elemento fundamental sobre el que se apoya la estrategia de despliegue.
 
-El workflow se ejecuta mediante GitHub Actions utilizando Python 3.13 y entorno uv.
+La contenerización permite que el mismo entorno validado durante el proceso de integración pueda ejecutarse posteriormente en producción con un comportamiento idéntico.
+
+Entre las ventajas obtenidas destacan:
+
+- entornos reproducibles;
+- aislamiento de dependencias;
+- facilidad de actualización;
+- despliegues consistentes;
+- reducción de errores de configuración.
+
+---
+
+# Docker Compose
+
+La orquestación de los servicios se realiza mediante Docker Compose.
+
+Actualmente coordina los siguientes componentes:
+
+| Servicio | Función |
+|-----------|-------------------------|
+| FastAPI | Aplicación backend |
+| MariaDB | Persistencia |
+| Nginx | Reverse Proxy |
+
+Esta organización simplifica el despliegue y facilita futuras ampliaciones de la infraestructura.
+
+---
+
+# Relación entre CI y Docker
+
+La arquitectura deja claramente diferenciadas dos fases.
+
+## Continuous Integration
+
+Valida:
+
+- código;
+- calidad;
+- pruebas;
+- cobertura;
+- análisis estático.
+
+---
+
+## Continuous Deployment
+
+Gestiona:
+
+- construcción de imágenes;
+- actualización de contenedores;
+- despliegue;
+- publicación.
+
+Esta separación mejora considerablemente la mantenibilidad del proceso DevOps.
+
+---
+
+# Integración con Nginx
+
+Una vez desplegada la aplicación, Nginx constituye el punto único de entrada a la infraestructura.
+
+Entre sus responsabilidades destacan:
+
+- recepción de peticiones HTTP;
+- proxy hacia FastAPI;
+- gestión de recursos estáticos;
+- soporte WebSocket;
+- preparación para HTTPS.
+
+La integración entre Docker Compose y Nginx permite mantener desacoplados los distintos servicios de la plataforma.
+
+---
+
+# Infraestructura Cloud
+
+El despliegue actual se realiza sobre una infraestructura cloud basada en:
+
+- Hetzner Cloud;
+- VPS Ubuntu Server;
+- Docker;
+- Docker Compose;
+- Nginx;
+- MariaDB persistente.
+
+Esta infraestructura aproxima el proyecto a escenarios habituales de explotación utilizados en aplicaciones backend profesionales.
+
+---
+
+# Flujo Completo DevOps
+
+```mermaid
+flowchart TD
+
+Código Fuente
+
+--> GitHub
+
+GitHub
+
+--> GitHub Actions
+
+GitHub Actions
+
+--> Ruff
+
+--> Pytest
+
+--> Coverage
+
+--> SonarCloud
+
+SonarCloud
+
+--> Quality Gate
+
+Quality Gate
+
+--> Docker Build
+
+Docker Build
+
+--> Docker Compose
+
+Docker Compose
+
+--> VPS Ubuntu
+
+VPS Ubuntu
+
+--> Plataforma Operativa
+```
+
+---
+
+# Observabilidad del Pipeline
+
+Uno de los beneficios del pipeline automatizado consiste en disponer de información detallada sobre cada ejecución.
+
+Cada pipeline proporciona información relativa a:
+
+- estado de ejecución;
+- duración;
+- pruebas ejecutadas;
+- cobertura obtenida;
+- errores detectados;
+- artefactos generados.
+
+Esta información facilita enormemente la detección de incidencias.
+
+---
+
+# Recuperación ante Errores
+
+La automatización también simplifica la recuperación cuando alguna validación falla.
+
+En función del punto donde se produzca el error, el proceso puede detenerse antes de afectar al resto de la infraestructura.
+
+Esto evita:
+
+- despliegues incompletos;
+- versiones inestables;
+- pérdida de consistencia;
+- errores difíciles de reproducir.
+
+---
+
+# Buenas Prácticas Aplicadas
+
+La estrategia CI/CD implementada sigue diversas recomendaciones ampliamente aceptadas dentro del desarrollo moderno.
+
+Entre ellas destacan:
+
+- automatización temprana;
+- validaciones frecuentes;
+- integración continua;
+- separación entre construcción y despliegue;
+- pipelines reproducibles;
+- Infrastructure as Code;
+- versionado del pipeline;
+- despliegues controlados.
+
+---
+
+# Roadmap DevOps
+
+La arquitectura actual deja preparada la incorporación progresiva de nuevas capacidades.
+
+Entre ellas:
+
+- publicación automática de imágenes Docker;
+- Docker Registry;
+- despliegues automáticos;
+- múltiples entornos;
+- staging;
+- rollback automático;
+- monitorización;
+- observabilidad;
+- despliegues blue-green;
+- Kubernetes.
+
+---
+
+# Evolución Hacia Producción
+
+La infraestructura implementada permite evolucionar hacia un entorno de producción completo incorporando:
+
+- HTTPS mediante Let's Encrypt;
+- balanceadores de carga;
+- alta disponibilidad;
+- escalado horizontal;
+- Redis;
+- monitorización Prometheus;
+- Grafana;
+- copias de seguridad automatizadas.
+
+La arquitectura actual constituye una base sólida para estas futuras ampliaciones.
+
+---
+
+# Estado Actual
+
+Actualmente Aula Robótica Platform dispone de una estrategia DevOps formada por:
+
+✅ GitHub como repositorio principal.
+
+✅ GitHub Actions como motor CI.
+
+✅ Ruff para análisis estático.
+
+✅ Pytest para testing automatizado.
+
+✅ Coverage para medición de pruebas.
+
+✅ SonarCloud para calidad software.
+
+✅ Quality Gates automáticos.
+
+✅ Docker como entorno de ejecución.
+
+✅ Docker Compose como orquestador.
+
+✅ Nginx como Reverse Proxy.
+
+✅ VPS Ubuntu desplegado en Hetzner Cloud.
+
+---
+
+# Beneficios Obtenidos
+
+La incorporación de CI/CD ha permitido:
+
+- automatizar la validación del proyecto;
+- aumentar la estabilidad del software;
+- detectar errores de forma temprana;
+- reducir el trabajo manual;
+- mejorar la calidad del código;
+- facilitar el despliegue;
+- aproximar el proyecto a prácticas DevOps profesionales.
+
+---
+
+# 🔮 Evolución Futura
+
+La estrategia actual deja preparada la evolución hacia un ciclo DevOps completamente automatizado.
+
+Las principales líneas de evolución previstas incluyen:
+
+- despliegue completamente automático;
+- publicación de imágenes Docker;
+- integración con registros privados;
+- múltiples entornos de ejecución;
+- observabilidad avanzada;
+- despliegues progresivos;
+- recuperación automática;
+- escalado horizontal.
+
+Estas mejoras podrán incorporarse sin modificar la arquitectura general del sistema gracias a la separación existente entre integración continua, despliegue e infraestructura.
+
+---
+
+# 📌 Conclusiones
+
+La estrategia de Integración Continua y Despliegue Continuo implementada en Aula Robótica Platform constituye uno de los elementos que más contribuyen a la calidad global del proyecto.
+
+La combinación de GitHub, GitHub Actions, Ruff, Pytest, Coverage, SonarCloud, Docker, Docker Compose y la infraestructura desplegada sobre Hetzner Cloud permite automatizar gran parte del ciclo de vida del software, reduciendo errores y aumentando la confianza en cada nueva versión.
+
+Aunque el despliegue continúa realizándose de forma supervisada, la arquitectura ha sido diseñada para evolucionar hacia un modelo DevOps más avanzado, manteniendo una clara separación entre validación, construcción y publicación.
+
+Esta aproximación proporciona una base sólida para futuras mejoras y acerca el proyecto a los procesos utilizados habitualmente en entornos profesionales de desarrollo backend y cloud.
+

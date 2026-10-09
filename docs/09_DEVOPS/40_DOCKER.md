@@ -1,399 +1,453 @@
 # 40_DOCKER.md
 
-# Docker Architecture
+# 🐳 Aula Robótica Platform — Arquitectura Docker
 
-## Objetivo
+---
 
-Este documento describe la estrategia futura de containerización de Aula Robótica Platform.
+# 📌 Introducción
 
-Actualmente Docker todavía NO está implementado, pero la arquitectura ya está siendo diseñada para evolucionar hacia:
+Docker constituye la base de la estrategia de despliegue de Aula Robótica Platform.
 
-```text
-Containerized Realtime Platform
+La plataforma ha sido containerizada y desplegada exitosamente sobre una infraestructura Linux cloud utilizando Docker Compose como mecanismo de orquestación.
+
+La adopción de Docker permite disponer de una infraestructura:
+
+* reproducible,
+* portable,
+* desacoplada,
+* mantenible,
+* preparada para entornos cloud.
+
+Docker no se utiliza únicamente como mecanismo de despliegue, sino también como herramienta para garantizar consistencia entre desarrollo, pruebas y producción.
+
+---
+
+# 🎯 Objetivos de Docker
+
+La incorporación de Docker persigue varios objetivos técnicos.
+
+---
+
+## Reproducibilidad
+
+Garantizar que la aplicación se ejecuta de forma idéntica independientemente del entorno.
+
+Beneficios:
+
+* eliminación de diferencias entre equipos,
+* despliegues consistentes,
+* reducción de errores de configuración.
+
+---
+
+## Aislamiento
+
+Cada servicio se ejecuta dentro de su propio contenedor.
+
+Beneficios:
+
+* separación de responsabilidades,
+* independencia de dependencias,
+* simplificación del mantenimiento.
+
+---
+
+## Portabilidad
+
+La infraestructura puede trasladarse fácilmente entre:
+
+* entornos locales,
+* VPS Linux,
+* cloud providers,
+* servidores dedicados.
+
+---
+
+## Aproximación DevOps
+
+Docker permite aproximar el proyecto a prácticas habituales en entornos profesionales:
+
+* Infrastructure as Code,
+* despliegues repetibles,
+* automatización,
+* CI/CD.
+
+---
+
+# 🏗️ Arquitectura Docker Implementada
+
+La plataforma utiliza una arquitectura multicontenedor basada en Docker Compose.
+
+---
+
+## Servicios desplegados
+
+| Servicio | Función         |
+| -------- | --------------- |
+| nginx    | Reverse Proxy   |
+| api      | Backend FastAPI |
+| db       | MariaDB         |
+| volume   | Persistencia    |
+
+---
+
+## Arquitectura general
+
+```mermaid id="m3c0x0"
+flowchart LR
+
+A[Cliente Web]
+--> B[Nginx Reverse Proxy]
+
+B --> C[FastAPI Container]
+
+C --> D[(MariaDB Container)]
+
+subgraph Docker Network
+B
+C
+D
+end
 ```
 
 ---
 
-# Estado Actual
+# Docker Compose
 
-# Situación actual
-
-Actualmente:
-
-```text
-No existe Docker
-```
+Docker Compose permite gestionar toda la infraestructura mediante un único archivo declarativo.
 
 ---
 
-# Runtime actual
+## Responsabilidades
 
-La plataforma se ejecuta mediante:
-
-```text
-uv
-uvicorn
-```
-
-en entorno local.
+* construcción imágenes,
+* creación contenedores,
+* gestión networking,
+* configuración variables entorno,
+* persistencia,
+* restart policies.
 
 ---
 
-# Arquitectura actual
+## Ventajas obtenidas
 
-```text
+* despliegue simplificado,
+* reconstrucción rápida,
+* administración centralizada,
+* consistencia entre entornos.
+
+---
+
+# 🐍 Contenedor FastAPI
+
+El backend se ejecuta dentro de un contenedor dedicado.
+
+---
+
+## Componentes incluidos
+
+* Python 3.13
+* FastAPI
+* Uvicorn
+* SQLAlchemy
+* PyMySQL
+* Jinja2
+* WebSockets
+* uv
+
+---
+
+## Funciones principales
+
+* SSR mediante Jinja2,
+* autenticación JWT,
+* lógica de negocio,
+* endpoints REST,
+* WebSockets realtime.
+
+---
+
+## Exposición de servicio
+
+El contenedor FastAPI no se expone directamente a Internet.
+
+La comunicación externa se realiza exclusivamente a través de Nginx.
+
+---
+
+# 🗄️ Contenedor MariaDB
+
+La persistencia de datos se implementa mediante MariaDB ejecutándose en un contenedor independiente.
+
+---
+
+## Ventajas
+
+* aislamiento de base de datos,
+* actualización independiente,
+* persistencia desacoplada.
+
+---
+
+## Funciones
+
+* almacenamiento relacional,
+* gestión usuarios,
+* proyectos,
+* tareas,
+* auditoría,
+* notificaciones.
+
+---
+
+# 🌐 Contenedor Nginx
+
+Nginx constituye el punto único de entrada al sistema.
+
+---
+
+## Responsabilidades
+
+* reverse proxy,
+* forwarding HTTP,
+* soporte WebSocket,
+* ocultación backend,
+* preparación HTTPS futura.
+
+---
+
+## Arquitectura
+
+```mermaid id="sxz3xj"
+flowchart LR
+
+Cliente
+--> Nginx
+
+Nginx
+--> FastAPI
+
 FastAPI
-+
-MariaDB
-+
-Static SSR
-+
-WebSockets
-+
-uv runtime
+--> MariaDB
 ```
 
 ---
 
-# Filosofía Docker
+# 🔗 Docker Networking
 
-Docker no se plantea únicamente para despliegue.
-
-También busca:
-
-- reproducibilidad,
-- aislamiento,
-- onboarding rápido,
-- consistencia entornos,
-- CI/CD,
-- escalabilidad futura.
+Docker Compose crea automáticamente una red privada interna.
 
 ---
 
-# Objetivos de Containerización
+## Servicios conectados
 
-# 1. Desarrollo reproducible
+* nginx
+* api
+* db
 
-Todos los desarrolladores ejecutando:
+---
+
+## Beneficios
+
+* aislamiento de tráfico interno,
+* comunicación segura entre servicios,
+* reducción de superficie de exposición.
+
+---
+
+## Comunicación interna
 
 ```text
-mismo entorno
+nginx → api:8000
+
+api → db:3306
 ```
 
----
-
-# 2. Despliegue consistente
-
-Evitar diferencias:
-
-```text
-works on my machine
-```
+Los servicios se comunican mediante nombres internos Docker.
 
 ---
 
-# 3. Escalabilidad futura
+# 💾 Persistencia
 
-Preparar:
-
-- staging,
-- producción,
-- CI/CD,
-- cloud deployment.
+La persistencia se implementa mediante Docker Volumes y bind mounts.
 
 ---
-
-# 4. Realtime-ready deployment
-
-Preparar despliegue estable para:
-
-- WebSockets,
-- dashboard realtime,
-- notifications,
-- activity feeds.
-
----
-
-# Arquitectura Objetivo
-
-# Container principal
-
-## FastAPI App
-
-```text
-FastAPI
-uvicorn
-SSR templates
-WebSockets
-```
-
----
-
-# Database Container
 
 ## MariaDB
-
-Persistencia separada.
-
----
-
-# Posibles servicios futuros
-
-## Redis
-
-Para:
-
-- websocket scaling,
-- pub/sub,
-- cache,
-- realtime coordination.
-
----
-
-## Nginx
-
-Como:
-
-- reverse proxy,
-- static serving,
-- websocket proxy.
-
----
-
-# Arquitectura prevista
-
-```text
-Nginx
-   ↓
-FastAPI Container
-   ↓
-MariaDB Container
-```
-
----
-
-# Docker Compose Futuro
-
-# Objetivo
-
-Orquestar:
-
-- app,
-- db,
-- networking,
-- volumes,
-- environment variables.
-
----
-
-# Volúmenes previstos
-
-## Database
-
-Persistencia MariaDB.
-
----
-
-## Attachments
 
 Persistencia:
 
 ```text
-storage/activity_attachments/
+Docker Volume
 ```
 
 ---
 
-# Networking
+## Storage
 
-# WebSocket Support
-
-La arquitectura Docker deberá soportar:
+Persistencia:
 
 ```text
-Upgrade
-Connection
-WebSocket proxy
+Bind Mount
 ```
 
 ---
 
-# Realtime Considerations
+## Beneficios
 
-Importante para:
-
-- dashboard live,
-- notifications,
-- project rooms,
-- activity feeds.
+* reconstrucción sin pérdida de datos,
+* mantenimiento simplificado,
+* backups,
+* separación datos/contenedores.
 
 ---
 
-# Variables de Entorno
+# ⚡ WebSockets y Docker
 
-Docker integrará:
+La plataforma incorpora funcionalidades realtime mediante WebSockets.
+
+---
+
+## Funcionalidades soportadas
+
+* dashboard realtime,
+* notificaciones,
+* sincronización colaborativa,
+* actividad reciente.
+
+---
+
+## Endpoints WebSocket
 
 ```text
-.env
+/ws/dashboard
+
+/ws/notifications
+
+/ws/projects/{id}
 ```
 
 ---
 
-# Variables previstas
+## Validación realizada
 
-- DATABASE_URL
-- SECRET_KEY
-- DEBUG
-- ENV
-- app_base_url
-- SAML config
+La infraestructura fue validada mediante:
+
+* DevTools navegador,
+* HTTP 101 Switching Protocols,
+* logs Docker,
+* múltiples clientes simultáneos.
 
 ---
 
-# Build Strategy
+# 🔐 Seguridad
 
-# Imagen Python moderna
+Docker contribuye a la seguridad mediante aislamiento de servicios.
 
-Posible base:
+---
+
+## Medidas implementadas
+
+* backend no expuesto directamente,
+* MariaDB inaccesible desde Internet,
+* Nginx como punto único de entrada,
+* redes privadas Docker.
+
+---
+
+## Arquitectura protegida
 
 ```text
-python:3.12-slim
+Internet
+   ↓
+Nginx
+   ↓
+FastAPI
+   ↓
+MariaDB
 ```
 
 ---
 
-# Dependency Strategy
+# 🚀 Proceso de Despliegue
 
-Compatibilidad con:
+La infraestructura puede desplegarse mediante Docker Compose.
 
-```text
-uv
-pyproject.toml
-uv.lock
+---
+
+## Flujo general
+
+```bash
+cp .env.example .env
+
+docker compose up -d --build
 ```
 
 ---
 
-# Beneficios esperados
+## Resultado
 
-# Desarrollo
+Se construye automáticamente:
 
-- onboarding rápido,
-- consistencia.
-
----
-
-# DevOps
-
-- CI/CD,
-- staging,
-- despliegues repetibles.
+* imagen backend,
+* contenedor FastAPI,
+* contenedor MariaDB,
+* contenedor Nginx,
+* red Docker,
+* volúmenes persistentes.
 
 ---
 
-# Producción
+# 📊 Ventajas Obtenidas
 
-- aislamiento,
-- escalabilidad,
-- mantenimiento.
+La adopción de Docker aporta:
 
 ---
 
-# Riesgos y Desafíos
+## Desarrollo
 
-# WebSockets
-
-Necesidad de configuración correcta reverse proxy.
-
----
-
-# Volúmenes persistentes
-
-Especialmente para:
-
-```text
-attachments
-```
+* onboarding sencillo,
+* entorno homogéneo,
+* menor configuración manual.
 
 ---
 
-# Realtime scaling
+## DevOps
 
-En futuro multiworker probablemente requerirá:
-
-```text
-Redis pub/sub
-```
+* despliegues repetibles,
+* automatización,
+* integración futura con CI/CD.
 
 ---
 
-# Estado Arquitectónico
+## Producción
 
-Actualmente Docker es:
-
-```text
-planned architecture
-```
-
-NO implementación activa.
+* aislamiento,
+* mantenibilidad,
+* portabilidad,
+* facilidad de recuperación.
 
 ---
 
-# Roadmap Docker
+# 🔮 Evolución Futura
 
-# Corto plazo
+La arquitectura Docker actual deja preparada la evolución hacia:
 
-- Dockerfile básico,
-- docker-compose.dev,
-- MariaDB container.
-
----
-
-# Medio plazo
-
-- Nginx reverse proxy,
-- websocket support,
-- staging deployment.
+* HTTPS completo,
+* certificados SSL,
+* GitHub Actions Deployment,
+* monitorización,
+* observabilidad,
+* Redis,
+* Kubernetes,
+* escalabilidad horizontal.
 
 ---
 
-# Largo plazo
+# 📌 Conclusión
 
-- Kubernetes,
-- autoscaling,
-- distributed realtime,
-- observability stack.
+Docker constituye uno de los pilares fundamentales de la infraestructura de Aula Robótica Platform.
 
----
+La utilización de Docker Compose, contenedores desacoplados, networking privado, persistencia y reverse proxy permite disponer de una arquitectura moderna, mantenible y alineada con prácticas habituales utilizadas en proyectos profesionales actuales.
 
-# Relación con otros documentos
-
-Relacionado con:
-
-- `39_CI_CD.md`
-- `41_GITHUB_ACTIONS.md`
-- `42_ENVIRONMENT.md`
-- `36_MONITORING.md`
-- `38_OBSERVABILITY.md`
-
----
-
-# Conclusión
-
-Aunque Docker todavía no existe en el proyecto, la arquitectura actual ya está claramente preparada para evolucionar hacia una plataforma containerizada moderna.
-
-La combinación de:
-
-- FastAPI modular,
-- SSR,
-- WebSockets,
-- realtime,
-- CI,
-- uv,
-- separación servicios,
-
-facilitará enormemente la transición futura hacia:
-
-```text
-Containerized Realtime Enterprise Platform
-```
+La plataforma ha validado con éxito la ejecución containerizada de FastAPI, MariaDB, Nginx y WebSockets sobre una infraestructura Linux cloud real.

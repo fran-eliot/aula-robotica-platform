@@ -1,0 +1,77 @@
+services:
+
+  db:
+    image: mariadb:11
+
+    container_name: aula_robotica_db
+
+    restart: unless-stopped
+
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+
+    volumes:
+      - mariadb_data:/var/lib/mysql
+
+    healthcheck:
+      test: ["CMD", "mariadb-admin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+    networks:
+      - aula_network
+
+  api:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+
+    container_name: aula_robotica_api
+
+    restart: unless-stopped
+
+    env_file:
+      - .env
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+    expose:
+      - "8000"
+
+    volumes:
+      - ../storage:/app/storage
+
+    networks:
+      - aula_network
+
+  nginx:
+    image: nginx:stable-alpine
+
+    container_name: aula_robotica_nginx
+
+    restart: unless-stopped
+
+    depends_on:
+      - api
+
+    ports:
+      - "80:80"
+
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+
+    networks:
+      - aula_network
+
+volumes:
+  mariadb_data:
+
+networks:
+  aula_network:
+    driver: bridge

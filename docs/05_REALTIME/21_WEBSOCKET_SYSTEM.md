@@ -1,939 +1,1453 @@
 # 21_WEBSOCKET_SYSTEM.md
 
-# Sistema WebSocket
-
-## Objetivo
-
-Este documento describe la arquitectura realtime basada en WebSockets de Aula Robótica Platform.
-
-El sistema permite:
-
-- colaboración realtime,
-- actualización viva de dashboards,
-- sincronización Kanban,
-- presencia de usuarios online,
-- activity feeds live,
-- auditoría realtime,
-- notificaciones instantáneas.
-
-La arquitectura está diseñada como una capa desacoplada sobre SSR/Jinja2.
+# ⚡ Sistema WebSocket
 
 ---
 
-# Filosofía Arquitectónica
+# 📌 Introducción
 
-La plataforma sigue una arquitectura:
+Uno de los componentes tecnológicos más importantes de Aula Robótica Platform es su sistema de comunicación en tiempo real basado en **WebSockets**.
 
-```text
-SSR-first + Realtime Enhancement
-```
+A diferencia del modelo tradicional basado exclusivamente en peticiones HTTP, donde el cliente debe consultar periódicamente al servidor para detectar cambios, la utilización de WebSockets permite mantener una conexión persistente entre cliente y servidor, posibilitando la transmisión inmediata de información en ambos sentidos.
 
-Esto significa:
+Esta arquitectura resulta especialmente adecuada para aplicaciones colaborativas donde varios usuarios trabajan simultáneamente sobre los mismos recursos y requieren una sincronización continua.
 
-- FastAPI renderiza HTML SSR,
-- Jinja2 genera vistas iniciales,
-- WebSockets sincronizan eventos posteriores,
-- no existe polling tradicional,
-- el frontend permanece sincronizado en tiempo real.
+La implementación desarrollada en Aula Robótica Platform se basa en **FastAPI**, utilizando capacidades ASGI para gestionar conexiones persistentes, broadcasting de eventos y sincronización multiusuario dentro de una infraestructura desplegada sobre Docker, Nginx y Ubuntu Server.
 
 ---
 
-# Objetivos del Sistema
+# 🎯 Objetivos
 
-## UX moderna
+El sistema WebSocket fue diseñado para satisfacer varios objetivos funcionales y técnicos.
 
-Experiencia similar a:
+## Objetivos funcionales
 
-- admin consoles enterprise,
-- herramientas colaborativas,
-- dashboards operativos realtime.
-
----
-
-## Sincronización multiusuario
-
-Mantener vistas sincronizadas entre:
-
-- profesores,
-- administradores,
-- coordinadores,
-- estudiantes.
+- sincronizar información en tiempo real;
+- mejorar la experiencia de usuario;
+- reducir recargas completas de páginas;
+- facilitar la colaboración simultánea;
+- mantener dashboards dinámicos;
+- ofrecer notificaciones instantáneas.
 
 ---
 
-## Desacoplamiento
+## Objetivos técnicos
 
-Separar:
-
-- lógica CRUD,
-- render SSR,
-- realtime,
-- notificaciones.
+- mantener conexiones persistentes;
+- minimizar la latencia;
+- reducir tráfico HTTP innecesario;
+- desacoplar comunicación realtime del flujo REST;
+- integrarse con FastAPI;
+- soportar múltiples clientes simultáneos;
+- funcionar correctamente tras un Reverse Proxy Nginx;
+- ser compatible con Docker Compose.
 
 ---
 
-## Escalabilidad
+# 🧠 Principios de Diseño
 
-Preparar arquitectura para:
+La arquitectura WebSocket sigue varios principios fundamentales.
 
-- múltiples salas,
-- múltiples usuarios,
-- realtime distribuido,
-- Redis Pub/Sub futuro.
+---
+
+# Comunicación Orientada a Eventos
+
+La plataforma únicamente transmite información cuando ocurre un cambio relevante.
+
+En lugar de realizar consultas periódicas al servidor, éste envía automáticamente los eventos necesarios únicamente a los clientes interesados.
+
+Este modelo reduce considerablemente el tráfico de red y mejora la capacidad de respuesta de la aplicación.
+
+---
+
+# Persistencia de Conexión
+
+Cada navegador mantiene una conexión abierta mientras la sesión permanece activa.
+
+Gracias a ello es posible:
+
+- recibir eventos instantáneamente;
+- enviar información sin establecer nuevas conexiones;
+- mantener sincronización continua;
+- detectar desconexiones de usuarios.
+
+---
+
+# Separación HTTP / WebSocket
+
+La arquitectura diferencia claramente dos tipos de comunicación.
+
+## HTTP
+
+Se utiliza para:
+
+- autenticación;
+- operaciones CRUD;
+- carga inicial de páginas;
+- renderizado SSR;
+- descarga de información.
+
+---
+
+## WebSocket
+
+Se utiliza exclusivamente para:
+
+- sincronización;
+- notificaciones;
+- actividad reciente;
+- Kanban colaborativo;
+- presencia de usuarios;
+- actualización de dashboards.
+
+Esta separación simplifica considerablemente el mantenimiento del sistema.
 
 ---
 
 # Arquitectura General
 
-```text
-Browser
-   ↓
-WebSocket Connection
-   ↓
-FastAPI WebSocket Router
-   ↓
-ConnectionManager
-   ↓
-Rooms / User Channels / Dashboard Channels
-   ↓
-Broadcast System
+La comunicación en tiempo real se integra sobre la arquitectura principal del proyecto.
+
+```mermaid
+flowchart LR
+
+Cliente
+
+<-- HTTP -->
+
+FastAPI
+
+Cliente
+
+<-- WebSocket -->
+
+WebSocket Endpoint
+
+WebSocket Endpoint
+
+--> Connection Manager
+
+Connection Manager
+
+--> Event Dispatcher
+
+Event Dispatcher
+
+--> Clientes Conectados
 ```
 
 ---
 
-# Estructura Actual
+# Arquitectura Desplegada
 
-```text
-app/core/websockets/
-├── manager.py
-├── router.py
-├── utils.py
-└── ws_auth.py
+Una vez desplegada la plataforma sobre infraestructura cloud, las conexiones WebSocket atraviesan varias capas.
+
+```mermaid
+flowchart LR
+
+Usuario
+
+--> Internet
+
+Internet
+
+--> Nginx
+
+Nginx
+
+--> FastAPI
+
+FastAPI
+
+--> WebSocket Endpoint
+
+WebSocket Endpoint
+
+--> Connection Manager
 ```
+
+Esta arquitectura permite que Nginx gestione el protocolo **HTTP Upgrade**, manteniendo posteriormente la comunicación bidireccional entre cliente y servidor.
 
 ---
 
 # Componentes Principales
 
-## 1. ConnectionManager
+La arquitectura WebSocket está formada por varios componentes especializados.
 
-Archivo:
-
-```text
-app/core/websockets/manager.py
-```
-
-Responsable de:
-
-- gestionar conexiones activas,
-- gestionar rooms,
-- gestionar usuarios online,
-- broadcasting,
-- conexiones dashboard,
-- conexiones individuales.
-
-:contentReference[oaicite:0]{index=0}
+| Componente | Responsabilidad |
+|------------|-----------------|
+| Cliente Web | Mantener conexión persistente |
+| WebSocket Endpoint | Gestionar handshake |
+| Connection Manager | Administrar conexiones |
+| Rooms | Agrupar clientes |
+| Event Dispatcher | Distribuir eventos |
+| Broadcast System | Sincronizar usuarios |
 
 ---
 
-## 2. Router WebSocket
+# Cliente Web
 
-Archivo:
+El navegador inicia automáticamente la conexión WebSocket una vez autenticado el usuario y renderizada la interfaz principal.
 
-```text
-app/core/websockets/router.py
+Desde ese momento permanece escuchando eventos enviados por el servidor.
+
+Entre sus responsabilidades destacan:
+
+- abrir la conexión;
+- detectar desconexiones;
+- recibir mensajes;
+- actualizar el DOM;
+- mantener sincronización visual.
+
+---
+
+# WebSocket Endpoint
+
+FastAPI expone uno o varios endpoints específicos para la comunicación realtime.
+
+Estos endpoints son independientes de la API REST.
+
+Sus responsabilidades incluyen:
+
+- aceptar conexiones;
+- validar autenticación;
+- registrar usuarios;
+- gestionar desconexiones;
+- recibir mensajes del cliente.
+
+---
+
+# Ciclo de Vida de una Conexión
+
+Cada conexión WebSocket sigue una secuencia perfectamente definida.
+
+```mermaid
+flowchart TD
+
+Cliente
+
+--> Handshake
+
+Handshake
+
+--> Validación
+
+Validación
+
+--> Registro
+
+Registro
+
+--> Comunicación
+
+Comunicación
+
+--> Desconexión
+
+Desconexión
+
+--> Liberación Recursos
 ```
 
-Define endpoints realtime:
+---
+
+# Fase 1 — Handshake
+
+El navegador solicita el cambio de protocolo utilizando una petición HTTP estándar.
+
+El servidor responde mediante el código:
 
 ```text
-/ws/projects/{project_id}
+101 Switching Protocols
+```
+
+confirmando el establecimiento de la conexión WebSocket.
+
+---
+
+# Fase 2 — Validación
+
+Antes de aceptar definitivamente la conexión, el servidor verifica:
+
+- identidad del usuario;
+- sesión válida;
+- token JWT;
+- permisos mínimos;
+- contexto de acceso.
+
+Solo tras superar estas comprobaciones la conexión queda registrada.
+
+---
+
+# Fase 3 — Registro
+
+Una vez autenticado el usuario:
+
+- la conexión se almacena en el Connection Manager;
+- se asocia al usuario correspondiente;
+- se incorpora a las rooms necesarias;
+- queda preparada para recibir eventos.
+
+---
+
+# Fase 4 — Comunicación
+
+Durante esta fase el servidor puede enviar eventos en cualquier momento sin necesidad de nuevas peticiones HTTP.
+
+La comunicación permanece abierta mientras:
+
+- el navegador permanezca conectado;
+- la sesión siga siendo válida;
+- no exista una desconexión voluntaria.
+
+---
+
+# Fase 5 — Desconexión
+
+La conexión puede finalizar por distintos motivos.
+
+Entre ellos:
+
+- cierre del navegador;
+- pérdida de conectividad;
+- cierre de sesión;
+- reinicio del servidor;
+- timeout.
+
+Cuando esto ocurre el Connection Manager elimina automáticamente la conexión y libera los recursos asociados.
+
+---
+
+# Beneficios de la Arquitectura
+
+La utilización de WebSockets proporciona numerosas ventajas frente al modelo tradicional basado únicamente en HTTP.
+
+Entre las más importantes destacan:
+
+- menor latencia;
+- comunicación bidireccional;
+- menor tráfico de red;
+- mayor sensación de inmediatez;
+- colaboración multiusuario;
+- dashboards dinámicos;
+- sincronización instantánea;
+- arquitectura moderna preparada para crecimiento.
+
+---
+
+# Connection Manager
+
+El **Connection Manager** constituye el componente central del sistema WebSocket.
+
+Su responsabilidad principal es mantener el registro de conexiones activas y permitir la comunicación entre el servidor y los clientes conectados.
+
+Actúa como capa de coordinación entre:
+
+- endpoints WebSocket;
+- usuarios conectados;
+- rooms;
+- eventos;
+- broadcasting.
+
+---
+
+# Responsabilidades del Connection Manager
+
+Entre sus responsabilidades principales se encuentran:
+
+- registrar nuevas conexiones;
+- eliminar conexiones cerradas;
+- asociar conexiones a usuarios;
+- asociar conexiones a rooms;
+- enviar mensajes individuales;
+- realizar broadcasting;
+- gestionar desconexiones;
+- mantener estado de usuarios conectados.
+
+---
+
+# Modelo Conceptual
+
+```mermaid
+flowchart TD
+
+A[WebSocket Endpoint]
+
+--> B[Connection Manager]
+
+B --> C[Active Connections]
+
+B --> D[User Connections]
+
+B --> E[Rooms]
+
+B --> F[Broadcast System]
+
+F --> G[Clientes Conectados]
+```
+
+---
+
+# Gestión de Conexiones Activas
+
+Cada conexión WebSocket aceptada queda almacenada temporalmente mientras el usuario permanece conectado.
+
+El sistema mantiene referencias a:
+
+- conexión WebSocket;
+- usuario asociado;
+- room asignada;
+- contexto funcional;
+- timestamp conexión.
+
+Esto permite enviar eventos únicamente a los usuarios adecuados.
+
+---
+
+# Conexiones por Usuario
+
+Un mismo usuario puede mantener más de una conexión activa.
+
+Por ejemplo:
+
+- misma sesión en dos pestañas;
+- navegador principal;
+- ventana secundaria;
+- dispositivo adicional.
+
+Por este motivo, el sistema no asume una relación estrictamente uno-a-uno entre usuario y conexión.
+
+```text
+User
+
+↓
+
+Connection 1
+
+↓
+
+Connection 2
+
+↓
+
+Connection 3
+```
+
+Esta decisión permite una experiencia más flexible y realista.
+
+---
+
+# Rooms
+
+Las **rooms** permiten agrupar conexiones según el contexto funcional.
+
+En lugar de enviar todos los eventos a todos los clientes, el sistema organiza los usuarios conectados por ámbitos.
+
+---
+
+# Tipos de Rooms
+
+| Room | Uso |
+|------|-----|
+| dashboard | eventos globales autorizados |
+| project:{id} | eventos específicos de proyecto |
+| user:{id} | notificaciones privadas |
+| notifications | avisos generales |
+| kanban:{project_id} | sincronización tablero Kanban |
+
+---
+
+# Ventajas de las Rooms
+
+La utilización de rooms permite:
+
+- reducir tráfico innecesario;
+- mejorar rendimiento;
+- aislar información;
+- limitar eventos por contexto;
+- facilitar escalabilidad futura.
+
+---
+
+# Registro en Rooms
+
+Cuando un usuario abre una vista específica, el frontend puede solicitar su incorporación a la room correspondiente.
+
+Ejemplos:
+
+- al entrar en Dashboard → room dashboard;
+- al abrir un proyecto → room project:{id};
+- al abrir Kanban → room kanban:{project_id};
+- al iniciar sesión → room user:{id}.
+
+---
+
+# Flujo de Registro en Room
+
+```mermaid
+flowchart LR
+
+A[Cliente]
+
+--> B[Conexión WebSocket]
+
+B --> C[Validación Usuario]
+
+C --> D[Resolver Contexto]
+
+D --> E[Asignar Room]
+
+E --> F[Registrar Conexión]
+```
+
+---
+
+# Broadcasting
+
+El broadcasting permite distribuir eventos desde el servidor hacia múltiples clientes conectados.
+
+---
+
+# Tipos de Broadcasting
+
+## Broadcast global
+
+Envía un evento a todos los usuarios conectados autorizados.
+
+Uso típico:
+
+- actualizaciones generales;
+- avisos del sistema;
+- cambios de dashboard.
+
+---
+
+## Broadcast por room
+
+Envía eventos únicamente a los usuarios suscritos a una room.
+
+Uso típico:
+
+- actualizaciones de proyecto;
+- cambios Kanban;
+- actividad reciente;
+- notificaciones contextuales.
+
+---
+
+## Broadcast individual
+
+Envía un evento a un usuario concreto.
+
+Uso típico:
+
+- notificación privada;
+- aviso de asignación;
+- evento personalizado.
+
+---
+
+# Arquitectura de Broadcasting
+
+```mermaid
+flowchart TD
+
+A[Evento Aplicación]
+
+--> B[Event Dispatcher]
+
+B --> C{Tipo Evento}
+
+C -->|Global| D[Broadcast Global]
+
+C -->|Room| E[Broadcast Room]
+
+C -->|Usuario| F[Broadcast Individual]
+
+D --> G[Clientes]
+
+E --> H[Clientes Room]
+
+F --> I[Usuario Destino]
+```
+
+---
+
+# Tipos de Eventos
+
+El sistema WebSocket trabaja con eventos estructurados.
+
+Cada evento suele incluir:
+
+- tipo;
+- payload;
+- timestamp;
+- contexto;
+- usuario origen;
+- recurso afectado.
+
+---
+
+# Ejemplo Conceptual de Evento
+
+```json
+{
+  "type": "task.updated",
+  "project_id": 4,
+  "task_id": 18,
+  "status": "in_progress",
+  "updated_by": 2,
+  "timestamp": "2026-06-01T10:30:00"
+}
+```
+
+---
+
+# Eventos de Dashboard
+
+Los eventos de Dashboard actualizan información operativa global.
+
+Pueden afectar a:
+
+- métricas;
+- actividad reciente;
+- usuarios conectados;
+- notificaciones;
+- estado de tareas.
+
+---
+
+# Eventos de Kanban
+
+Los eventos Kanban permiten sincronizar cambios entre usuarios.
+
+Ejemplos:
+
+```text
+task.created
+task.updated
+task.moved
+task.deleted
+task.status_changed
+```
+
+Cuando un usuario mueve una tarea, los demás usuarios conectados al mismo tablero reciben el evento y actualizan la interfaz.
+
+---
+
+# Flujo de Evento Kanban
+
+```mermaid
+sequenceDiagram
+    participant U1 as Usuario A
+    participant API as FastAPI
+    participant DB as MariaDB
+    participant WS as WebSocket Manager
+    participant U2 as Usuario B
+
+    U1->>API: Actualiza tarea
+    API->>DB: Persiste cambio
+    DB-->>API: OK
+    API->>WS: Emite task.updated
+    WS-->>U2: Broadcast evento
+    U2-->>U2: Actualiza interfaz
+```
+
+---
+
+# Eventos de Actividad Reciente
+
+El activity feed se actualiza dinámicamente mediante eventos realtime.
+
+Cuando ocurre una acción relevante:
+
+1. El backend registra la actividad.
+2. Se construye un evento.
+3. El evento se distribuye a los usuarios autorizados.
+4. La interfaz inserta el nuevo elemento sin recargar.
+
+---
+
+# Eventos de Notificaciones
+
+Las notificaciones utilizan WebSockets para informar al usuario en tiempo real.
+
+Ejemplos:
+
+- tarea asignada;
+- cambio de estado;
+- actividad relevante;
+- aviso del sistema.
+
+---
+
+# Sincronización Multiusuario
+
+La sincronización multiusuario es uno de los objetivos principales del sistema WebSocket.
+
+Permite que varios usuarios trabajen simultáneamente sobre el mismo contexto sin perder coherencia visual.
+
+---
+
+# Casos de Sincronización
+
+## Caso 1 — Movimiento de tarea
+
+Un usuario mueve una tarea en el Kanban.
+
+Los demás usuarios ven el cambio instantáneamente.
+
+---
+
+## Caso 2 — Nueva actividad
+
+Un usuario registra una actividad.
+
+El activity feed se actualiza automáticamente.
+
+---
+
+## Caso 3 — Nueva notificación
+
+Un usuario recibe una notificación sin recargar la página.
+
+---
+
+## Caso 4 — Usuarios conectados
+
+El sistema actualiza el estado de presencia de usuarios.
+
+---
+
+# Consistencia Visual
+
+El sistema realtime no sustituye a la base de datos.
+
+La fuente de verdad sigue siendo MariaDB.
+
+Los WebSockets actúan como canal de propagación de cambios ya validados y persistidos.
+
+```text
+Operación HTTP
+
+↓
+
+Validación Backend
+
+↓
+
+Persistencia MariaDB
+
+↓
+
+Evento WebSocket
+
+↓
+
+Actualización UI
+```
+
+---
+
+# Relación con la Base de Datos
+
+Los WebSockets **no escriben directamente en MariaDB**.
+
+La persistencia continúa realizándose a través de:
+
+- routers HTTP;
+- servicios backend;
+- SQLAlchemy;
+- transacciones de base de datos.
+
+Después de persistir un cambio, el backend emite el evento realtime correspondiente.
+
+Esta separación evita inconsistencias y mantiene clara la responsabilidad de cada capa.
+
+---
+
+# Integración con Dashboard
+
+El Dashboard consume eventos realtime para actualizar:
+
+- métricas;
+- actividad reciente;
+- usuarios conectados;
+- notificaciones.
+
+Esto convierte el panel en un punto de observación dinámica del sistema.
+
+---
+
+# Integración con Kanban
+
+El Kanban colaborativo utiliza WebSockets para sincronizar:
+
+- creación de tareas;
+- movimiento entre columnas;
+- cambios de estado;
+- actualizaciones de contenido.
+
+El resultado es una experiencia colaborativa más fluida.
+
+---
+
+# Integración con Notificaciones
+
+Las notificaciones realtime permiten informar al usuario sin polling.
+
+Esto mejora:
+
+- rapidez de respuesta;
+- experiencia usuario;
+- percepción de sistema vivo;
+- coordinación entre participantes.
+
+---
+
+# Beneficios del Sistema de Rooms y Broadcasting
+
+La combinación de rooms y broadcasting aporta:
+
+- menor latencia;
+- menor carga servidor;
+- menor tráfico red;
+- mayor seguridad contextual;
+- sincronización granular;
+- base preparada para escalabilidad futura.
+
+---
+
+# 🔐 Seguridad WebSocket
+
+Las conexiones WebSocket requieren controles específicos de seguridad porque permanecen abiertas durante periodos prolongados y permiten comunicación bidireccional entre cliente y servidor.
+
+La seguridad del sistema realtime se integra con la arquitectura general de autenticación y autorización de Aula Robótica Platform.
+
+---
+
+# Autenticación de la Conexión
+
+Antes de aceptar una conexión WebSocket, el backend valida la identidad del usuario.
+
+La autenticación se basa en:
+
+* JWT;
+* cookies HTTPOnly;
+* sesión activa;
+* usuario habilitado.
+
+La conexión únicamente se acepta cuando el usuario puede ser resuelto correctamente desde el contexto de autenticación.
+
+---
+
+# Flujo de Seguridad
+
+```mermaid
+flowchart TD
+
+A[Cliente solicita WebSocket]
+
+--> B[FastAPI WebSocket Endpoint]
+
+B --> C[Leer Cookie / JWT]
+
+C --> D[Resolver Usuario]
+
+D --> E{Usuario válido}
+
+E -->|No| F[Rechazar conexión]
+
+E -->|Sí| G[Validar contexto]
+
+G --> H{Acceso autorizado}
+
+H -->|No| I[Cerrar conexión]
+
+H -->|Sí| J[Registrar en Connection Manager]
+```
+
+---
+
+# Autorización Contextual
+
+Además de autenticar al usuario, el sistema verifica si puede acceder al contexto solicitado.
+
+Las comprobaciones pueden incluir:
+
+* pertenencia al proyecto;
+* permisos sobre el recurso;
+* rol contextual;
+* ownership;
+* acceso a la room;
+* estado activo del usuario.
+
+Esto evita que una conexión autenticada acceda automáticamente a cualquier canal realtime.
+
+---
+
+# Aislamiento por Rooms
+
+Las rooms actúan como mecanismo de segmentación funcional y de seguridad.
+
+Cada usuario únicamente puede incorporarse a aquellas rooms para las que dispone de autorización.
+
+Ejemplos:
+
+```text
+project:12
+user:8
+kanban:12
+dashboard
+notifications
+```
+
+La separación por rooms evita distribuir eventos sensibles a usuarios ajenos al contexto.
+
+---
+
+# Validación de Eventos
+
+Los mensajes recibidos desde cliente nunca se consideran confiables por defecto.
+
+El backend debe validar:
+
+* estructura del mensaje;
+* tipo de evento;
+* identificadores;
+* permisos;
+* contexto;
+* recurso afectado.
+
+Las operaciones de negocio no deben ejecutarse únicamente por recibir un mensaje WebSocket.
+
+---
+
+# Separación entre Comando y Notificación
+
+En la arquitectura actual, las operaciones críticas se realizan preferentemente mediante HTTP.
+
+El flujo recomendado es:
+
+```text
+Cliente envía operación HTTP
+        ↓
+FastAPI valida y procesa
+        ↓
+SQLAlchemy persiste
+        ↓
+Backend genera evento
+        ↓
+WebSocket notifica a clientes
+```
+
+De este modo, WebSocket actúa principalmente como canal de sincronización y no como sustituto de la capa de servicios.
+
+---
+
+# ⚙️ Integración con FastAPI
+
+FastAPI proporciona soporte nativo para WebSockets mediante ASGI.
+
+La implementación realtime se integra con:
+
+* endpoints WebSocket;
+* servicios de negocio;
+* helpers de autenticación;
+* connection managers;
+* routers HTTP;
+* middleware de seguridad.
+
+---
+
+# Endpoints WebSocket
+
+Los endpoints WebSocket gestionan:
+
+* aceptación de conexiones;
+* validación de usuario;
+* incorporación a rooms;
+* recepción de mensajes;
+* gestión de desconexiones.
+
+Ejemplos conceptuales:
+
+```text
 /ws/dashboard
 /ws/notifications
-```
-
-:contentReference[oaicite:1]{index=1}
-
----
-
-## 3. Utilidades de emisión
-
-Archivo:
-
-```text
-app/core/websockets/utils.py
-```
-
-Define helpers desacoplados:
-
-```python
-emit_project_event()
-emit_dashboard_event()
-emit_user_event()
-```
-
-:contentReference[oaicite:2]{index=2}
-
----
-
-## 4. Autenticación WS
-
-Archivo:
-
-```text
-app/core/websockets/ws_auth.py
-```
-
-Valida JWT desde cookies HTTPOnly.
-
-:contentReference[oaicite:3]{index=3}
-
----
-
-# Arquitectura de Canales
-
-Actualmente existen tres tipos principales de canal.
-
----
-
-# 1. Project Rooms
-
-Endpoint:
-
-```text
 /ws/projects/{project_id}
 ```
 
-Responsable de:
+---
 
-- Kanban realtime,
-- usuarios online,
-- auditoría realtime,
-- activity feed realtime.
+# Integración con la Capa de Servicios
+
+La lógica de negocio no debe residir directamente en el endpoint WebSocket.
+
+El endpoint coordina la comunicación, mientras que los servicios se encargan de:
+
+* validaciones;
+* persistencia;
+* reglas de negocio;
+* autorización;
+* generación de eventos.
+
+Esta separación mantiene la arquitectura modular y facilita el testing.
 
 ---
 
-## Concepto de Room
+# Gestión de Errores
 
-Cada proyecto funciona como una sala independiente:
+Los errores pueden producirse durante:
 
-```python
-self.rooms[project_id]
+* autenticación;
+* validación;
+* recepción de mensajes;
+* broadcasting;
+* desconexión;
+* pérdida de red.
+
+El sistema debe gestionar estas situaciones evitando que una conexión defectuosa afecte al resto de usuarios.
+
+---
+
+# Tratamiento de Desconexiones
+
+Cuando una conexión se cierra:
+
+1. Se elimina del Connection Manager.
+2. Se elimina de sus rooms.
+3. Se actualiza la presencia del usuario.
+4. Se liberan recursos.
+5. Se registra la desconexión si procede.
+
+---
+
+# 🐳 Integración con Docker
+
+El sistema WebSocket se ejecuta dentro del contenedor principal de FastAPI.
+
+Docker permite mantener un entorno reproducible para:
+
+* Uvicorn;
+* FastAPI;
+* dependencias;
+* configuración;
+* red interna.
+
+---
+
+# Arquitectura Multicontenedor
+
+```mermaid
+flowchart LR
+
+A[Cliente]
+
+--> B[Nginx]
+
+B --> C[FastAPI + WebSockets]
+
+C --> D[(MariaDB)]
+
+subgraph Docker Compose
+B
+C
+D
+end
 ```
 
-:contentReference[oaicite:4]{index=4}
+---
+
+# Comunicación Interna
+
+La comunicación entre Nginx y FastAPI se realiza mediante la red interna de Docker Compose.
+
+FastAPI no necesita exponerse directamente a Internet.
+
+Esto permite:
+
+* reducir superficie de ataque;
+* centralizar entrada;
+* simplificar configuración;
+* aislar servicios.
 
 ---
 
-## Aislamiento
+# 🌐 Integración con Nginx
 
-Los eventos de un proyecto NO se envían a otros proyectos.
+Nginx actúa como Reverse Proxy tanto para tráfico HTTP como para WebSockets.
 
-Esto reduce:
-
-- ruido,
-- consumo,
-- fugas de información,
-- acoplamiento.
+Para que una conexión WebSocket funcione correctamente, Nginx debe permitir el cambio de protocolo HTTP.
 
 ---
 
-## Validación de acceso
+# HTTP Upgrade
 
-Antes de aceptar conexión:
+El navegador solicita cambiar de protocolo utilizando cabeceras específicas.
 
-```python
-user_in_project(user, project)
+Nginx debe reenviar dichas cabeceras a FastAPI.
+
+Configuración conceptual:
+
+```nginx
+proxy_set_header Upgrade $http_upgrade;
+proxy_set_header Connection "upgrade";
 ```
 
-:contentReference[oaicite:5]{index=5}
+---
+
+# Flujo Desplegado
+
+```mermaid
+sequenceDiagram
+    participant C as Cliente
+    participant N as Nginx
+    participant F as FastAPI
+    participant M as Connection Manager
+
+    C->>N: Solicitud WebSocket
+    N->>F: Proxy + Upgrade
+    F->>F: Validar JWT
+    F->>M: Registrar conexión
+    M-->>C: Conexión aceptada
+```
 
 ---
 
-## Eventos actuales
+# Beneficios de Nginx
+
+Nginx aporta:
+
+* punto único de entrada;
+* ocultación de FastAPI;
+* proxy WebSocket;
+* gestión de cabeceras;
+* preparación para HTTPS;
+* futura escalabilidad.
+
+---
+
+# ☁️ Validación en Entorno Desplegado
+
+La arquitectura WebSocket fue validada sobre un VPS Linux real en Hetzner Cloud.
+
+La infraestructura utilizada incluye:
+
+* Ubuntu Server 24.04;
+* Docker;
+* Docker Compose;
+* Nginx;
+* FastAPI;
+* MariaDB persistente.
+
+---
+
+# Pruebas Realizadas
+
+Se verificó:
+
+* conexión inicial;
+* handshake correcto;
+* código HTTP 101;
+* múltiples clientes;
+* rooms;
+* broadcasting;
+* persistencia de la conexión;
+* funcionamiento detrás de Nginx;
+* comportamiento tras reinicio.
+
+---
+
+# Verificación mediante DevTools
+
+Las herramientas de desarrollo del navegador permitieron comprobar:
+
+* estado de la conexión;
+* frames enviados;
+* frames recibidos;
+* código de respuesta;
+* duración;
+* eventos intercambiados.
+
+El código esperado durante el handshake es:
 
 ```text
-users_online
-task_updated
-audit
-feed_event
-```
-
-:contentReference[oaicite:6]{index=6}
-
----
-
-# 2. Dashboard Channel
-
-Endpoint:
-
-```text
-/ws/dashboard
-```
-
-Responsable de:
-
-- dashboard realtime,
-- activity feed global,
-- métricas dinámicas.
-
----
-
-## Características
-
-Canal compartido global.
-
-Conexiones almacenadas en:
-
-```python
-self.dashboard_connections
-```
-
-:contentReference[oaicite:7]{index=7}
-
----
-
-## Eventos actuales
-
-```text
-dashboard_feed_event
-```
-
-:contentReference[oaicite:8]{index=8}
-
----
-
-# 3. User Notification Channels
-
-Endpoint:
-
-```text
-/ws/notifications
-```
-
-Responsable de:
-
-- notificaciones personales,
-- dropdown navbar,
-- contador unread,
-- toast notifications.
-
----
-
-## Arquitectura
-
-Cada usuario tiene su propio canal:
-
-```python
-self.user_connections[user_id]
-```
-
-:contentReference[oaicite:9]{index=9}
-
----
-
-## Eventos actuales
-
-```text
-notification
-```
-
-:contentReference[oaicite:10]{index=10}
-
----
-
-# ConnectionManager
-
-## Estructuras internas
-
-### Rooms
-
-```python
-self.rooms = {}
-```
-
-Mapa:
-
-```text
-project_id -> websocket connections
+101 Switching Protocols
 ```
 
 ---
 
-### Usuarios online
+# Verificación mediante Logs
 
-```python
-self.users = {}
+Los logs de FastAPI y Docker permitieron revisar:
+
+* conexiones aceptadas;
+* desconexiones;
+* errores;
+* broadcasting;
+* excepciones;
+* actividad realtime.
+
+Comandos habituales:
+
+```bash
+docker compose logs -f api
 ```
 
-Mapa:
-
-```text
-project_id -> online users
-```
-
----
-
-### Dashboard connections
-
-```python
-self.dashboard_connections = []
-```
-
----
-
-### User connections
-
-```python
-self.user_connections = {}
-```
-
-Mapa:
-
-```text
-user_id -> websocket connections
-```
-
-:contentReference[oaicite:11]{index=11}
-
----
-
-# Flujo de Conexión
-
-## 1. Cliente abre WebSocket
-
-Ejemplo:
-
-```javascript
-new WebSocket("/ws/projects/1")
-```
-
-:contentReference[oaicite:12]{index=12}
-
----
-
-## 2. FastAPI recibe conexión
-
-Router WS:
-
-```python
-@router.websocket("/projects/{project_id}")
-```
-
-:contentReference[oaicite:13]{index=13}
-
----
-
-## 3. Validación JWT
-
-```python
-get_current_user_ws()
-```
-
-Lee:
-
-```python
-websocket.cookies.get("access_token")
-```
-
-:contentReference[oaicite:14]{index=14}
-
----
-
-## 4. Validación de acceso contextual
-
-```python
-user_in_project(user, project)
+```bash
+docker compose logs -f nginx
 ```
 
 ---
 
-## 5. Registro de conexión
+# Incidencias Detectadas
 
-```python
-manager.connect()
-```
+Durante el despliegue se detectaron problemas reales relacionados con:
 
-:contentReference[oaicite:15]{index=15}
+* autenticación WebSocket;
+* configuración de Nginx;
+* uso incorrecto de `await`;
+* resolución de usuario;
+* desconexiones;
+* cabeceras Upgrade.
 
----
-
-## 6. Broadcasting
-
-Los eventos se emiten automáticamente a la room correspondiente.
-
----
-
-# Broadcasting Architecture
-
-## Project Broadcast
-
-```python
-broadcast_to_project(project_id, payload)
-```
-
-:contentReference[oaicite:16]{index=16}
+La resolución de estas incidencias permitió validar la arquitectura completa en un entorno cercano a producción.
 
 ---
 
-## Dashboard Broadcast
+# 📈 Rendimiento y Concurrencia
 
-```python
-broadcast_dashboard(payload)
-```
+WebSockets permiten mantener múltiples conexiones simultáneas con un consumo menor que el polling frecuente.
 
-:contentReference[oaicite:17]{index=17}
+FastAPI y Uvicorn utilizan un modelo asíncrono basado en ASGI, adecuado para cargas con numerosas conexiones persistentes.
 
 ---
 
-## User Broadcast
+# Ventajas del Modelo Asíncrono
 
-```python
-broadcast_to_user(user_id, payload)
-```
-
-:contentReference[oaicite:18]{index=18}
-
----
-
-# Emisión Desacoplada
-
-## Filosofía
-
-Los servicios NO deberían conocer detalles internos del manager.
-
-Se utilizan helpers:
-
-```python
-emit_project_event()
-emit_dashboard_event()
-emit_user_event()
-```
-
-:contentReference[oaicite:19]{index=19}
+* menor bloqueo;
+* mejor utilización de recursos;
+* alta concurrencia;
+* baja latencia;
+* integración con `asyncio`.
 
 ---
 
-# Arquitectura Async
-
-## create_task()
-
-La emisión se realiza sin bloquear request principal:
-
-```python
-loop.create_task(...)
-```
-
-:contentReference[oaicite:20]{index=20}
-
----
-
-## Beneficios
-
-- menor latencia,
-- mejor UX,
-- desacoplamiento realtime,
-- requests más rápidas.
-
----
-
-# Gestión de Usuarios Online
-
-## Arquitectura
-
-Cuando un usuario entra:
-
-```python
-self.users[project_id][user.id_usuario]
-```
-
-:contentReference[oaicite:21]{index=21}
-
----
-
-## Broadcast automático
-
-Cada conexión/desconexión ejecuta:
-
-```python
-broadcast_users(project_id)
-```
-
-:contentReference[oaicite:22]{index=22}
-
----
-
-## Evento emitido
-
-```json
-{
-  "type": "users_online",
-  "users": [...]
-}
-```
-
----
-
-# Seguridad
-
-## JWT Cookies
-
-Los WebSockets usan:
-
-```text
-HTTPOnly JWT cookies
-```
-
-No usan tokens en querystring.
-
----
-
-## Validación SSR integrada
-
-La autenticación reutiliza:
-
-```python
-validate_access_token()
-```
-
-:contentReference[oaicite:23]{index=23}
-
----
-
-## Cierre seguro
-
-Conexiones inválidas:
-
-```python
-await websocket.close(code=1008)
-```
-
-:contentReference[oaicite:24]{index=24}
-
----
-
-# Gestión de Desconexiones
-
-## WebSocketDisconnect
-
-Cada endpoint captura:
-
-```python
-except WebSocketDisconnect:
-```
-
-:contentReference[oaicite:25]{index=25}
-
----
-
-## Limpieza automática
-
-Se eliminan:
-
-- sockets muertos,
-- usuarios desconectados,
-- rooms vacías.
-
-:contentReference[oaicite:26]{index=26}
-
----
-
-# Frontend Realtime
-
-## Dashboard
-
-Archivo:
-
-```text
-static/js/dashboard/dashboard.js
-```
-
-Características:
-
-- reconexión automática,
-- feed live,
-- toasts realtime,
-- deduplicación.
-
-:contentReference[oaicite:27]{index=27}
-
----
-
-## Notifications
-
-Archivo:
-
-```text
-static/js/core/notifications.js
-```
-
-Características:
-
-- keepalive,
-- reconexión,
-- dropdown dinámico,
-- contador unread,
-- toast realtime.
-
-:contentReference[oaicite:28]{index=28}
-
----
-
-## Project Detail
-
-Archivo:
-
-```text
-static/js/projects/project_detail.js
-```
-
-Características:
-
-- Kanban realtime,
-- auditoría realtime,
-- feed realtime,
-- online users,
-- optimistic UI.
-
-:contentReference[oaicite:29]{index=29}
-
----
-
-# Keepalive
-
-Notifications WS implementa:
-
-```javascript
-socket.send("ping")
-```
-
-cada:
-
-```text
-30 segundos
-```
-
-:contentReference[oaicite:30]{index=30}
-
----
-
-# Reconnection Strategy
-
-Todos los canales implementan:
-
-```javascript
-setTimeout(connect..., X)
-```
-
-para reconexión automática.
-
-
-
----
-
-# Arquitectura de Eventos
-
-## Estructura general
-
-```json
-{
-  "type": "...",
-  "payload": ...
-}
-```
-
----
-
-## Ejemplos
-
-### Task update
-
-```json
-{
-  "type": "task_updated",
-  "task_id": 12,
-  "status": "doing"
-}
-```
-
----
-
-### Notification
-
-```json
-{
-  "type": "notification",
-  "notification": {...}
-}
-```
-
----
-
-### Feed event
-
-```json
-{
-  "type": "feed_event",
-  "activity": {...}
-}
-```
-
----
-
-# Beneficios Arquitectónicos
-
-## 1. UX moderna
-
-Interfaz viva y colaborativa.
-
----
-
-## 2. SSR compatible
-
-No requiere SPA.
-
----
-
-## 3. Bajo acoplamiento
-
-Realtime desacoplado del CRUD.
-
----
-
-## 4. Escalabilidad conceptual
-
-Preparado para:
-
-- Redis,
-- Pub/Sub,
-- workers,
-- horizontal scaling.
-
----
-
-## 5. Aislamiento contextual
-
-Rooms por proyecto.
-
----
-
-## 6. Enterprise feel
-
-La plataforma se comporta como:
-
-```text
-Enterprise Realtime Admin Platform
-```
+# Consideraciones de Rendimiento
+
+El rendimiento depende de:
+
+* número de conexiones;
+* frecuencia de eventos;
+* tamaño de mensajes;
+* número de rooms;
+* lógica ejecutada por evento;
+* capacidad del servidor.
 
 ---
 
 # Limitaciones Actuales
 
-## 1. Estado en memoria
+La implementación actual utiliza gestión de conexiones en memoria dentro de una única instancia de FastAPI.
 
-Las conexiones viven en memoria del proceso.
+Esto significa que:
 
-Problema:
+* las conexiones pertenecen a un único proceso;
+* el broadcasting no se comparte entre múltiples instancias;
+* el escalado horizontal requiere infraestructura adicional.
 
-```text
-multi-worker deployment
+---
+
+# Escalabilidad Futura
+
+Para soportar múltiples instancias podrían incorporarse tecnologías como:
+
+* Redis Pub/Sub;
+* RabbitMQ;
+* Apache Kafka;
+* backplanes distribuidos;
+* balanceadores compatibles con WebSocket;
+* sticky sessions.
+
+---
+
+# Arquitectura Distribuida Futura
+
+```mermaid
+flowchart LR
+
+A[Clientes]
+
+--> B[Load Balancer]
+
+B --> C1[FastAPI Instance 1]
+
+B --> C2[FastAPI Instance 2]
+
+C1 --> D[Redis Pub/Sub]
+
+C2 --> D
+
+D --> C1
+D --> C2
 ```
 
 ---
 
-## 2. No hay Redis Pub/Sub
+# 🧪 Estrategia de Testing
 
-Actualmente:
-
-```text
-single-process realtime
-```
+El sistema realtime requiere validaciones complementarias a los tests HTTP tradicionales.
 
 ---
 
-## 3. Reconexión básica
+# Testing Unitario
 
-No existe:
+Permite probar:
 
-- exponential backoff,
-- jitter,
-- estado visual conexión.
-
----
-
-## 4. No existe heartbeat server-side
-
-Solo cliente → servidor.
+* Connection Manager;
+* registro de conexiones;
+* eliminación;
+* rooms;
+* helpers;
+* serialización de eventos.
 
 ---
 
-## 5. Sin message persistence
+# Testing de Integración
 
-Los eventos realtime no se almacenan.
+Permite validar:
 
----
-
-# Roadmap Futuro
-
-## Corto plazo
-
-- extraer websocket.js reusable,
-- heartbeat bidireccional,
-- estado visual conexión.
+* apertura de conexiones;
+* autenticación;
+* recepción de mensajes;
+* broadcasting;
+* cierre de conexión.
 
 ---
 
-## Medio plazo
+# Testing Manual
 
-- Redis Pub/Sub,
-- event bus,
-- reconnect strategy avanzada,
-- rate limiting WS.
+Se realizaron pruebas con:
 
----
-
-## Largo plazo
-
-- horizontal scaling,
-- distributed realtime,
-- observabilidad realtime,
-- métricas WS,
-- tracing.
+* dos navegadores;
+* pestañas independientes;
+* usuarios diferentes;
+* cambios Kanban;
+* notificaciones;
+* actividad reciente.
 
 ---
 
-# Relación con otros documentos
+# Validación Operativa
 
-Relacionado con:
+También se verificó:
 
-- `20_JS_ARCHITECTURE.md`
-- `22_REALTIME_DASHBOARD.md`
-- `23_REALTIME_NOTIFICATIONS.md`
-- `24_REALTIME_KANBAN.md`
-- `15_AUDIT_SYSTEM.md`
-- `17_DIALOG_SYSTEM.md`
-- `18_TOAST_SYSTEM.md`
+* funcionamiento tras Nginx;
+* reconexión;
+* comportamiento tras reinicio;
+* logs;
+* estabilidad en VPS.
 
 ---
 
-# Conclusión
+# 📊 Observabilidad
 
-El sistema WebSocket actual representa una arquitectura realtime sorprendentemente madura para una plataforma SSR.
+Actualmente la observabilidad realtime se apoya principalmente en logs.
 
-La plataforma ya dispone de:
+Los eventos registrados pueden incluir:
 
-- realtime contextual,
-- project rooms,
-- dashboard live,
-- realtime notifications,
-- Kanban colaborativo,
-- auditoría live,
-- activity feed live,
-- online presence,
-- broadcasting desacoplado.
+* apertura de conexión;
+* cierre;
+* usuario;
+* room;
+* error;
+* tipo de evento.
 
-La siguiente evolución natural será:
+---
 
-```text
-Redis + distributed realtime + reusable websocket framework
-```
+# Mejoras de Observabilidad
+
+La arquitectura queda preparada para incorporar:
+
+* métricas de conexiones activas;
+* eventos por segundo;
+* latencia;
+* errores;
+* reconexiones;
+* uso por room;
+* Prometheus;
+* Grafana.
+
+---
+
+# 📈 Estado Actual
+
+Actualmente el sistema WebSocket dispone de:
+
+✅ Conexiones persistentes.
+
+✅ Autenticación mediante JWT.
+
+✅ Connection Manager.
+
+✅ Rooms contextuales.
+
+✅ Broadcasting.
+
+✅ Kanban realtime.
+
+✅ Notificaciones realtime.
+
+✅ Actividad reciente.
+
+✅ Usuarios conectados.
+
+✅ Integración FastAPI.
+
+✅ Integración Docker.
+
+✅ Proxy WebSocket mediante Nginx.
+
+✅ Validación en VPS.
+
+---
+
+# 🔮 Evolución Futura
+
+La arquitectura actual permite evolucionar hacia:
+
+* Redis Pub/Sub;
+* múltiples instancias FastAPI;
+* escalabilidad horizontal;
+* presencia avanzada;
+* reconexión automática;
+* entrega garantizada;
+* versionado de eventos;
+* observabilidad avanzada;
+* dashboards realtime enriquecidos;
+* colaboración distribuida.
+
+---
+
+# 📌 Conclusión
+
+El sistema WebSocket de Aula Robótica Platform constituye una de las piezas técnicas más relevantes de la plataforma.
+
+La combinación de:
+
+* FastAPI;
+* ASGI;
+* Connection Manager;
+* rooms;
+* broadcasting;
+* JWT;
+* Docker;
+* Nginx;
+* VPS Linux;
+
+permite proporcionar una experiencia colaborativa en tiempo real sobre una infraestructura cloud real.
+
+La arquitectura mantiene una separación clara entre operaciones HTTP, persistencia y propagación de eventos. MariaDB continúa siendo la fuente de verdad, mientras que WebSockets actúan como canal de sincronización entre clientes.
+
+Esta aproximación mejora la experiencia de usuario, facilita la colaboración multiusuario y deja preparada la plataforma para futuras evoluciones hacia arquitecturas distribuidas y escalables.

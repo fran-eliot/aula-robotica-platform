@@ -2,6 +2,7 @@
 # Reinicia la base de datos de desarrollo
 
 # Importa todos los modelos antes de drop_all/create_all
+
 from app.db.base import Base
 from app.db.session import engine
 from scripts.seed_db.seed_run import run as seed_run

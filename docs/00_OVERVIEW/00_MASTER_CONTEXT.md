@@ -1,495 +1,498 @@
 # 00_MASTER_CONTEXT.md
 
-# Aula Robótica Platform
-
-## 🧠 Identidad del Proyecto
-
-**Nombre del proyecto:** Aula Robótica Platform  
-**Tipo:** Plataforma administrativa y colaborativa enterprise-style basada en SSR  
-**Dominio:** Aula de Robótica / Universidad / Gestión técnica y académica  
-**Arquitectura:** Plataforma modular SSR con capacidades realtime  
-**Estado actual:** Desarrollo avanzado activo
+# 🤖 Aula Robótica Platform — Contexto Maestro del Proyecto
 
 ---
 
-# 🎯 Visión Principal
+# 📌 Identidad del Proyecto
 
-Aula Robótica Platform tiene como objetivo evolucionar hacia una plataforma modular completa para:
+## Nombre del proyecto
 
-- gestión de identidades y accesos
-- gestión colaborativa de proyectos
-- operaciones académicas y técnicas
-- trazabilidad y auditoría
-- sincronización realtime
-- integraciones futuras con ecosistemas universitarios
-
-El proyecto comenzó como una plataforma IAM/RBAC y ha evolucionado progresivamente hacia un sistema operativo moderno inspirado en plataformas internas enterprise.
+**Aula Robótica Platform**
 
 ---
 
-# 🏗️ Filosofía Arquitectónica
+## Tipo de sistema
 
-La plataforma sigue varios principios fundamentales.
+Plataforma colaborativa educativa orientada a la gestión de proyectos de robótica, coordinación académica, colaboración multiusuario y operaciones realtime.
 
----
-
-## 1. Seguridad backend-first
-
-Toda validación y autorización real debe ocurrir en backend.
-
-La lógica frontend nunca se considera confiable.
+La plataforma ha evolucionado desde un proyecto académico DAM hacia una arquitectura backend moderna desplegada sobre infraestructura cloud Linux real.
 
 ---
 
-## 2. Arquitectura SSR-first
+# 🎯 Visión del Proyecto
 
-El sistema está construido principalmente alrededor de:
+Aula Robótica Platform nace como una plataforma moderna destinada a centralizar:
 
-- FastAPI
-- Jinja2
-- renderizado server-side
-- macros reutilizables
+* coordinación de proyectos,
+* gestión de tareas,
+* actividades colaborativas,
+* usuarios y permisos,
+* trazabilidad,
+* auditoría,
+* notificaciones,
+* sincronización realtime,
+* operaciones administrativas educativas.
 
-En lugar de una arquitectura SPA-first.
+El objetivo del proyecto no fue únicamente desarrollar una aplicación CRUD tradicional, sino diseñar una arquitectura mantenible, escalable y preparada para entornos reales.
 
-Esto permite:
+La plataforma prioriza especialmente:
 
-- menor complejidad frontend
-- mejor mantenibilidad
-- límites de seguridad claros
-- renderizado robusto
-- mejor trazabilidad
-
----
-
-## 3. Arquitectura UI reutilizable
-
-El frontend está diseñado alrededor de patrones reutilizables:
-
-- macros
-- row components
-- layouts reutilizables
-- dialogs centralizados
-- sistema toast centralizado
-- sistemas de acciones reutilizables
-
-Objetivo:
-
-👉 eliminar duplicación al máximo.
+* modularidad,
+* seguridad,
+* mantenibilidad,
+* colaboración multiusuario,
+* despliegue cloud,
+* sincronización realtime,
+* buenas prácticas backend,
+* y aproximación DevOps.
 
 ---
 
-## 4. Arquitectura modular por dominios
+# 🧠 Filosofía Arquitectónica
 
-Cada módulo posee:
-
-- modelos
-- routers
-- servicios
-- schemas
-- templates
-- JavaScript asociado
-
-Ejemplos:
-
-- users
-- roles
-- identities
-- projects
-- tasks
-- activities
-- audit
-- notifications
+La plataforma sigue varios principios arquitectónicos fundamentales.
 
 ---
 
-## 5. Seguridad por diseño
+# 1. Arquitectura backend-first
 
-La seguridad es una capa arquitectónica central.
+El backend actúa como fuente principal de verdad del sistema.
 
-Actualmente implementado:
+Toda la lógica crítica se centraliza en servidor:
 
-- JWT
-- refresh tokens
-- cookies HTTPOnly
-- RBAC
-- permisos contextuales
-- auditoría
-- aislamiento websocket
+* autenticación,
+* autorización,
+* RBAC,
+* ownership,
+* auditoría,
+* validaciones,
+* sincronización realtime,
+* control de permisos,
+* lógica de negocio.
 
-Pendiente:
-
-- protección CSRF
-- motor avanzado de policies
-
----
-
-# ⚙️ Stack Tecnológico Actual
-
-## Backend
-
-- Python
-- FastAPI
-- SQLAlchemy
-- MariaDB
-- Pydantic
-- WebSockets
+La interfaz cliente se considera una capa controlada y ligera.
 
 ---
 
-## Frontend
+# 2. Estrategia SSR-first
 
-- Jinja2
-- Bootstrap
-- AdminLTE
-- JavaScript
-- Chart.js
-- Font Awesome
+La plataforma utiliza una arquitectura basada en:
 
----
+* FastAPI,
+* Jinja2,
+* AdminLTE,
+* renderizado server-side.
 
-## Calidad y DevOps
+En lugar de adoptar inicialmente una SPA completa, se priorizó:
 
-- pytest
-- pytest-cov
-- Ruff
-- GitHub Actions
-- SonarCloud
-- uv
+* simplicidad arquitectónica,
+* integración backend/frontend,
+* mantenibilidad,
+* rapidez de desarrollo,
+* seguridad,
+* renderizado contextual basado en permisos.
 
----
-
-# 🔐 Arquitectura de Seguridad
-
-## Autenticación
-
-Implementada mediante:
-
-- JWT access tokens
-- refresh tokens
-- cookies seguras HTTPOnly
-- middleware de validación
+La arquitectura queda preparada para futura evolución hacia SPA desacoplada.
 
 ---
 
-## Autorización
+# 3. Arquitectura modular por dominios
 
-Existen dos niveles principales.
+El backend se organiza mediante dominios funcionales independientes.
 
-### RBAC global
+Cada módulo encapsula:
 
-Ejemplos:
-
-- admin
-- profesor
-- estudiante
-
----
-
-### Permisos contextuales
-
-Ejemplos:
-
-- coordinador de proyecto
-- ownership de recursos
-- ownership de tareas
+* routers,
+* servicios,
+* modelos,
+* validaciones,
+* templates,
+* lógica JavaScript,
+* permisos,
+* sincronización realtime.
 
 ---
 
-## Auditoría
+## Principales dominios funcionales
 
-Las operaciones importantes generan:
-
-- logs de auditoría
-- timeline events
-- notificaciones
-- actualizaciones realtime
-
----
-
-# 🧩 Áreas Funcionales Principales
-
-## Sistema IAM
-
-Incluye:
-
-- users
-- identities
-- roles
-- permissions
-- audit logging
-
-Es actualmente la parte más madura de la plataforma.
+* auth
+* users
+* identities
+* roles
+* permissions
+* projects
+* tasks
+* activities
+* notifications
+* dashboard
+* audit
+* websocket
+* realtime feeds
 
 ---
 
-## Gestión de Proyectos
+# 4. Colaboración realtime
 
-Soporta:
+La colaboración en tiempo real constituye una característica central del sistema.
 
-- proyectos
-- miembros
-- tareas
-- actividades
-- adjuntos
+La plataforma utiliza conexiones WebSocket persistentes para:
 
-La arquitectura ya está preparada para:
+* sincronización Kanban,
+* actividad reciente,
+* usuarios conectados,
+* notificaciones live,
+* coordinación multiusuario,
+* actualización dinámica de dashboard.
 
-- Kanban
-- colaboración realtime
-- notificaciones
-
----
-
-## Dashboard Administrativo
-
-El dashboard actual incluye:
-
-- métricas del sistema
-- estadísticas operativas
-- resúmenes de actividad
-- gráficas dinámicas
-- resúmenes de auditoría
+La lógica realtime se implementa mediante endpoints WebSocket y connection managers gestionados desde FastAPI.
 
 ---
 
-## Sistema de Actividad y Auditoría
+# 5. Arquitectura preparada para cloud
 
-Una de las áreas más sólidas arquitectónicamente.
+La plataforma evolucionó desde un entorno puramente local hacia una arquitectura desplegada sobre infraestructura Linux real basada en:
 
-Incluye:
+* Docker,
+* Docker Compose,
+* Nginx Reverse Proxy,
+* VPS Linux,
+* MariaDB persistente,
+* WebSockets,
+* contenedores desacoplados,
+* reverse proxy,
+* persistencia Docker.
 
-- timelines
-- auditoría visual
-- realtime updates
-- renderizado contextual
-- indicadores visuales de estado
-
----
-
-## Sistema de Adjuntos
-
-Las actividades soportan adjuntos con:
-
-- subida segura
-- eliminación controlada
-- metadatos
-- trazabilidad del uploader
-- persistencia filesystem
+La infraestructura fue diseñada para aproximarse a escenarios productivos reales.
 
 ---
 
-# 🎨 Filosofía Frontend/UI
-
-La UI sigue un enfoque tipo:
-
-👉 “enterprise admin platform”
-
-Objetivos:
-
-- claridad
-- consistencia
-- mantenibilidad
-- reutilización visual
+# 🏗️ Arquitectura Actual del Sistema
 
 ---
 
-# 🧱 Sistemas UI Importantes
+# Backend
 
-## Sistema Toast
+## Tecnologías principales
 
-Renderizado custom de flash messages con:
-
-- success
-- error
-- warning
-- info
-
-Integrado con sesiones.
+* Python 3.13
+* FastAPI
+* SQLAlchemy
+* Pydantic
+* Uvicorn
+* WebSockets
 
 ---
 
-## Sistema de Confirm Dialogs
+# Frontend SSR
 
-Los `confirm()` nativos están siendo reemplazados por:
+## Tecnologías principales
 
-- dialogs reutilizables
-- handlers JS centralizados
-- formularios confirmables reutilizables
-
----
-
-## Sistema de Detail Layouts
-
-Las páginas detail utilizan patrones reutilizables:
-
-- paneles laterales
-- metadata cards
-- timelines
-- actions sections
-- attachments sections
+* Jinja2
+* AdminLTE
+* Bootstrap
+* Chart.js
+* JavaScript modular
 
 ---
 
-# 🔄 Arquitectura Realtime
+# Persistencia
 
-La plataforma ya incluye infraestructura realtime mediante WebSockets.
-
-Usos actuales:
-
-- notificaciones
-- dashboard sync
-- timelines dinámicos
-
-Usos futuros:
-
-- Kanban live sync
-- presencia de usuarios
-- colaboración en vivo
+* MariaDB 11
+* SQLAlchemy ORM
+* modelo relacional
 
 ---
 
-# 🧪 Filosofía de Testing
+# Infraestructura
 
-El testing se considera una prioridad arquitectónica.
+* Ubuntu Server 24.04
+* Docker
+* Docker Compose
+* Nginx
+* Hetzner Cloud VPS
 
-Foco actual:
-
-- testing backend
-- testing de servicios
-- permisos
-- autenticación
-- routers
-
-Objetivo de cobertura:
-
-```text
->= 85%
-```
-
-Objetivo futuro:
-
-```text
-90%+
-```
 ---
 
-# 📊 Evaluación Actual de Madurez
+# DevOps y Calidad
 
-## Muy maduros
-- IAM
-- arquitectura SSR
-- sistema reusable de templates
-- RBAC
-- dashboard
-- auditoría
-- workflows de actividades
+* GitHub Actions
+* Ruff
+* SonarCloud
+* pytest
+* pytest-cov
+* validación despliegue
+* logs Docker
 
-## Maduros pero evolucionando
-- realtime
-- permisos contextuales
-- attachments
-- arquitectura UI
+---
 
-## Todavía evolucionando
-- Teams
-- notifications
-- Kanban UX
-- CSRF
-- robustez websocket
+# ☁️ Infraestructura Cloud
+
+La plataforma se encuentra desplegada sobre infraestructura cloud Linux real.
+
+---
+
+# Entorno VPS
+
+## Proveedor
+
+Hetzner Cloud
+
+---
+
+## Sistema operativo
+
+Ubuntu Server 24.04 LTS
+
+---
+
+# Características de infraestructura
+
+* VPS Linux
+* arquitectura multicontenedor
+* servicios Dockerizados
+* persistencia de datos
+* reverse proxy
+* soporte WebSockets
+* snapshots cloud
+* acceso SSH endurecido
+
+---
+
+# Arquitectura Docker
+
+La plataforma se despliega mediante Docker Compose.
+
+---
+
+## Servicios principales
+
+| Servicio | Responsabilidad                 |
+| -------- | ------------------------------- |
+| api      | Backend FastAPI                 |
+| mariadb  | Persistencia relacional         |
+| nginx    | Reverse Proxy y WebSocket proxy |
+
+---
+
+# Arquitectura Reverse Proxy
+
+Nginx gestiona:
+
+* entrada HTTP pública,
+* proxy inverso,
+* forwarding de peticiones,
+* proxy WebSocket,
+* aislamiento backend,
+* preparación HTTPS futura.
+
+---
+
+# Persistencia
+
+Los volúmenes Docker permiten persistencia de:
+
+* MariaDB,
+* uploads,
+* logs,
+* backups.
+
+Esto permite reconstruir contenedores sin pérdida de datos.
+
+---
+
+# 🔐 Modelo de Seguridad
+
+La seguridad constituye una preocupación arquitectónica central.
+
+---
+
+# Autenticación
+
+La plataforma utiliza:
+
+* JWT Authentication,
+* cookies HTTPOnly,
+* sesiones stateless,
+* middleware de validación.
+
+---
+
+# Autorización
+
+El sistema combina:
+
+* RBAC,
+* permisos contextuales,
+* ownership,
+* control granular de acceso,
+* validación de recursos.
+
+---
+
+# Modelo IAM
+
+La arquitectura IAM separa:
+
+* usuarios,
+* identidades,
+* roles,
+* permisos,
+* proveedores.
+
+Esto prepara el sistema para futura integración con:
+
+* SAML,
+* OAuth2,
+* SSO institucional,
+* identidad federada.
+
+---
+
+# Seguridad Infraestructura
+
+Actualmente se implementan:
+
+* autenticación SSH mediante claves,
+* root deshabilitado,
+* usuario administrativo dedicado,
+* firewall,
+* aislamiento Docker,
+* backend protegido tras Nginx.
+
+---
+
+# ⚡ Sistema Realtime
+
+La comunicación realtime se implementa mediante WebSockets gestionados por FastAPI.
+
+---
+
+# Características realtime actuales
+
+* Kanban colaborativo,
+* actividad reciente,
+* notificaciones live,
+* usuarios conectados,
+* sincronización instantánea,
+* colaboración multiusuario.
+
+---
+
+# Validación realtime
+
+La sincronización realtime fue validada mediante:
+
+* múltiples clientes simultáneos,
+* DevTools navegador,
+* verificación HTTP 101,
+* logs Docker,
+* sincronización live.
+
+---
+
+# 🧪 Calidad Software
+
+La calidad software forma parte del flujo de desarrollo.
+
+---
+
+# Testing
+
+La estrategia de testing incluye:
+
+* pytest,
+* cobertura,
+* tests servicios,
+* tests repositorios,
+* tests API,
+* validación despliegue.
+
+---
+
+# Calidad y análisis estático
+
+El proyecto utiliza:
+
+* Ruff,
+* SonarCloud,
+* linting,
+* formatting,
+* quality gates.
+
+---
+
+# CI/CD
+
+GitHub Actions valida automáticamente:
+
+* testing,
+* cobertura,
+* linting,
+* calidad código,
+* consistencia despliegue.
+
+---
+
+# 📈 Estado Actual del Proyecto
+
+---
+
+# Estado funcional
+
+✅ Sistema autenticación operativo
+✅ RBAC operativo
+✅ Realtime operativo
+✅ Kanban operativo
+✅ Dashboard operativo
+✅ Notificaciones operativas
+✅ Auditoría operativa
+✅ Actividad reciente operativa
+
+---
+
+# Estado infraestructura
+
+✅ Docker desplegado
+✅ Arquitectura multicontenedor operativa
+✅ Reverse proxy operativo
+✅ VPS Linux desplegado
+✅ Persistencia validada
+✅ WebSockets operativos
+✅ Despliegue cloud validado
+
+---
 
 # 🚀 Visión a Largo Plazo
-El objetivo a largo plazo es transformar **Aula Robótica Platform** en un ecosistema universitario completo.
 
-### Posibles módulos futuros:
-- inventario
-- reservas
-- dispositivos robóticos
-- gestión de laboratorios
-- SSO/SAML
-- coordinación académica
-- reporting
-- workflows asistidos por IA
+La arquitectura actual prepara el sistema para futura evolución hacia:
 
-# 📌 Filosofía de Desarrollo
-El proyecto prioriza:
-- calidad arquitectónica
-- mantenibilidad
-- seguridad
-- modularidad
-- evolución progresiva
-
-**Por encima de:**
-- sobreingeniería
-- complejidad innecesaria
-- dependencia excesiva frontend
-
-# 🧠 Decisiones Arquitectónicas Importantes
-*Elegidas deliberadamente*
-
-### SSR sobre SPA
-Por mantenibilidad y seguridad.
-
-### Macros reutilizables Jinja2
-Para reducir duplicación.
-
-### RBAC + permisos contextuales
-Para soportar workflows enterprise-style.
-
-### Separación Router → Service
-Para aislar lógica de negocio.
-
-### Introducción progresiva de WebSockets
-Para evitar complejidad prematura.
-
-# 📁 Estructura General del Proyecto
-```text
-app/
-├── core/
-├── modules/
-├── templates/
-├── static/
-├── websocket/
-├── middleware/
-├── services/
-└── tests/
-'''
-
-## 📌 Prioridades Estratégicas Actuales
-
-### Alta prioridad
-- protección CSRF
-- hardening de permisos contextuales
-- resiliencia websocket
-- testing realtime
-- sistema de notificaciones
-
-### Prioridad media
-- Kanban avanzado
-- módulo Teams
-- versionado API
-- dockerización
-
-### Largo plazo
-- SAML/SSO
-- multi-tenant
-- observabilidad avanzada
-- integraciones IA
+* HTTPS completo,
+* integración SAML,
+* SSO institucional,
+* frontend SPA desacoplado,
+* observabilidad,
+* métricas centralizadas,
+* Kubernetes,
+* escalabilidad horizontal,
+* evolución cloud-native.
 
 ---
 
-## 🏁 Resumen
-Aula Robótica Platform ya no es únicamente un proyecto IAM.
+# 📌 Posicionamiento Estratégico
 
-Ha evolucionado hacia:
-👉 **una plataforma colaborativa SSR modular enterprise-style**
+Aula Robótica Platform no debe entenderse únicamente como una aplicación CRUD académica.
 
-**Centrada en:**
-- seguridad
-- operaciones realtime
-- arquitectura reutilizable
-- trazabilidad
-- mantenibilidad
-- escalabilidad progresiva
+El proyecto evolucionó progresivamente hacia una plataforma backend colaborativa que integra:
 
-*Manteniendo siempre una complejidad razonable y controlada.*
+* realtime,
+* IAM avanzado,
+* Docker,
+* despliegue cloud,
+* DevOps,
+* reverse proxy,
+* auditoría,
+* WebSockets,
+* arquitectura modular moderna,
+
+manteniendo simultáneamente un enfoque educativo y colaborativo.

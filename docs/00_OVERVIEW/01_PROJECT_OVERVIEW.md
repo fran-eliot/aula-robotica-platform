@@ -1,417 +1,404 @@
 # 01_PROJECT_OVERVIEW.md
 
-# Aula Robótica Platform
+# 🤖 Aula Robótica Platform — Visión General del Proyecto
 
-## 📌 Descripción General
+---
 
-Aula Robótica Platform es una plataforma web modular enterprise-style desarrollada para la gestión integral del Aula de Robótica de la Escuela Politécnica Superior de la Universidad de Alcalá.
+# 📌 Introducción
 
-El proyecto ha evolucionado desde un sistema inicial IAM/RBAC hacia una plataforma SSR colaborativa moderna orientada a:
+Aula Robótica Platform es una plataforma colaborativa educativa desarrollada para la gestión integral de proyectos, tareas, usuarios y actividades dentro del Aula de Robótica de la Escuela Politécnica Superior de la Universidad de Alcalá.
 
-- gestión académica
-- gestión operativa
-- coordinación de proyectos
-- trazabilidad completa
-- operaciones realtime
-- administración centralizada
+El proyecto surge como respuesta a la necesidad de disponer de una herramienta moderna capaz de centralizar la coordinación de proyectos educativos y colaborativos en un entorno multiusuario, incorporando además capacidades realtime, trazabilidad, seguridad avanzada y despliegue cloud.
 
-La arquitectura prioriza:
+A lo largo de su evolución, el sistema pasó de ser una aplicación académica inicial basada en gestión IAM/RBAC a convertirse en una plataforma backend modular desplegada sobre infraestructura Linux real y preparada para futuros escenarios institucionales y cloud-native.
 
-- seguridad backend-first
-- renderizado server-side
-- modularidad
-- reutilización UI
-- mantenibilidad
-- escalabilidad progresiva
+---
+
+# 🎯 Objetivos del Proyecto
+
+El proyecto persigue simultáneamente objetivos funcionales, arquitectónicos y tecnológicos.
+
+---
+
+# Objetivos funcionales
+
+La plataforma permite:
+
+* gestión de usuarios,
+* gestión de identidades,
+* gestión de roles y permisos,
+* coordinación de proyectos,
+* gestión de tareas,
+* registro de actividades,
+* notificaciones,
+* dashboards administrativos,
+* auditoría y trazabilidad,
+* colaboración multiusuario.
+
+---
+
+# Objetivos técnicos
+
+A nivel técnico, el proyecto busca demostrar:
+
+* arquitectura backend modular,
+* integración realtime mediante WebSockets,
+* diseño IAM avanzado,
+* despliegue cloud multicontenedor,
+* integración DevOps,
+* buenas prácticas de seguridad,
+* testing automatizado,
+* CI/CD,
+* mantenibilidad y escalabilidad.
 
 ---
 
 # 🏗️ Arquitectura General
 
-La plataforma utiliza una arquitectura SSR (Server Side Rendering) basada en FastAPI + Jinja2 con enfoque enterprise admin platform.
-
-## Stack principal
-
-### Backend
-
-- FastAPI
-- SQLAlchemy
-- MariaDB
-- Pydantic
-- WebSockets
-- JWT Authentication
-
-### Frontend
-
-- Jinja2
-- Bootstrap
-- AdminLTE
-- JavaScript modular
-- Chart.js
-- Font Awesome
+La plataforma sigue una arquitectura backend moderna basada en FastAPI y renderizado SSR mediante Jinja2.
 
 ---
 
-# 🎯 Objetivos Principales
+# Arquitectura principal
 
-## Objetivos funcionales
+La aplicación se organiza en varias capas funcionales:
 
-- Gestión centralizada de usuarios
-- Gestión de identidades
-- Roles y permisos avanzados
-- Gestión de proyectos colaborativos
-- Gestión de tareas y actividades
-- Timeline de actividad
-- Sistema de adjuntos
-- Notificaciones realtime
-- Auditoría completa
-- Dashboard administrativo
-
----
-
-## Objetivos técnicos
-
-- Arquitectura modular
-- Seguridad por diseño
-- Reutilización máxima UI
-- SSR-first architecture
-- Contextual authorization
-- Escalabilidad progresiva
-- Realtime synchronization
-- Preparación para SSO/SAML
-- Testing automatizado
+| Capa                 | Responsabilidad                          |
+| -------------------- | ---------------------------------------- |
+| Frontend SSR         | Renderizado visual e interacción usuario |
+| FastAPI Backend      | Lógica negocio y APIs                    |
+| Service Layer        | Reglas negocio y validaciones            |
+| ORM Layer            | Persistencia mediante SQLAlchemy         |
+| Database Layer       | MariaDB                                  |
+| Realtime Layer       | WebSockets                               |
+| Infrastructure Layer | Docker + Nginx + VPS                     |
 
 ---
 
-# 🔐 Arquitectura de Seguridad
+# Arquitectura SSR
 
-La seguridad es uno de los pilares fundamentales del sistema.
+La interfaz utiliza:
 
-## Autenticación
+* Jinja2,
+* AdminLTE,
+* Bootstrap,
+* JavaScript modular.
 
-Actualmente implementado:
+Este enfoque permite:
 
-- JWT access tokens
-- refresh tokens
-- cookies HTTPOnly
-- middleware de autenticación
-- validación backend centralizada
+* renderizado contextual,
+* integración backend/frontend simplificada,
+* menor complejidad frontend,
+* mayor mantenibilidad,
+* seguridad backend-first.
 
----
-
-## Autorización
-
-La plataforma combina:
-
-### RBAC global
-
-Ejemplos:
-
-- admin
-- profesor
-- estudiante
+La arquitectura queda preparada para futura evolución hacia SPA desacoplada.
 
 ---
 
-### Permisos contextuales
+# Arquitectura modular
 
-El sistema soporta autorización dinámica basada en contexto:
+El backend se organiza mediante dominios funcionales independientes.
 
-- ownership de recursos
-- coordinadores de proyecto
-- permisos por entidad
-- validaciones condicionales
+Cada dominio encapsula:
 
----
-
-## Seguridad UI contextual
-
-La interfaz se adapta dinámicamente según permisos del usuario:
-
-- acciones visibles/invisibles
-- menús dinámicos
-- botones protegidos
-- acciones contextuales
-- renderizado condicional SSR
+* routers,
+* servicios,
+* modelos,
+* permisos,
+* templates,
+* validaciones,
+* lógica realtime.
 
 ---
 
-# 🧩 Sistemas Funcionales Principales
+# Dominios funcionales principales
 
-# IAM / RBAC
-
-El núcleo IAM incluye:
-
-- users
-- identities
-- roles
-- permissions
-- policies
-- auditoría de accesos
-
-Es actualmente uno de los módulos más maduros del proyecto.
-
----
-
-# Gestión de Proyectos
-
-La plataforma soporta:
-
-- proyectos colaborativos
-- miembros
-- coordinadores
-- tareas
-- actividades
-- timelines
-
-La arquitectura ya está preparada para evolución tipo:
-
-- Kanban avanzado
-- realtime collaboration
-- dashboards operativos
+| Dominio       | Responsabilidad  |
+| ------------- | ---------------- |
+| auth          | autenticación    |
+| users         | usuarios         |
+| identities    | identidades      |
+| roles         | roles y permisos |
+| projects      | proyectos        |
+| tasks         | tareas           |
+| activities    | actividades      |
+| notifications | notificaciones   |
+| audit         | auditoría        |
+| dashboard     | métricas         |
+| websocket     | realtime         |
 
 ---
 
-# Gestión de Actividades
+# ⚡ Sistema Realtime
 
-Cada actividad puede incluir:
+Uno de los elementos diferenciales del proyecto es la integración de funcionalidades realtime mediante WebSockets.
 
-- estado
-- horas invertidas
-- usuario responsable
-- trazabilidad
-- archivos adjuntos
-
-El sistema de actividades es uno de los núcleos operativos principales.
+La plataforma mantiene conexiones persistentes entre clientes y backend para sincronizar información en tiempo real.
 
 ---
 
-# Sistema de Adjuntos
+# Funcionalidades realtime implementadas
 
-Las actividades soportan subida y gestión de archivos:
+Actualmente se utilizan WebSockets para:
 
-- almacenamiento filesystem
-- metadatos persistentes
-- subida segura
-- eliminación controlada
-- ownership tracking
-
-Actualmente integrado completamente en SSR.
-
----
-
-# Sistema de Auditoría
-
-Toda acción importante genera trazabilidad.
-
-Incluye:
-
-- audit logs
-- timelines visuales
-- historial de acciones
-- metadata contextual
-- información de usuario
-- timestamps completos
+* Kanban colaborativo,
+* actividad reciente,
+* usuarios conectados,
+* notificaciones,
+* sincronización instantánea,
+* actualización dinámica de dashboard.
 
 ---
 
-# Timeline Realtime
+# Arquitectura realtime
 
-La plataforma ya incorpora capacidades realtime mediante WebSockets.
+La lógica realtime se implementa mediante:
 
-Actualmente se utilizan para:
-
-- notificaciones
-- dashboard sync
-- timelines dinámicos
-- actualización parcial UI
-
-La arquitectura está preparada para:
-
-- colaboración en vivo
-- presencia de usuarios
-- Kanban realtime
+* endpoints WebSocket FastAPI,
+* connection managers,
+* broadcasting,
+* rooms por proyecto,
+* sincronización multiusuario.
 
 ---
 
-# 🔔 Sistema de Notificaciones
+# 🔐 Seguridad e IAM
 
-El sistema de notificaciones soporta:
-
-- notificaciones persistentes
-- unread counters
-- actualización realtime
-- renderizado SSR
-- integración websocket
-
-Actualmente ya existe infraestructura backend y frontend funcional.
+La seguridad constituye uno de los pilares arquitectónicos del sistema.
 
 ---
 
-# 🎨 Arquitectura UI Reutilizable
+# Autenticación
 
-Uno de los pilares actuales del proyecto es la reutilización visual y estructural.
+La plataforma implementa:
 
----
-
-## Sistema de macros reutilizables
-
-La UI utiliza macros Jinja2 reutilizables para:
-
-- tablas
-- badges
-- botones
-- filas
-- layouts
-- acciones
+* JWT Authentication,
+* cookies HTTPOnly,
+* middleware de sesión,
+* validación backend,
+* autenticación stateless.
 
 ---
 
-## Reusable Row Components
+# Autorización
 
-Se utilizan componentes parciales reutilizables:
+El sistema combina:
 
-- activity_row
-- task_row
-- project_row
-- notification_row
-
----
-
-## Reusable Dialog System
-
-Los antiguos `confirm()` nativos han sido reemplazados progresivamente por:
-
-- dialogs reutilizables
-- confirm handlers centralizados
-- atributos data-confirm
-- UX consistente
+* RBAC,
+* permisos granulares,
+* ownership,
+* autorización contextual,
+* validación por recurso.
 
 ---
 
-## Sistema Toast Centralizado
+# Modelo IAM
 
-La plataforma utiliza un sistema moderno de toast notifications para:
+La arquitectura IAM separa:
 
-- success
-- error
-- warning
-- info
+* usuarios,
+* identidades,
+* roles,
+* permisos,
+* proveedores.
 
-Características:
+Este diseño deja preparada la plataforma para futura integración con:
 
-- renderizado SSR
-- autoclose
-- integración con flash messages
-- persistencia controlada
-- limpieza automática de sesión
-
----
-
-# 📊 Dashboard Administrativo
-
-El dashboard actual incluye:
-
-- métricas globales
-- estadísticas operativas
-- actividad reciente
-- timelines
-- indicadores visuales
-- gráficas Chart.js
-- auditoría reciente
+* SAML,
+* OAuth2,
+* SSO institucional,
+* identidad federada.
 
 ---
 
-# 🧪 Testing y Calidad
+# 🗄️ Persistencia y Modelo de Datos
 
-La plataforma incorpora:
+La plataforma utiliza MariaDB como sistema de persistencia principal.
 
-- pytest
-- pytest-cov
-- Ruff
-- GitHub Actions
-- SonarCloud
+La persistencia se gestiona mediante:
 
-Objetivos actuales:
-
-- aumentar cobertura
-- robustecer realtime
-- validar permisos contextuales
+* SQLAlchemy ORM,
+* relaciones relacionales,
+* modelos desacoplados,
+* validaciones backend.
 
 ---
 
-# 📈 Estado Actual del Proyecto
+# Principales entidades
 
-## Muy maduros
-
-- IAM
-- RBAC
-- arquitectura SSR
-- reusable UI
-- auditoría
-- dashboard
-- activities workflow
-
----
-
-## Maduros
-
-- notifications
-- realtime
-- attachment system
-- contextual authorization
-- toast/dialog systems
+| Entidad       | Función                   |
+| ------------- | ------------------------- |
+| users         | usuarios sistema          |
+| identities    | identidades autenticación |
+| roles         | roles globales            |
+| permissions   | permisos                  |
+| projects      | proyectos                 |
+| tasks         | tareas Kanban             |
+| activities    | actividades               |
+| notifications | notificaciones            |
+| audit_logs    | auditoría                 |
 
 ---
 
-## En evolución
+# ☁️ Infraestructura Cloud y DevOps
 
-- Kanban avanzado
-- Teams
-- CSRF protection
-- SAML/SSO
-- observabilidad avanzada
+La plataforma se encuentra desplegada sobre infraestructura Linux real.
 
 ---
 
-# 🚀 Roadmap Futuro
+# Entorno cloud actual
 
-## Corto plazo
-
-- hardening de seguridad
-- mejora realtime
-- testing avanzado
-- optimización UI reusable
-
----
-
-## Medio plazo
-
-- SSO/SAML
-- dashboards avanzados
-- colaboración realtime avanzada
-- Dockerización
+| Elemento          | Tecnología          |
+| ----------------- | ------------------- |
+| Cloud Provider    | Hetzner Cloud       |
+| Sistema operativo | Ubuntu Server 24.04 |
+| Backend           | FastAPI             |
+| Persistencia      | MariaDB 11          |
+| Reverse Proxy     | Nginx               |
+| Contenedores      | Docker Compose      |
 
 ---
 
-## Largo plazo
+# Arquitectura multicontenedor
 
-- multi-tenant
-- IA aplicada
-- integración universitaria
-- workflows inteligentes
+La infraestructura se organiza mediante Docker Compose separando:
+
+* backend,
+* base de datos,
+* reverse proxy.
+
+Esto permite:
+
+* aislamiento,
+* mantenibilidad,
+* persistencia,
+* despliegue reproducible,
+* aproximación productiva.
 
 ---
 
-# 🏁 Resumen
+# Reverse Proxy
 
-Aula Robótica Platform ha evolucionado hacia una plataforma SSR enterprise-style moderna centrada en:
+Nginx actúa como:
 
-- seguridad
-- mantenibilidad
-- trazabilidad
-- realtime
-- reutilización
-- modularidad
+* reverse proxy HTTP,
+* proxy WebSocket,
+* capa de aislamiento backend,
+* punto de entrada público.
 
-manteniendo una arquitectura coherente, escalable y preparada para crecimiento progresivo.
+---
+
+# Persistencia Docker
+
+La infraestructura utiliza volúmenes persistentes para:
+
+* MariaDB,
+* uploads,
+* logs,
+* backups.
+
+---
+
+# Seguridad Infraestructura
+
+Se implementaron medidas como:
+
+* acceso SSH mediante claves,
+* deshabilitación root,
+* firewall,
+* aislamiento contenedores,
+* backend protegido tras Nginx.
+
+---
+
+# 🧪 Calidad Software
+
+La calidad software forma parte activa del proyecto.
+
+---
+
+# Testing
+
+El sistema incorpora:
+
+* pytest,
+* tests backend,
+* validación API,
+* validación despliegue,
+* validación WebSockets.
+
+---
+
+# Calidad código
+
+La plataforma utiliza:
+
+* Ruff,
+* SonarCloud,
+* coverage,
+* linting,
+* quality gates.
+
+---
+
+# CI/CD
+
+GitHub Actions automatiza:
+
+* testing,
+* coverage,
+* análisis calidad,
+* validación pipeline.
+
+---
+
+# 📈 Estado Actual
+
+Actualmente la plataforma dispone de:
+
+✅ Arquitectura modular funcional
+✅ IAM avanzado operativo
+✅ WebSockets operativos
+✅ Kanban realtime funcional
+✅ Auditoría operativa
+✅ Notificaciones operativas
+✅ Dashboard operativo
+✅ Despliegue cloud funcional
+✅ Docker Compose operativo
+✅ Reverse proxy Nginx operativo
+
+---
+
+# 🚀 Evolución Futura
+
+La arquitectura actual deja preparada la plataforma para futuras mejoras:
+
+* HTTPS completo,
+* SAML institucional,
+* SPA desacoplada,
+* observabilidad,
+* métricas avanzadas,
+* monitorización,
+* Kubernetes,
+* escalabilidad horizontal,
+* evolución cloud-native.
+
+---
+
+# 📌 Conclusión
+
+Aula Robótica Platform evolucionó progresivamente desde un sistema académico inicial hacia una plataforma backend colaborativa moderna capaz de integrar:
+
+* realtime,
+* IAM avanzado,
+* WebSockets,
+* Docker,
+* despliegue cloud,
+* DevOps,
+* auditoría,
+* sincronización multiusuario,
+* arquitectura modular,
+* y seguridad backend-first.
+
+El proyecto demuestra la viabilidad de construir una plataforma educativa moderna utilizando tecnologías backend actuales y aproximaciones arquitectónicas cercanas a entornos reales.
